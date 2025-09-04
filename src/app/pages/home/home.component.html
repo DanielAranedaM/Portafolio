@@ -1,0 +1,70 @@
+<!-- NavBar -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+    <!-- Imagen -->
+    <div class="logo-login">
+        <img class="logo-login-img" src="../../../assets/imagen/logo.png" alt="">
+    </div>
+      <form class="d-flex" role="search">
+        <button class="login-btn btn btn-outline-success" type="submit" (click)="routeLogin()">Iniciar Sesión /Registro</button>
+      </form>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <h1>Conecta con talento local, rápido y sin complicaciones</h1>
+        <p>Desde jardinería hasta clases de computación: encuentra el profesional que necesitas en tu barrio.</p>
+        <button class="hero-btn" (click)="routeLogin()">Buscar servicios cerca de mi</button>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="services">
+    <div class="services-container">
+        <h2>Beneficios de nuestros servicios</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Trabajo Local</h3>
+                <p>Apoyamos a profesionales de tu comunidad.</p>
+                <span class="service-tag">Local</span>
+            </div>
+            <div class="service-card">
+                <h3>Inclusivo</h3>
+                <p>Cualquier persona puede ofrecer y encontrar servic.</p>
+                <span class="service-tag">Inclusividad</span>
+            </div>
+            <div class="service-card">
+                <h3>Microservicios</h3>
+                <p>Soluciones rápidas y eficientes para cualquier.</p>
+                <span class="service-tag">Finanzas</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section">
+    <div class="map-container">
+        <div class="map-placeholder">
+            Conéctate con expertos en tu área
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-links">
+            <a href="#">Contacto: info&#64;servicios.com</a>
+            <a href="#">Políticas: términos y condiciones</a>
+        </div>
+        <div class="social-links">
+            Síguenos en: <a href="#">Facebook</a>, <a href="#">Twitter</a>, <a href="#">LinkedIn</a>
+        </div>
+    </div>
+</footer>
+
+<!-- CHATBOT -->
+<app-chatbot></app-chatbot>

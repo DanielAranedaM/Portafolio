@@ -1,55 +1,195 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            Dropdown
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another action</a></li>
-            <li><hr class="dropdown-divider" /></li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
-      <form class="d-flex" role="search">
-        <input
-          class="form-control me-2"
-          type="search"
-          placeholder="Buscar Servicio"
-          aria-label="Search"
-        />
-        <button class="btn btn-outline-success" type="submit">Buscar</button>
-      </form>
+<!-- Botón para mostrar/ocultar sidebar -->
+<button 
+  [class]="toggleButtonClasses"
+  [title]="toggleTitle"
+  (click)="toggleSidebar()">
+  {{ toggleIcon }}
+</button>
+
+<!-- Barra lateral de perfil -->
+<aside [class]="sidebarClasses">
+  <br>
+  <br>
+    <div class="welcome-section">
+        <!-- Titulo -->
+        <h2 class="welcome-title">Bienvenido Usuario</h2>
+        
+        <!-- Foto Perfil CON FUNCIONALIDAD -->
+        <div class="profile-photo" (click)="openPhotoModal()">
+          <!-- Imagen si existe -->
+          <img 
+            *ngIf="hasProfileImage" 
+            [src]="profileImageUrl" 
+            alt="Foto de perfil">
+          <!-- Iniciales si no hay imagen -->
+          <span *ngIf="!hasProfileImage" id="profileInitials">{{ userInitials }}</span>
+          <!-- Overlay de cámara -->
+          <div class="camera-overlay">📷</div>
+        </div>
+        
+        <!-- Nombre de Usuario -->
+        <div class="user-name">Alan Brito</div>
+        
+        <!-- Clasificación -->
+        <div class="rating-section">
+            <div class="stars">★★★★★</div>
+            <span class="rating-text">4.9</span>
+        </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="description-section">
+        <h3 class="section-title">Descripción</h3>
+        <p class="description-text">
+            Profesional con más de 15 años de experiencia en jardinería y mantenimiento de espacios verdes. Especialista en diseño de jardines y cuidado de plantas.
+        </p>
+    </div>
+
+    <!-- Recomendaciones -->
+    <div class="reviews-section">
+        <h3 class="section-title">Recomendaciones</h3>
+        <div class="review-item">
+            <div class="review-author">Elena Nito</div>
+            <p class="review-text">"Excelente trabajo en mi jardín. Muy profesional y puntual."</p>
+        </div>
+        <div class="review-item">
+            <div class="review-author">Armando Casas</div>
+            <p class="review-text">"Recomiendo 100%. Transformó completamente mi patio."</p>
+        </div>
+    </div>
+
+    <!-- Btns de Acción -->
+    <div class="action-buttons">
+        <button class="action-btn btn-primary">✏️ Editar Perfil</button>
+        <button class="action-btn btn-secondary">📷 Subir Fotos</button>
+        <button class="action-btn btn-danger">🚪 Cerrar Sesión</button>
+    </div>
+</aside>
+
+<!-- MODAL PARA SELECCIONAR FOTO -->
+<div *ngIf="photoModalVisible" class="modal" (click)="onModalBackdropClick($event)">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <span class="close" (click)="closePhotoModal()">&times;</span>
+    <h3>Cambiar foto de perfil</h3>
+    <button (click)="takePhoto()">📷 Tomar foto</button>
+    <button (click)="uploadPhoto()">📁 Subir archivo</button>
+    <button *ngIf="hasProfileImage" (click)="removePhoto()" style="background: #f44336;">🗑️ Eliminar foto</button>
+  </div>
+</div>
+
+<!-- MODAL DE CÁMARA - ESTE ERA EL QUE FALTABA -->
+<div *ngIf="cameraModalVisible" class="camera-modal" (click)="onCameraBackdropClick($event)">
+  <div class="camera-container" (click)="$event.stopPropagation()">
+    <div class="camera-header">
+      <h3>Tomar foto</h3>
+      <button class="close-camera" (click)="closeCameraModal()">&times;</button>
+    </div>
+    
+    <div class="camera-content">
+      <video id="cameraVideo" autoplay playsinline muted></video>
+      <canvas id="photoCanvas" style="display: none;"></canvas>
+    </div>
+    
+    <div class="camera-controls">
+      <button class="camera-btn switch-btn" (click)="switchCamera()" title="Cambiar cámara">
+        Cambiar Cámara
+      </button>
+      <button class="camera-btn capture-btn" (click)="capturePhoto()" title="Capturar foto">
+        TOMAR FOTO
+      </button>
+      <button class="camera-btn cancel-btn" (click)="closeCameraModal()" title="Cancelar">
+        Cancelar
+      </button>
     </div>
   </div>
-</nav>
+</div>
+
+<!-- INPUTS OCULTOS PARA MANEJO DE ARCHIVOS -->
+<input 
+  type="file" 
+  id="cameraInput" 
+  accept="image/*" 
+  capture="camera" 
+  style="display: none;" 
+  (change)="handlePhotoUpload($event)">
+
+<input 
+  type="file" 
+  id="fileInput" 
+  accept="image/*" 
+  style="display: none;" 
+  (change)="handlePhotoUpload($event)">
+
+<!-- Contenido principal -->
+<main [class]="mainContentClasses">
+    <div class="platform-container">
+        <header class="platform-header">
+            <div class="logo">
+                <div class="logo-icon">🔍</div>
+                <h1 class="logo-text">EL DATO</h1>
+            </div>
+        </header>
+
+        <!-- Barra de busqueda -->
+        <section class="search-section">
+            <div class="search-bar">
+                <input type="text" placeholder="¿Qué Dato necesitas hoy?" id="searchInput">
+                <button class="search-btn" (click)="buscarServicio()">Buscar</button>
+            </div>
+        </section>
+
+        <section class="services-grid">
+            <div class="service-card" (click)="seleccionarServicio('jardineria')">
+                <div class="service-icon">🌱</div>
+                <h3 class="service-title">Jardinería</h3>
+                <p class="service-description">Cuidado y mantenimiento de jardines, poda de plantas y diseño de espacios verdes.</p>
+            </div>
+
+            <div class="service-card" (click)="seleccionarServicio('limpieza')">
+                <div class="service-icon">🧹</div>
+                <h3 class="service-title">Limpieza</h3>
+                <p class="service-description">Servicios de limpieza para hogares, oficinas y espacios comerciales.</p>
+            </div>
+
+            <div class="service-card" (click)="seleccionarServicio('plomeria')">
+                <div class="service-icon">🔧</div>
+                <h3 class="service-title">Plomería</h3>
+                <p class="service-description">Reparación de tuberías, instalaciones sanitarias y servicios de fontanería.</p>
+            </div>
+
+            <div class="service-card" (click)="seleccionarServicio('electricidad')">
+                <div class="service-icon">⚡</div>
+                <h3 class="service-title">Electricidad</h3>
+                <p class="service-description">Instalaciones eléctricas, reparaciones y mantenimiento de sistemas eléctricos.</p>
+            </div>
+
+            <div class="service-card" (click)="seleccionarServicio('computacion')">
+                <div class="service-icon">💻</div>
+                <h3 class="service-title">Clases de Computación</h3>
+                <p class="service-description">Enseñanza de informática básica, internet y uso de dispositivos tecnológicos.</p>
+            </div>
+
+            <div class="service-card" (click)="seleccionarServicio('pintura')">
+                <div class="service-icon">🎨</div>
+                <h3 class="service-title">Pintura</h3>
+                <p class="service-description">Servicios de pintura para interiores y exteriores, restauración de superficies.</p>
+            </div>
+        </section>
+
+        <section class="recent-searches">
+            <h3 class="recent-title">Búsquedas Recientes</h3>
+            <div class="search-item" (click)="buscarReciente('jardineria')">
+                <div class="search-item-icon">🌱</div>
+                <span class="search-item-text">Jardinería en mi zona</span>
+            </div>
+            <div class="search-item" (click)="buscarReciente('limpieza')">
+                <div class="search-item-icon">🧹</div>
+                <span class="search-item-text">Limpieza semanal</span>
+            </div>
+            <div class="search-item" (click)="buscarReciente('plomeria')">
+                <div class="search-item-icon">🔧</div>
+                <span class="search-item-text">Plomero urgente</span>
+            </div>
+        </section>
+    </div>
+</main>

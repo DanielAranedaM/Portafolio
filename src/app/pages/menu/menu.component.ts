@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-menu',
@@ -7,7 +8,21 @@ import { CommonModule } from '@angular/common';
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css'
 })
+
 export class MenuComponent {
+  private router: Router;
+
+  constructor(router: Router) {
+    this.router = router;    
+  }
+
+  logoutModalVisible: boolean = false;
+
+  //-------------------------------Navegación------------------------------
+  //Navegar a Editar Perfil
+  routePerfil() {
+    this.router.navigate(['/perfil']);
+  }
 
   //---------------------------SideBar-------------------------------------
   //Estado de sidebar
@@ -47,7 +62,6 @@ export class MenuComponent {
   }
 
   //-----------------------------Foto-------------------------------------
-  
   // Estado del modal de foto
   photoModalVisible: boolean = false;
   
@@ -261,8 +275,44 @@ export class MenuComponent {
     }
   }
 
-  //-----------------------------Servicios y Búsquedas-------------------------------------
-  
+  //-----------------------------Logout Modal-------------------------------------
+  //Abre el modal de confirmación para cerrar sesión
+  openLogoutModal(): void {
+    this.logoutModalVisible = true;
+  }
+
+  //Cierra el modal de confirmación
+  closeLogoutModal(): void {
+    this.logoutModalVisible = false;
+  }
+
+  //Confirma el cierre de sesión y redirige al login
+  confirmLogout(): void {
+    // Limpiar datos de sesión
+    this.clearSessionData();
+    
+    // Cerrar el modal
+    this.closeLogoutModal();
+    debugger;
+    // Redirigir al login
+    this.router.navigate(['/login']); 
+    
+    //Mostrar mensaje de confirmación
+    console.log('Sesión cerrada exitosamente');
+  }
+
+  //Método para limpiar datos de sesión
+  private clearSessionData(): void {
+    // Limpiar localStorage
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userPreferences');
+    
+    // Limpiar sessionStorage
+    sessionStorage.clear();
+  }
+
+  //-----------------------------Servicios y Búsquedas------------------------------------- 
   // Función para buscar servicios
   buscarServicio(): void {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;

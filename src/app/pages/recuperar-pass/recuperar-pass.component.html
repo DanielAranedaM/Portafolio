@@ -1,0 +1,58 @@
+<div class="login-container">
+    <!-- Imagen -->
+    <div class="logo-login">
+        <img class="logo-login-img" src="../../../assets/imagen/logo.png" alt="">
+    </div>
+
+    <!-- Titulo -->
+    <h1 class="welcome-title">RECUPERAR CONTRASEÑA</h1>
+
+    <!-- Parrafo -->
+    <h2 class="Parrafo">Ingrese Correo Registrado:</h2>
+
+    <!-- Formulario Ingreso Login -->
+    <form class="login-form" (ngSubmit)="onSubmit()" #recoveryForm="ngForm">
+        <div class="form-group">
+            <div class="input-container">
+                <span class="input-icon">📧</span>
+                <input 
+                    type="email" 
+                    class="form-input" 
+                    placeholder="Email" 
+                    [(ngModel)]="email" 
+                    name="email" 
+                    required 
+                    #emailInput="ngModel">
+            </div>
+        </div>
+
+        <!-- Boton Recuperar -->
+        <button type="submit" class="recuperar-button">Recuperar</button>
+        <br> 
+        <br>
+
+        <!-- Boton Cancelar -->
+        <button type="button" class="cancel-button" (click)="routeLogin()">Cancelar</button>
+    </form>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <span class="checkmark">✓</span>
+            </div>
+            <button class="close-button" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <h3>¡Correo Enviado!</h3>
+            <p>Se ha enviado un correo electrónico con las instrucciones para recuperar tu contraseña a:</p>
+            <div class="email-display">{{ email }}</div>
+            <p class="note">Revisa tu bandeja de entrada y sigue las instrucciones del correo.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-button" (click)="closeModal()">Entendido</button>
+        </div>
+    </div>
+</div>

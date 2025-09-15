@@ -6,72 +6,79 @@
      </div>
    
 
-    <!-- Formulario Ingreso Login -->
-    <form class="login-form">
-        
-        <!-- Nombre Completo -->
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">👤</span>
-                <input type="text" class="form-input" placeholder="Nombre Completo" required>
-            </div>
+  <form class="login-form" [formGroup]="form">
+    <!-- Nombre -->
+    <div class="form-group">
+      <div class="input-container">
+        <span class="input-icon">👤</span>
+        <input class="form-input" placeholder="Nombre Completo" formControlName="nombreCompleto">
+      </div>
+      <div class="error" *ngIf="form.get('nombreCompleto')?.touched && form.get('nombreCompleto')?.invalid">
+        Nombre obligatorio (mínimo 3 caracteres).
+      </div>
+    </div>
+
+    <!-- Dirección -->
+    <div class="form-group">
+      <div class="input-container">
+        <span class="input-icon">📍</span>
+        <input class="form-input" placeholder="Dirección" formControlName="direccion">
+      </div>
+      <div class="error" *ngIf="form.get('direccion')?.touched && form.get('direccion')?.invalid">
+        Dirección obligatoria.
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <div class="input-container">
+        <span class="input-icon">📧</span>
+        <input class="form-input" type="email" placeholder="Email" formControlName="email">
+      </div>
+      <div class="error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+        Ingresa un correo válido.
+      </div>
+    </div>
+
+    <!-- Passwords -->
+    <div formGroupName="passwordGroup">
+      <div class="form-group">
+        <div class="input-container">
+          <span class="input-icon">🔒</span>
+          <input [type]="showPass ? 'text':'password'" class="form-input" placeholder="Contraseña" formControlName="password">
+          <button type="button" class="password-toggle" (click)="showPass = !showPass">👁</button>
         </div>
+      </div>
 
-        <!-- Direccion -->
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">📍</span>
-                <input type="text" class="form-input" placeholder="Dirección" required>
-            </div>
+      <div class="form-group">
+        <div class="input-container">
+          <span class="input-icon">🔒</span>
+          <input [type]="showPass2 ? 'text':'password'" class="form-input" placeholder="Repetir Contraseña" formControlName="repeatPassword">
+          <button type="button" class="password-toggle" (click)="showPass2 = !showPass2">👁</button>
         </div>
+      </div>
 
-        <!-- Correo -->
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">📧</span>
-                <input type="email" class="form-input" placeholder="Email" required>
-            </div>
-        </div>
+      <div class="error" *ngIf="form.get('passwordGroup')?.touched && form.get('passwordGroup')?.errors?.['passwordsMismatch']">
+        Las contraseñas no coinciden.
+      </div>
+    </div>
 
-        <!-- Password -->
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">🔒</span>
-                <input type="password" class="form-input" placeholder="Contraseña" id="passwordInput" required>
-                <button type="button" class="password-toggle" onclick="togglePassword()">👁</button>
-            </div>
-        </div>
+    <!-- Rol -->
+    <div class="tipo-usuario-container">
+      <label>Tipo de Usuario:</label>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" formControlName="role" value="proveedor" id="radioProveedor">
+        <label class="form-check-label" for="radioProveedor">Proveedor</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" formControlName="role" value="solicitante" id="radioSolicitante">
+        <label class="form-check-label" for="radioSolicitante">Solicitante</label>
+      </div>
+    </div>
 
-        <!-- Repeat Password -->
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">🔒</span>
-                <input type="password" class="form-input" placeholder="Repetir Contraseña" id="passwordInput" required>
-                <button type="button" class="password-toggle" onclick="togglePassword()">👁</button>
-            </div>
-        </div>
-
-        <div class="tipo-usuario-container">
-        <label>Tipo de Usuario:</label>
-
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
-            <label class="form-check-label" for="radioDefault1">Proveedor</label>
-        </div>
-
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
-            <label class="form-check-label" for="radioDefault2">Solicitante</label>
-        </div>
-        </div>
-        <br>
-
-        <!-- Boton Ingresar -->
-        <button type="submit" class="login-button" (click)="routeLogin()">Ingresar</button>
-        <br>
-        <br>
-
-        <!-- Boton Cancelar -->
-        <button type="submit" class="cancel-button" (click)="routeLogin()">Cancelar</button>
-    </form>
+    <!-- Acciones -->
+    <button type="button" class="login-button" [disabled]="form.invalid" (click)="registrarme()">Registrarme</button>
+    <br><br>
+    <button type="button" class="cancel-button" (click)="routeLogin()">Cancelar</button>
+  </form>
 </div>

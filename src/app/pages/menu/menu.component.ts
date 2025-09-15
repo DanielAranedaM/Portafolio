@@ -10,11 +10,7 @@ import { Router } from '@angular/router';
 })
 
 export class MenuComponent {
-  private router: Router;
-
-  constructor(router: Router) {
-    this.router = router;    
-  }
+  constructor(private router: Router) {}
 
   logoutModalVisible: boolean = false;
 
@@ -288,17 +284,22 @@ export class MenuComponent {
 
   //Confirma el cierre de sesión y redirige al login
   confirmLogout(): void {
-    // Limpiar datos de sesión
-    this.clearSessionData();
-    
-    // Cerrar el modal
-    this.closeLogoutModal();
-    debugger;
-    // Redirigir al login
-    this.router.navigate(['/login']); 
-    
-    //Mostrar mensaje de confirmación
-    console.log('Sesión cerrada exitosamente');
+    try {
+      // Limpiar datos de sesión
+      this.clearSessionData();
+      
+      // Cerrar el modal
+      this.closeLogoutModal();
+      
+      // Redirigir al login y esperar a que se complete la navegación
+      this.router.navigate(['/login']).then(() => {
+        console.log('Sesión cerrada exitosamente');
+      }).catch(error => {
+        console.error('Error al navegar:', error);
+      });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   }
 
   //Método para limpiar datos de sesión

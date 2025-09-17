@@ -1,0 +1,108 @@
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Registrar Servicio</h1>
+
+  <!-- Indicador de pasos -->
+  <div class="step-indicator d-flex justify-content-center mb-4">
+    <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+      <span class="step-number">1</span>
+      <span class="step-label">Información Básica</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+      <span class="step-number">2</span>
+      <span class="step-label">Detalles del Servicio</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+      <span class="step-number">3</span>
+      <span class="step-label">Imágenes y Confirmación</span>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Paso 1 -->
+    <div *ngIf="currentStep === 1" class="step-content">
+      <h3>Información Básica</h3>
+      <div class="mb-3">
+        <label for="nombreServicio" class="form-label">Nombre del Servicio</label>
+        <input type="text" class="form-control form-control-lg" id="nombreServicio" formControlName="nombreServicio" placeholder="Ej: Limpieza del hogar">
+        <div *ngIf="form.get('nombreServicio')?.invalid && form.get('nombreServicio')?.touched" class="text-danger">
+          Nombre requerido (mínimo 3 caracteres)
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="categoria" class="form-label">Categoría</label>
+        <select class="form-select form-select-lg" id="categoria" formControlName="categoria">
+          <option value="">Selecciona una categoría</option>
+          <option value="limpieza">Limpieza</option>
+          <option value="jardineria">Jardinería</option>
+          <option value="reparaciones">Reparaciones</option>
+          <option value="cuidado">Cuidado Personal</option>
+          <option value="otros">Otros</option>
+        </select>
+        <div *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="text-danger">
+          Categoría requerida
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 2 -->
+    <div *ngIf="currentStep === 2" class="step-content">
+      <h3>Detalles del Servicio</h3>
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <textarea class="form-control form-control-lg" id="descripcion" formControlName="descripcion" rows="4" placeholder="Describe el servicio que ofreces"></textarea>
+        <div *ngIf="form.get('descripcion')?.invalid && form.get('descripcion')?.touched" class="text-danger">
+          Descripción requerida (mínimo 10 caracteres)
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="precio" class="form-label">Precio por Hora (en pesos)</label>
+        <input type="number" class="form-control form-control-lg" id="precio" formControlName="precio" placeholder="Ej: 5000">
+        <div *ngIf="form.get('precio')?.invalid && form.get('precio')?.touched" class="text-danger">
+          Precio requerido (mayor a 0)
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 3 -->
+    <div *ngIf="currentStep === 3" class="step-content">
+      <h3>Imágenes y Confirmación</h3>
+      <div class="mb-3">
+        <label for="ubicacion" class="form-label">Ubicación (desde tu perfil)</label>
+        <input type="text" class="form-control form-control-lg" id="ubicacion" [value]="userDireccion" readonly>
+        <small class="text-muted">Esta dirección se obtiene automáticamente de tu registro</small>
+      </div>
+      <div class="mb-3">
+        <label for="imagenes" class="form-label">Adjuntar Imágenes del Servicio</label>
+        <input type="file" class="form-control form-control-lg" id="imagenes" multiple accept="image/*" (change)="onFileSelected($event)">
+        <small class="text-muted">Puedes seleccionar múltiples imágenes (máx. 5)</small>
+        <div *ngIf="selectedFiles.length > 0" class="mt-3">
+          <h6>Imágenes seleccionadas:</h6>
+          <ul class="list-group">
+            <li *ngFor="let file of selectedFiles; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+              {{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeFile(i)">Eliminar</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="mb-3">
+        <h5>Resumen:</h5>
+        <p><strong>Nombre:</strong> {{ form.value.nombreServicio }}</p>
+        <p><strong>Categoría:</strong> {{ form.value.categoria }}</p>
+        <p><strong>Descripción:</strong> {{ form.value.descripcion }}</p>
+        <p><strong>Precio:</strong> {{ form.value.precio }}</p>
+        <p><strong>Ubicación:</strong> {{ userDireccion }}</p>
+        <p><strong>Imágenes:</strong> {{ selectedFiles.length }} seleccionadas</p>
+      </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="d-flex justify-content-between mt-4">
+      <button type="button" class="btn btn-secondary btn-lg" (click)="prevStep()" [disabled]="currentStep === 1">Anterior</button>
+      <button type="button" class="btn btn-primary btn-lg" (click)="nextStep()" [disabled]="!isStepValid(currentStep)" *ngIf="currentStep < totalSteps">Siguiente</button>
+      <button type="submit" class="btn btn-success btn-lg" [disabled]="!form.valid" *ngIf="currentStep === totalSteps">Registrar Servicio</button>
+    </div>
+  </form>
+</div>

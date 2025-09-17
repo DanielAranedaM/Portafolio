@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -9,15 +9,45 @@ import { Router } from '@angular/router';
   styleUrl: './menu.component.css'
 })
 
-export class MenuComponent {
+export class MenuComponent implements OnInit {
   constructor(private router: Router) {}
 
+  ngOnInit(): void {
+    // Obtener el rol del usuario desde localStorage
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        this.userRole = user.role || '';
+        console.log('Usuario logueado:', user);
+        console.log('Rol del usuario:', this.userRole);
+      } catch (error) {
+        console.error('Error al parsear userData:', error);
+        this.userRole = '';
+      }
+    } else {
+      console.log('No hay datos de usuario en localStorage');
+      this.userRole = '';
+    }
+  }
+
   logoutModalVisible: boolean = false;
+  userRole: string = ''; // Rol del usuario (proveedor o solicitante)
 
   //-------------------------------Navegación------------------------------
   //Navegar a Editar Perfil
   routePerfil() {
     this.router.navigate(['/perfil']);
+  }
+
+  //Navegar a Registrar Servicio
+  routeRegistrarServicio() {
+    this.router.navigate(['/registrar-servicio']);
+  }
+
+  // Getter para verificar si el usuario es proveedor
+  get isProveedor(): boolean {
+    return this.userRole === 'proveedor';
   }
 
   //---------------------------SideBar-------------------------------------

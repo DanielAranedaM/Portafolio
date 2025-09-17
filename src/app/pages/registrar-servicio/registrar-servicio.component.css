@@ -1,0 +1,141 @@
+/* Estilos para el stepper */
+.step-indicator {
+  margin-bottom: 2rem;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background-color: #007bff;
+  color: white;
+}
+
+.step.completed .step-number {
+  background-color: #28a745;
+  color: white;
+}
+
+.step-label {
+  font-size: 1.1rem;
+  color: #6c757d;
+  text-align: center;
+}
+
+.step.active .step-label {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.step.completed .step-label {
+  color: #28a745;
+}
+
+.step-line {
+  width: 100px;
+  height: 2px;
+  background-color: #e9ecef;
+  margin: 0 1rem;
+  align-self: center;
+}
+
+.step.completed + .step-line {
+  background-color: #28a745;
+}
+
+/* Contenido de pasos */
+.step-content {
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 2rem;
+}
+
+.step-content h3 {
+  color: #495057;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+/* Formularios */
+.form-label {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #495057;
+}
+
+.form-control, .form-select {
+  font-size: 1.2rem;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  border: 2px solid #ced4da;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Botones */
+.btn {
+  font-size: 1.3rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  min-width: 120px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensajes de error */
+.text-danger {
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+/* Resumen */
+.mb-3 h5 {
+  font-size: 1.4rem;
+  color: #495057;
+}
+
+.mb-3 p {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos para imágenes */
+.list-group-item {
+  font-size: 1.1rem;
+}
+
+.btn-sm {
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.text-muted {
+  font-size: 1rem;
+}

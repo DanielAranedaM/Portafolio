@@ -45,6 +45,10 @@ export class RegistroComponent {
         role: this.form.value.role
       };
       console.log('Usuario registrado:', userData);
+      
+      // Guardar datos en localStorage
+      localStorage.setItem('userData', JSON.stringify(userData));
+      
       this.router.navigate(['/login']);
     } else {
       this.form.markAllAsTouched();

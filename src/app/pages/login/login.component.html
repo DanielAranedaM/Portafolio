@@ -1,44 +1,57 @@
 <div class="login-container">
 
-    <!-- Imagen -->
-        <div class="logo-login">
-        <img class="logo-login-img" src="../../../assets/imagen/logo.png" alt="">
-        </div>
+  <div class="logo-login">
+    <img class="logo-login-img" src="../../../assets/imagen/logo.png" alt="">
+  </div>
 
-    <!-- Titulo -->
-    <h1 class="welcome-title">INICIAR SESIÓN</h1>
+  <!--Titulo-->
+  <h1 class="welcome-title">INICIAR SESIÓN</h1>
 
-    <!-- Formulario Ingreso Login -->
-    <form class="login-form">
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">📧</span>
-                <input type="email" class="form-input" placeholder="Email" required>
-            </div>
-        </div>
+  <!-- Formulario Ingreso Login -->
+  <form class="login-form" (ngSubmit)="login()">
+    <div class="form-group">
+      <div class="input-container">
+        <span class="input-icon">📧</span>
+        <input type="email"
+               class="form-input"
+               placeholder="Email"
+               required
+               [(ngModel)]="correo"
+               name="correo">
+      </div>
+    </div>
 
-        <div class="form-group">
-            <div class="input-container">
-                <span class="input-icon">🔒</span>
-                <input type="password" class="form-input" placeholder="Contraseña" id="passwordInput" required>
-                <button type="button" class="password-toggle" onclick="togglePassword()">👁</button>
-            </div>
-        </div>
+    <div class="form-group">
+      <div class="input-container">
+        <span class="input-icon">🔒</span>
+        <input 
+            #pwd 
+            type="password"
+            class="form-input"
+            placeholder="Contraseña"
+            id="passwordInput"
+            required
+            [(ngModel)]="contrasena"
+            name="contrasena">
+        <button type="button" class="password-toggle" (click)="togglePassword(pwd)">👁</button>
+      </div>
+    </div>
 
-        <div class="form-options">
-            <label class="remember-me">
-                <input type="checkbox">
-                Recordarme
-            </label>
-            <a href="#" routerLink="/recuperar-pass" class="forgot-password">Has Olvidado tu contraseña?</a>
-        </div>
+    <div class="form-options">
+      <label class="remember-me">
+        <input type="checkbox">
+        Recordarme
+      </label>
+      <a routerLink="/recuperar-pass" class="forgot-password">Has Olvidado tu contraseña?</a>
+    </div>
 
-        <!-- Boton Ingresar -->
-        <button type="submit" class="login-button" (click)="routeMenu()">Ingresar</button>
-        <br> 
-        <br>
+    <!-- Boton Ingresar -->
+    <button type="submit" class="login-button" [disabled]="loading">Ingresar</button>
+    <br><br>
 
-        <!-- Boton Registrar -->
-        <button type="submit" class="register-button" (click)="routeRegistro()">Registrarse</button>
-    </form>
+    <!-- Boton Registrar -->
+    <button type="button" class="register-button" (click)="routeRegistro()">Registrarse</button>
+  </form>
+
+  <p *ngIf="mensajeError" class="error">{{ mensajeError }}</p>
 </div>

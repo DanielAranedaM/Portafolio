@@ -293,7 +293,6 @@ export class MenuComponent {
     
     // Cerrar el modal
     this.closeLogoutModal();
-    debugger;
     // Redirigir al login
     this.router.navigate(['/login']); 
     

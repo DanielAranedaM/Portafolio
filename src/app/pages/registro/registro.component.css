@@ -158,8 +158,8 @@
 .tipo-usuario-container {
   display: flex;
   align-items: center;
-  gap: 20px; /* Espacio entre radios */
-  flex-wrap: wrap; /* Por si se achica en móvil */
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .tipo-usuario-container label:first-child {
@@ -171,6 +171,43 @@
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+/* --- Autocompletado Dirección --- */
+.sugerencias {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  max-height: 260px;
+  overflow: auto;
+  z-index: 20;
+}
+
+.sugerencia-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.sugerencia-item:last-child {
+  border-bottom: none;
+}
+
+.sugerencia-item:hover {
+  background: #f9fafb;
+}
+
+.sugerencia-atribucion {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #6b7280;
+  background: #fafafa;
+  border-top: 1px dashed #e5e7eb;
+  border-radius: 0 0 12px 12px;
 }
 
 @media (max-width: 480px) {

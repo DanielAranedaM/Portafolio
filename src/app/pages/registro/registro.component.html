@@ -1,42 +1,26 @@
 <div class="registro-container">
-
-  <div>
-    <h1 class="welcome-title">REGÍSTRATE</h1>
-  </div>
+  <div><h1 class="welcome-title">REGÍSTRATE</h1></div>
 
   <form class="login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-
-    <!-- Nombre Completo -->
+    <!-- Nombre -->
     <div class="form-group">
       <label class="form-label">Nombre *</label>
       <div class="input-container">
         <span class="input-icon">👤</span>
-        <input
-          type="text"
-          class="form-input"
-          placeholder="Nombre Completo"
-          formControlName="nombre"
-          [class.invalid]="invalid('nombre')"
-          required
-        >
+        <input type="text" class="form-input" placeholder="Nombre Completo"
+               formControlName="nombre" [class.invalid]="invalid('nombre')" required>
       </div>
       <div class="error-text" *ngIf="invalid('nombre')">El nombre es obligatorio.</div>
     </div>
 
-    <!-- Fecha de Nacimiento -->
+    <!-- Fecha de nacimiento -->
     <div class="form-group">
       <label class="form-label">Fecha de nacimiento *</label>
       <div class="input-container">
         <span class="input-icon">🎂</span>
-        <input
-          type="date"
-          class="form-input"
-          placeholder="AAAA-MM-DD"
-          formControlName="fechaNacimiento"
-          [attr.max]="today"
-          [class.invalid]="invalid('fechaNacimiento')"
-          required
-        >
+        <input type="date" class="form-input" placeholder="AAAA-MM-DD"
+               formControlName="fechaNacimiento" [attr.max]="today"
+               [class.invalid]="invalid('fechaNacimiento')" required>
       </div>
       <div class="error-text" *ngIf="invalid('fechaNacimiento')">
         La fecha de nacimiento es obligatoria y no puede ser futura.
@@ -48,32 +32,20 @@
       <label class="form-label">Dirección *</label>
       <div class="input-container">
         <span class="input-icon">📍</span>
-        <input
-          #direccionInput
-          type="text"
-          class="form-input"
-          placeholder="Escribe tu dirección"
-          autocomplete="off"
-          (keydown.enter)="$event.preventDefault()"
-          (input)="onDireccionInput(direccionInput.value)"
-          (focus)="abrirSugerenciasSiHay()"
-          (blur)="onDireccionBlur()"
-          [value]="form.value.direccionDescripcion || ''"
-          [class.invalid]="invalid('direccionDescripcion')"
-          required
-        >
+        <input #direccionInput type="text" class="form-input" placeholder="Escribe tu dirección"
+               autocomplete="off"
+               (keydown.enter)="$event.preventDefault()"
+               (input)="onDireccionInput(direccionInput.value)"
+               (focus)="abrirSugerenciasSiHay()"
+               (blur)="onDireccionBlur()"
+               [value]="form.value.direccionDescripcion || ''"
+               [class.invalid]="invalid('direccionDescripcion')" required>
       </div>
-      <div class="error-text" *ngIf="invalid('direccionDescripcion')">
-        La dirección es obligatoria.
-      </div>
+      <div class="error-text" *ngIf="invalid('direccionDescripcion')">La dirección es obligatoria.</div>
 
-      <!-- Lista de sugerencias -->
       <ul class="sugerencias" *ngIf="mostrandoSugerencias">
-        <li
-          class="sugerencia-item"
-          *ngFor="let s of sugerencias"
-          (mousedown)="seleccionarSugerencia(s, direccionInput)"
-        >
+        <li class="sugerencia-item" *ngFor="let s of sugerencias"
+            (mousedown)="seleccionarSugerencia(s, direccionInput)">
           {{ s.display_name }}
         </li>
         <li class="sugerencia-atribucion">
@@ -87,18 +59,10 @@
       <label class="form-label">Correo electrónico *</label>
       <div class="input-container">
         <span class="input-icon">📧</span>
-        <input
-          type="email"
-          class="form-input"
-          placeholder="tu@correo.com"
-          formControlName="correo"
-          [class.invalid]="invalid('correo')"
-          required
-        >
+        <input type="email" class="form-input" placeholder="tu@correo.com"
+               formControlName="correo" [class.invalid]="invalid('correo')" required>
       </div>
-      <div class="error-text" *ngIf="invalid('correo')">
-        Ingresa un correo válido.
-      </div>
+      <div class="error-text" *ngIf="invalid('correo')">Ingresa un correo válido.</div>
     </div>
 
     <!-- Teléfono (opcional) -->
@@ -106,110 +70,64 @@
       <label class="form-label">Teléfono (opcional)</label>
       <div class="input-container">
         <span class="input-icon">📱</span>
-        <input
-          type="tel"
-          class="form-input"
-          placeholder="+56 9 1234 5678"
-          formControlName="telefono"
-        >
+        <input type="tel" class="form-input" placeholder="+56 9 1234 5678"
+               formControlName="telefono">
       </div>
     </div>
 
-    <!-- Passwords -->
+    <!-- Passwords (grupo) -->
     <div formGroupName="passwordGroup">
       <div class="form-group">
+        <label class="form-label">Contraseña *</label>
         <div class="input-container">
           <span class="input-icon">🔒</span>
-          <input [type]="showPass ? 'text':'password'" class="form-input" placeholder="Contraseña" formControlName="password">
-          <button type="button" class="password-toggle" (click)="showPass = !showPass">👁</button>
+          <input [type]="showPass ? 'text' : 'password'" class="form-input"
+                 placeholder="Contraseña" formControlName="password" id="passwordInput"
+                 [class.invalid]="form.get('passwordGroup.password')?.invalid && (form.get('passwordGroup.password')?.touched || form.get('passwordGroup.password')?.dirty)" required>
+          <button type="button" class="password-toggle" (click)="togglePassword()">
+            {{ showPass ? '🙈' : '👁' }}
+          </button>
+        </div>
+        <div class="error-text"
+             *ngIf="form.get('passwordGroup.password')?.invalid && (form.get('passwordGroup.password')?.touched || form.get('passwordGroup.password')?.dirty)">
+          La contraseña es obligatoria (mínimo 6 caracteres).
         </div>
       </div>
-    <!-- Password -->
-    <div class="form-group">
-      <label class="form-label">Contraseña *</label>
-      <div class="input-container">
-        <span class="input-icon">🔒</span>
-        <input
-          [type]="showPass ? 'text' : 'password'"
-          class="form-input"
-          placeholder="Contraseña"
-          formControlName="contrasena"
-          id="passwordInput"
-          [class.invalid]="invalid('contrasena')"
-          required
-        >
-        <button type="button" class="password-toggle" (click)="togglePassword()">
-          {{ showPass ? '🙈' : '👁' }}
-        </button>
-      </div>
-      <div class="error-text" *ngIf="invalid('contrasena')">
-        La contraseña es obligatoria (mínimo 6 caracteres).
-      </div>
-    </div>
 
       <div class="form-group">
+        <label class="form-label">Repetir contraseña *</label>
         <div class="input-container">
           <span class="input-icon">🔒</span>
-          <input [type]="showPass2 ? 'text':'password'" class="form-input" placeholder="Repetir Contraseña" formControlName="repeatPassword">
-          <button type="button" class="password-toggle" (click)="showPass2 = !showPass2">👁</button>
+          <input [type]="showPass2 ? 'text' : 'password'" class="form-input"
+                 placeholder="Repetir Contraseña" formControlName="repeatPassword" id="passwordRepeatInput"
+                 [class.invalid]="(form.get('passwordGroup.repeatPassword')?.touched || form.get('passwordGroup.repeatPassword')?.dirty) && !passwordsMatch" required>
+          <button type="button" class="password-toggle" (click)="togglePassword2()">
+            {{ showPass2 ? '🙈' : '👁' }}
+          </button>
         </div>
-      </div>
-
-      <div class="error" *ngIf="form.get('passwordGroup')?.touched && form.get('passwordGroup')?.errors?.['passwordsMismatch']">
-        Las contraseñas no coinciden.
-      </div>
-    </div>
-    <!-- Repeat Password -->
-    <div class="form-group">
-      <label class="form-label">Repetir contraseña *</label>
-      <div class="input-container">
-        <span class="input-icon">🔒</span>
-        <input
-          [type]="showPass2 ? 'text' : 'password'"
-          class="form-input"
-          placeholder="Repetir Contraseña"
-          formControlName="repetirContrasena"
-          id="passwordRepeatInput"
-          [class.invalid]="invalid('repetirContrasena') || (form.touched && !passwordsMatch)"
-          required
-        >
-        <button type="button" class="password-toggle" (click)="togglePassword2()">
-          {{ showPass2 ? '🙈' : '👁' }}
-        </button>
-      </div>
-      <div class="error-text" *ngIf="invalid('repetirContrasena')">
-        Debes repetir la contraseña.
-      </div>
-      <div class="error-text" *ngIf="form.touched && !passwordsMatch">
-        Las contraseñas no coinciden.
+        <div class="error-text"
+             *ngIf="form.get('passwordGroup')?.touched && form.get('passwordGroup')?.errors?.['passwordsMismatch']">
+          Las contraseñas no coinciden.
+        </div>
       </div>
     </div>
 
     <!-- Tipo de usuario -->
     <div class="tipo-usuario-container">
       <label>Tipo de Usuario *:</label>
-
       <div class="form-check">
         <input class="form-check-input" type="radio" formControlName="tipoUsuario" value="proveedor" id="radioDefault1">
         <label class="form-check-label" for="radioDefault1">Proveedor</label>
       </div>
-
       <div class="form-check">
         <input class="form-check-input" type="radio" formControlName="tipoUsuario" value="solicitante" id="radioDefault2">
         <label class="form-check-label" for="radioDefault2">Solicitante</label>
       </div>
     </div>
+
     <br>
-
-    <button
-      type="submit"
-      class="login-button"
-      [disabled]="form.invalid || !passwordsMatch"
-    >
-      Registrarme
-    </button>
+    <button type="submit" class="login-button" [disabled]="form.invalid">Registrarme</button>
     <br><br>
-
     <button type="button" class="cancel-button" (click)="routeLogin()">Cancelar</button>
   </form>
 </div>

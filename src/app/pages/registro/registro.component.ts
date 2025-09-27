@@ -10,7 +10,7 @@ import {
   filter,
   switchMap,
 } from 'rxjs';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { AccessService } from '../../core/services/access.service';
 import { UsuarioDTO } from '../../core/models/usuario.dto';
 
@@ -32,17 +32,20 @@ type NominatimResult = {
   };
 };
 
+const passwordsMatchValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+  const p = group.get('password')?.value ?? '';
+  const r = group.get('repeatPassword')?.value ?? '';
+  return p && r && p === r ? null : { passwordsMismatch: true };
+};
+
 @Component({
   selector: 'app-registro',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './registro.component.html',
-  styleUrl: './registro.component.css',
+  styleUrls: ['./registro.component.css'],
 })
 export class RegistroComponent implements OnInit, OnDestroy {
-
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -53,22 +56,12 @@ export class RegistroComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  // ---------- Reactive Form ----------
-  form!: FormGroup; // se inicializa en ngOnInit
-
-  get passwordsMatch(): boolean {
-    if (!this.form) return false;
-    const p1 = this.form.value.contrasena;
-    const p2 = this.form.value.repetirContrasena;
-    return !!p1 && !!p2 && p1 === p2;
-  }
-
+  form!: FormGroup;
   showPass = false;
   showPass2 = false;
   togglePassword() { this.showPass = !this.showPass; }
   togglePassword2() { this.showPass2 = !this.showPass2; }
 
-  // ---------- Autocompletado Dirección ----------
   private direccionInput$ = new Subject<string>();
   private sub?: Subscription;
 
@@ -80,18 +73,28 @@ export class RegistroComponent implements OnInit, OnDestroy {
   lonSeleccionada: string | null = null;
   today = this.toYMD(new Date());
 
+  get passwordsMatch(): boolean {
+    const g = this.form.get('passwordGroup');
+    return !!g && !g.invalid && !g.errors?.['passwordsMismatch'];
+  }
+
   ngOnInit() {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(200)]],
       fechaNacimiento: ['', [Validators.required]],
       direccionDescripcion: ['', [Validators.required]],
       correo: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
-      contrasena: ['', [Validators.required, Validators.minLength(6)]],
-      repetirContrasena: ['', [Validators.required]],
+      telefono: [''], // opcional
       tipoUsuario: ['solicitante', [Validators.required]],
-      telefono: [''] // opcional
+      // Grupo de contraseñas
+      passwordGroup: this.fb.group(
+        {
+          password: ['', [Validators.required, Validators.minLength(6)]],
+          repeatPassword: ['', [Validators.required]],
+        },
+        { validators: passwordsMatchValidator }
+      ),
     });
-
 
     // Suscripción a Nominatim
     this.sub = this.direccionInput$
@@ -153,52 +156,46 @@ export class RegistroComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  // helper para pintar errores de un control
   invalid(ctrlName: string): boolean {
     const c = this.form.get(ctrlName);
     return !!c && c.invalid && (c.touched || c.dirty);
   }
 
-
-  // ---------- Registro ----------
   onSubmit() {
-    if (this.form.invalid || !this.passwordsMatch) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-
     const tipo = this.form.value.tipoUsuario as 'proveedor' | 'solicitante';
     const esProveedor = tipo === 'proveedor';
     const esCliente = tipo === 'solicitante';
 
-    // yyyy-MM-dd (para DateOnly del backend)
     const fn: string = this.toYMD(this.form.value.fechaNacimiento);
-
     const dirDto = this.toDireccionDTO();
+
+    const password = this.form.get('passwordGroup.password')?.value as string;
 
     const payload: UsuarioDTO = {
       correo: (this.form.value.correo ?? '').trim(),
       nombre: (this.form.value.nombre ?? '').trim(),
-      contrasena: this.form.value.contrasena,
+      contrasena: password,
       esCliente,
       esProveedor,
       telefono: (this.form.value.telefono ?? '').trim() || null,
       fechaNacimiento: fn,
       direccion: dirDto,
-      // campos que el backend ignora/establece
       idUsuario: 0,
       fechaCreacion: new Date().toISOString(),
       evaluacion: null,
       descripcion: null,
       idDireccion: null,
-      fotoPerfilUrl: null
+      fotoPerfilUrl: null,
     } as unknown as UsuarioDTO;
 
     this.access.register(payload).subscribe({
       next: () => this.routeLogin(),
       error: (err) => {
         console.error('Error de registro', err);
-        // aquí puedes manejar ValidationProblemDetails si err.errors existe
       }
     });
   }

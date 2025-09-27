@@ -1,18 +1,29 @@
-// FechaNacimiento en .NET es DateOnly? => envía string "YYYY-MM-DD"
+// core/models/usuario.dto.ts
+export interface DireccionDTO {
+  idDireccion?: number | null;
+  descripcion: string;
+  comuna?: string | null;
+  codigoPostal?: string | null;
+  region?: string | null;
+}
+
 export interface UsuarioDTO {
-  idUsuario?: number;
+  idUsuario?: number | null;
   correo: string;
   nombre: string;
   contrasena: string;
+
   evaluacion?: number | null;
   descripcion?: string | null;
-  fechaNacimiento?: string | null; // "yyyy-MM-dd"
-  fechaCreacion?: string;          // backend la setea, no enviarla al registrar
+  fechaNacimiento?: string | null;   // yyyy-MM-dd
+  fechaCreacion?: string | null;
   telefono?: string | null;
   idDireccion?: number | null;
   esCliente: boolean;
   esProveedor: boolean;
   fotoPerfilUrl?: string | null;
+
+  direccion?: DireccionDTO | null;   // <<-- embebida para crear en backend
 }
 
 export interface RegisterResponse {
@@ -21,12 +32,9 @@ export interface RegisterResponse {
   message?: string;
 }
 
-// Para capturar errores de validación
 export interface ValidationProblemDetails {
   type?: string;
   title?: string;
   status?: number;
-  detail?: string;
-  instance?: string;
   errors: Record<string, string[]>;
 }

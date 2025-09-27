@@ -193,6 +193,24 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #374151; /* gris oscuro */
+}
+
+.form-input.invalid {
+  border-color: #ef4444; /* rojo */
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-text {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #dc2626; /* rojo */
+}
+
 .sugerencia-item:last-child {
   border-bottom: none;
 }

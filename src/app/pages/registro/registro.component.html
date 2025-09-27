@@ -1,37 +1,70 @@
 <div class="registro-container">
 
-  <!-- Titulo -->
   <div>
     <h1 class="welcome-title">REGÍSTRATE</h1>
   </div>
 
-  <!-- Formulario Registro -->
-  <form class="login-form">
+  <form class="login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
 
     <!-- Nombre Completo -->
     <div class="form-group">
+      <label class="form-label">Nombre *</label>
       <div class="input-container">
         <span class="input-icon">👤</span>
-        <input type="text" class="form-input" placeholder="Nombre Completo" required>
+        <input
+          type="text"
+          class="form-input"
+          placeholder="Nombre Completo"
+          formControlName="nombre"
+          [class.invalid]="invalid('nombre')"
+          required
+        >
+      </div>
+      <div class="error-text" *ngIf="invalid('nombre')">El nombre es obligatorio.</div>
+    </div>
+
+    <!-- Fecha de Nacimiento -->
+    <div class="form-group">
+      <label class="form-label">Fecha de nacimiento *</label>
+      <div class="input-container">
+        <span class="input-icon">🎂</span>
+        <input
+          type="date"
+          class="form-input"
+          placeholder="AAAA-MM-DD"
+          formControlName="fechaNacimiento"
+          [attr.max]="today"
+          [class.invalid]="invalid('fechaNacimiento')"
+          required
+        >
+      </div>
+      <div class="error-text" *ngIf="invalid('fechaNacimiento')">
+        La fecha de nacimiento es obligatoria y no puede ser futura.
       </div>
     </div>
 
     <!-- Dirección con autocompletado -->
     <div class="form-group" style="position: relative;">
+      <label class="form-label">Dirección *</label>
       <div class="input-container">
         <span class="input-icon">📍</span>
         <input
           #direccionInput
           type="text"
           class="form-input"
-          placeholder="Dirección"
-          required
+          placeholder="Escribe tu dirección"
           autocomplete="off"
           (keydown.enter)="$event.preventDefault()"
           (input)="onDireccionInput(direccionInput.value)"
           (focus)="abrirSugerenciasSiHay()"
           (blur)="onDireccionBlur()"
+          [value]="form.value.direccionDescripcion || ''"
+          [class.invalid]="invalid('direccionDescripcion')"
+          required
         >
+      </div>
+      <div class="error-text" *ngIf="invalid('direccionDescripcion')">
+        La dirección es obligatoria.
       </div>
 
       <!-- Lista de sugerencias -->
@@ -51,51 +84,111 @@
 
     <!-- Correo -->
     <div class="form-group">
+      <label class="form-label">Correo electrónico *</label>
       <div class="input-container">
         <span class="input-icon">📧</span>
-        <input type="email" class="form-input" placeholder="Email" required>
+        <input
+          type="email"
+          class="form-input"
+          placeholder="tu@correo.com"
+          formControlName="correo"
+          [class.invalid]="invalid('correo')"
+          required
+        >
+      </div>
+      <div class="error-text" *ngIf="invalid('correo')">
+        Ingresa un correo válido.
+      </div>
+    </div>
+
+    <!-- Teléfono (opcional) -->
+    <div class="form-group">
+      <label class="form-label">Teléfono (opcional)</label>
+      <div class="input-container">
+        <span class="input-icon">📱</span>
+        <input
+          type="tel"
+          class="form-input"
+          placeholder="+56 9 1234 5678"
+          formControlName="telefono"
+        >
       </div>
     </div>
 
     <!-- Password -->
     <div class="form-group">
+      <label class="form-label">Contraseña *</label>
       <div class="input-container">
         <span class="input-icon">🔒</span>
-        <input type="password" class="form-input" placeholder="Contraseña" id="passwordInput" required>
-        <button type="button" class="password-toggle" onclick="togglePassword()">👁</button>
+        <input
+          [type]="showPass ? 'text' : 'password'"
+          class="form-input"
+          placeholder="Contraseña"
+          formControlName="contrasena"
+          id="passwordInput"
+          [class.invalid]="invalid('contrasena')"
+          required
+        >
+        <button type="button" class="password-toggle" (click)="togglePassword()">
+          {{ showPass ? '🙈' : '👁' }}
+        </button>
+      </div>
+      <div class="error-text" *ngIf="invalid('contrasena')">
+        La contraseña es obligatoria (mínimo 6 caracteres).
       </div>
     </div>
 
     <!-- Repeat Password -->
     <div class="form-group">
+      <label class="form-label">Repetir contraseña *</label>
       <div class="input-container">
         <span class="input-icon">🔒</span>
-        <input type="password" class="form-input" placeholder="Repetir Contraseña" id="passwordRepeatInput" required>
-        <button type="button" class="password-toggle" onclick="togglePassword()">👁</button>
+        <input
+          [type]="showPass2 ? 'text' : 'password'"
+          class="form-input"
+          placeholder="Repetir Contraseña"
+          formControlName="repetirContrasena"
+          id="passwordRepeatInput"
+          [class.invalid]="invalid('repetirContrasena') || (form.touched && !passwordsMatch)"
+          required
+        >
+        <button type="button" class="password-toggle" (click)="togglePassword2()">
+          {{ showPass2 ? '🙈' : '👁' }}
+        </button>
+      </div>
+      <div class="error-text" *ngIf="invalid('repetirContrasena')">
+        Debes repetir la contraseña.
+      </div>
+      <div class="error-text" *ngIf="form.touched && !passwordsMatch">
+        Las contraseñas no coinciden.
       </div>
     </div>
 
     <!-- Tipo de usuario -->
     <div class="tipo-usuario-container">
-      <label>Tipo de Usuario:</label>
+      <label>Tipo de Usuario *:</label>
 
       <div class="form-check">
-        <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+        <input class="form-check-input" type="radio" formControlName="tipoUsuario" value="proveedor" id="radioDefault1">
         <label class="form-check-label" for="radioDefault1">Proveedor</label>
       </div>
 
       <div class="form-check">
-        <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
+        <input class="form-check-input" type="radio" formControlName="tipoUsuario" value="solicitante" id="radioDefault2">
         <label class="form-check-label" for="radioDefault2">Solicitante</label>
       </div>
     </div>
     <br>
 
-    <!-- Botón Ingresar -->
-    <button type="button" class="login-button" (click)="routeLogin()">Ingresar</button>
+    <button
+      type="submit"
+      class="login-button"
+      [disabled]="form.invalid || !passwordsMatch"
+    >
+      Registrarme
+    </button>
     <br><br>
 
-    <!-- Botón Cancelar -->
     <button type="button" class="cancel-button" (click)="routeLogin()">Cancelar</button>
   </form>
 </div>

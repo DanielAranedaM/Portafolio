@@ -21,6 +21,8 @@ type NominatimResult = {
 @Component({
   selector: 'app-registro',
   standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.css',

@@ -61,6 +61,7 @@
     <!-- Btns de Acción -->
     <div class="action-buttons">
         <button class="action-btn btn-primary" (click)="routePerfil()">✏️ Editar Perfil</button>
+        <button *ngIf="isProveedor" class="action-btn btn-success" (click)="routeRegistrarServicio()">➕ Publicar Servicio</button>
         <button class="action-btn btn-secondary">📷 Subir Fotos</button>
         <button class="action-btn btn-danger" (click)="openLogoutModal()">🚪 Cerrar Sesión</button>
     </div>

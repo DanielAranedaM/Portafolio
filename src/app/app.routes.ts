@@ -5,6 +5,7 @@ import { MenuComponent } from './pages/menu/menu.component';
 import { HomeComponent } from './pages/home/home.component';
 import { RecuperarPassComponent } from './pages/recuperar-pass/recuperar-pass.component';
 import { PerfilComponent } from './pages/perfil/perfil.component';
+import { RegistrarServicioComponent } from './pages/registrar-servicio/registrar-servicio.component';
 
 export const routes: Routes = [
     {
@@ -35,6 +36,10 @@ export const routes: Routes = [
     {
         path: 'perfil',
         component: PerfilComponent
+    },
+    {
+        path: 'registrar-servicio',
+        component: RegistrarServicioComponent
     },
     {
         path: '**',

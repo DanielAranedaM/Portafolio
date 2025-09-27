@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AccessService } from '../../core/services/access.service';
 import { LoginDTO } from '../../core/models/login.dto';
@@ -29,9 +29,15 @@ export class LoginComponent {
     this.router.navigate(['/registro']);
   }
 
-  //Navegar a Menu
+  //Navegar a Menu (solo si hay datos de usuario)
   routeMenu() {
-    this.router.navigate(['/menu']);
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      this.router.navigate(['/menu']);
+    } else {
+      alert('Por favor regístrate primero');
+      this.router.navigate(['/registro']);
+    }
   }
 
   //Navegar a Recuperar pass

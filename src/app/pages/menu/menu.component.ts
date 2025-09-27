@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -9,19 +9,45 @@ import { Router } from '@angular/router';
   styleUrl: './menu.component.css'
 })
 
-export class MenuComponent {
-  private router: Router;
+export class MenuComponent implements OnInit {
+  constructor(private router: Router) {}
 
-  constructor(router: Router) {
-    this.router = router;    
+  ngOnInit(): void {
+    // Obtener el rol del usuario desde localStorage
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        this.userRole = user.role || '';
+        console.log('Usuario logueado:', user);
+        console.log('Rol del usuario:', this.userRole);
+      } catch (error) {
+        console.error('Error al parsear userData:', error);
+        this.userRole = '';
+      }
+    } else {
+      console.log('No hay datos de usuario en localStorage');
+      this.userRole = '';
+    }
   }
 
   logoutModalVisible: boolean = false;
+  userRole: string = ''; // Rol del usuario (proveedor o solicitante)
 
   //-------------------------------Navegación------------------------------
   //Navegar a Editar Perfil
   routePerfil() {
     this.router.navigate(['/perfil']);
+  }
+
+  //Navegar a Registrar Servicio
+  routeRegistrarServicio() {
+    this.router.navigate(['/registrar-servicio']);
+  }
+
+  // Getter para verificar si el usuario es proveedor
+  get isProveedor(): boolean {
+    return this.userRole === 'proveedor';
   }
 
   //---------------------------SideBar-------------------------------------
@@ -288,16 +314,22 @@ export class MenuComponent {
 
   //Confirma el cierre de sesión y redirige al login
   confirmLogout(): void {
-    // Limpiar datos de sesión
-    this.clearSessionData();
-    
-    // Cerrar el modal
-    this.closeLogoutModal();
-    // Redirigir al login
-    this.router.navigate(['/login']); 
-    
-    //Mostrar mensaje de confirmación
-    console.log('Sesión cerrada exitosamente');
+    try {
+      // Limpiar datos de sesión
+      this.clearSessionData();
+      
+      // Cerrar el modal
+      this.closeLogoutModal();
+      
+      // Redirigir al login y esperar a que se complete la navegación
+      this.router.navigate(['/login']).then(() => {
+        console.log('Sesión cerrada exitosamente');
+      }).catch(error => {
+        console.error('Error al navegar:', error);
+      });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   }
 
   //Método para limpiar datos de sesión
@@ -306,6 +338,7 @@ export class MenuComponent {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userData');
     localStorage.removeItem('userPreferences');
+    localStorage.removeItem('auth_token');
     
     // Limpiar sessionStorage
     sessionStorage.clear();

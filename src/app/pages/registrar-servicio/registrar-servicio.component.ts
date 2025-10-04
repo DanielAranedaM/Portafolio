@@ -1,7 +1,43 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+
+import {
+  Subject,
+  Subscription,
+  from,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  switchMap,
+} from 'rxjs';
+
+import { ServicesService } from '../../core/services/services.service';
+import { UsersService } from '../../core/services/users.service';
+import { CategoriasService } from '../../core/services/categorias.service';
+
+import { CreateServiceDTO } from '../../core/models/create-Service.dto';
+import { DireccionDTO } from '../../core/models/direccion.dto';
+import { CategoriaDTO } from '../../core/models/categoria.dto';
+
+type NominatimResult = {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  address?: {
+    postcode?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    suburb?: string;
+    state?: string;
+    region?: string;
+    county?: string;
+    municipality?: string;
+  };
+};
 
 @Component({
   selector: 'app-registrar-servicio',
@@ -10,40 +46,140 @@ import { Router } from '@angular/router';
   templateUrl: './registrar-servicio.component.html',
   styleUrl: './registrar-servicio.component.css'
 })
-export class RegistrarServicioComponent implements OnInit {
+export class RegistrarServicioComponent implements OnInit, OnDestroy {
   currentStep = 1;
   totalSteps = 3;
 
   form!: FormGroup;
-  userDireccion: string = '';
   selectedFiles: File[] = [];
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  // categorías
+  categorias: CategoriaDTO[] = [];
+  cargandoCategorias = false;
+
+  // OSM / Nominatim
+  private direccionInput$ = new Subject<string>();
+  private sub?: Subscription;
+  sugerencias: NominatimResult[] = [];
+  mostrandoSugerencias = false;
+  direccionSeleccionada: NominatimResult | null = null;
+  latSeleccionada: string | null = null;
+  lonSeleccionada: string | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private servicesService: ServicesService,
+    private usersService: UsersService,
+    private categoriasService: CategoriasService
+  ) {
     this.form = this.fb.group({
       nombreServicio: ['', [Validators.required, Validators.minLength(3)]],
-      categoria: ['', Validators.required],
+      categoria: ['', Validators.required], // value será un ID numérico
       descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      precio: ['', [Validators.required, Validators.min(0)]]
+      precio: ['', [Validators.required, Validators.min(0)]],
+      direccionDescripcion: ['']
     });
   }
 
   ngOnInit() {
-    // Obtener dirección del usuario desde localStorage
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        this.userDireccion = user.direccion || '';
-      } catch (error) {
-        console.error('Error al parsear userData:', error);
+    // Cargar categorías desde API
+    this.cargandoCategorias = true;
+    this.categoriasService.getAll().subscribe({
+      next: (cats) => {
+        this.categorias = cats ?? [];
+        this.cargandoCategorias = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar categorías', err);
+        this.cargandoCategorias = false;
       }
+    });
+
+    // Precargar dirección REAL desde la API (SQL)
+    this.usersService.getMe().subscribe({
+      next: (user) => {
+        const desc = (user?.direccion?.descripcion ?? '').toString().trim();
+        if (desc) this.form.patchValue({ direccionDescripcion: desc });
+      },
+      error: (err) => {
+        console.warn('No se pudo precargar dirección desde API:', err);
+        this.precargarDesdeLocalStorage();
+      }
+    });
+
+    // Suscripción a Nominatim
+    this.sub = this.direccionInput$
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        filter((txt) => (txt ?? '').trim().length >= 3),
+        switchMap((texto) => from(this.buscarNominatim(texto)))
+      )
+      .subscribe((res) => {
+        this.sugerencias = res;
+        this.mostrandoSugerencias = res.length > 0;
+      });
+  }
+
+  private precargarDesdeLocalStorage() {
+    const userData = localStorage.getItem('userData');
+    if (!userData) return;
+    try {
+      const user = JSON.parse(userData);
+      const desc = (user?.direccion ?? '').toString();
+      if (desc) this.form.patchValue({ direccionDescripcion: desc });
+    } catch (e) {
+      console.error('Error al parsear userData:', e);
     }
   }
 
-  onFileSelected(event: any) {
-    const files = event.target.files;
+  // ======= OSM / Nominatim =======
+  onDireccionInput(texto: string) {
+    this.direccionSeleccionada = null;
+    this.latSeleccionada = null;
+    this.lonSeleccionada = null;
+    this.form.patchValue({ direccionDescripcion: (texto ?? '').trim() }, { emitEvent: false });
+    this.direccionInput$.next((texto ?? '').trim());
+  }
+
+  abrirSugerenciasSiHay() {
+    this.mostrandoSugerencias = this.sugerencias.length > 0;
+  }
+
+  onDireccionBlur() {
+    setTimeout(() => this.cerrarSugerencias(), 150);
+  }
+
+  cerrarSugerencias() {
+    this.mostrandoSugerencias = false;
+  }
+
+  async buscarNominatim(q: string): Promise<NominatimResult[]> {
+    const url =
+      'https://nominatim.openstreetmap.org/search?' +
+      `format=jsonv2&addressdetails=1&limit=8&countrycodes=cl&q=${encodeURIComponent(q)}`;
+
+    const resp = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!resp.ok) return [];
+    return resp.json();
+  }
+
+  seleccionarSugerencia(item: NominatimResult, inputEl: HTMLInputElement) {
+    inputEl.value = item.display_name;
+    this.direccionSeleccionada = item;
+    this.latSeleccionada = item.lat;
+    this.lonSeleccionada = item.lon;
+    this.form.patchValue({ direccionDescripcion: item.display_name }, { emitEvent: false });
+    this.cerrarSugerencias();
+  }
+  // ======= /OSM =======
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files: FileList | null = input.files;
     if (files) {
-      this.selectedFiles = Array.from(files);
+      this.selectedFiles = Array.from(files).slice(0, 5) as File[];
     }
   }
 
@@ -52,29 +188,16 @@ export class RegistrarServicioComponent implements OnInit {
   }
 
   nextStep() {
-    if (this.currentStep < this.totalSteps) {
+    if (this.currentStep < this.totalSteps && this.isStepValid(this.currentStep)) {
       this.currentStep++;
+    } else {
+      this.form.markAllAsTouched();
     }
   }
 
   prevStep() {
     if (this.currentStep > 1) {
       this.currentStep--;
-    }
-  }
-
-  submit() {
-    if (this.form.valid) {
-      const servicioData = {
-        ...this.form.value,
-        ubicacion: this.userDireccion,
-        imagenes: this.selectedFiles
-      };
-      console.log('Servicio registrado:', servicioData);
-      // Aquí podrías enviar a un servicio o API
-      this.router.navigate(['/menu']); // O a donde corresponda
-    } else {
-      this.form.markAllAsTouched();
     }
   }
 
@@ -85,9 +208,67 @@ export class RegistrarServicioComponent implements OnInit {
       case 2:
         return !!(this.form.get('descripcion')?.valid && this.form.get('precio')?.valid);
       case 3:
-        return true; // Siempre válido ya que la ubicación viene del usuario
+        return true;
       default:
         return false;
     }
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
+
+  // === SUBMIT ===
+  submit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    // Ahora el select tiene IDs reales -> Number directo
+    const idCategoriaServicio = Number(this.form.value.categoria) || 0;
+    if (idCategoriaServicio <= 0) {
+      alert('Selecciona una categoría válida.');
+      return;
+    }
+
+    const direccion: DireccionDTO | null = this.toDireccionDTO();
+
+    const payload: CreateServiceDTO = {
+      titulo: (this.form.value.nombreServicio ?? '').trim(),
+      descripcion: (this.form.value.descripcion ?? '').trim(),
+      precioBase: Number(this.form.value.precio) ?? 0,
+      idCategoriaServicio,
+      direccion,
+      fotos: null
+    };
+
+    this.servicesService.createService(payload).subscribe({
+      next: () => this.router.navigate(['/menu']),
+      error: (err) => {
+        console.error('Error al crear servicio:', err);
+        alert(err?.message || 'Error al crear el servicio');
+      }
+    });
+  }
+
+  private toDireccionDTO(): DireccionDTO | null {
+    const desc = (this.form.value.direccionDescripcion ?? '').trim();
+    if (!desc) return null;
+
+    const addr = this.direccionSeleccionada?.address;
+    const comuna =
+      (addr?.city || addr?.town || addr?.village || addr?.suburb || addr?.municipality || addr?.county) ?? null;
+    const region =
+      (addr?.region || addr?.state) ?? null;
+    const codigoPostal = addr?.postcode ?? null;
+
+    return {
+      idDireccion: 0,
+      descripcion: desc,
+      comuna,
+      region,
+      codigoPostal
+    };
   }
 }

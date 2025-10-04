@@ -32,14 +32,16 @@
       </div>
       <div class="mb-3">
         <label for="categoria" class="form-label">Categoría</label>
+
         <select class="form-select form-select-lg" id="categoria" formControlName="categoria">
           <option value="">Selecciona una categoría</option>
-          <option value="limpieza">Limpieza</option>
-          <option value="jardineria">Jardinería</option>
-          <option value="reparaciones">Reparaciones</option>
-          <option value="cuidado">Cuidado Personal</option>
-          <option value="otros">Otros</option>
+          <option *ngFor="let c of categorias" [value]="c.idCategoriaServicio">
+            {{ c.nombre }}
+          </option>
         </select>
+
+        <div *ngIf="cargandoCategorias" class="form-text">Cargando categorías…</div>
+
         <div *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="text-danger">
           Categoría requerida
         </div>
@@ -68,32 +70,73 @@
     <!-- Paso 3 -->
     <div *ngIf="currentStep === 3" class="step-content">
       <h3>Imágenes y Confirmación</h3>
-      <div class="mb-3">
+
+      <!-- Dirección con autocompletado y precarga -->
+      <div class="mb-3" style="position: relative;">
         <label for="ubicacion" class="form-label">Ubicación (desde tu perfil)</label>
-        <input type="text" class="form-control form-control-lg" id="ubicacion" [value]="userDireccion" readonly>
-        <small class="text-muted">Esta dirección se obtiene automáticamente de tu registro</small>
+        <input
+          #direccionInput
+          type="text"
+          class="form-control form-control-lg"
+          id="ubicacion"
+          autocomplete="off"
+          placeholder="Escribe tu dirección"
+          (keydown.enter)="$event.preventDefault()"
+          (input)="onDireccionInput(direccionInput.value)"
+          (focus)="abrirSugerenciasSiHay()"
+          (blur)="onDireccionBlur()"
+          [value]="form.value.direccionDescripcion || ''"
+        />
+        <small class="text-muted">Puedes usar tu dirección precargada o escribir una nueva.</small>
+
+        <!-- Sugerencias -->
+        <ul class="list-group sugerencias" *ngIf="mostrandoSugerencias">
+          <li
+            class="list-group-item sugerencia-item"
+            *ngFor="let s of sugerencias"
+            (mousedown)="seleccionarSugerencia(s, direccionInput)"
+          >
+            {{ s.display_name }}
+          </li>
+          <li class="list-group-item sugerencia-atribucion">
+            Resultados por Nominatim — © OpenStreetMap contributors
+          </li>
+        </ul>
       </div>
+
+      <!-- Imágenes -->
       <div class="mb-3">
         <label for="imagenes" class="form-label">Adjuntar Imágenes del Servicio</label>
-        <input type="file" class="form-control form-control-lg" id="imagenes" multiple accept="image/*" (change)="onFileSelected($event)">
+        <input
+          type="file"
+          class="form-control form-control-lg"
+          id="imagenes"
+          multiple
+          accept="image/*"
+          (change)="onFileSelected($event)"
+        />
         <small class="text-muted">Puedes seleccionar múltiples imágenes (máx. 5)</small>
         <div *ngIf="selectedFiles.length > 0" class="mt-3">
           <h6>Imágenes seleccionadas:</h6>
           <ul class="list-group">
-            <li *ngFor="let file of selectedFiles; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+            <li
+              *ngFor="let file of selectedFiles; let i = index"
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
               {{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
               <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeFile(i)">Eliminar</button>
             </li>
           </ul>
         </div>
       </div>
+
       <div class="mb-3">
         <h5>Resumen:</h5>
         <p><strong>Nombre:</strong> {{ form.value.nombreServicio }}</p>
         <p><strong>Categoría:</strong> {{ form.value.categoria }}</p>
         <p><strong>Descripción:</strong> {{ form.value.descripcion }}</p>
         <p><strong>Precio:</strong> {{ form.value.precio }}</p>
-        <p><strong>Ubicación:</strong> {{ userDireccion }}</p>
+        <p><strong>Ubicación:</strong> {{ form.value.direccionDescripcion }}</p>
         <p><strong>Imágenes:</strong> {{ selectedFiles.length }} seleccionadas</p>
       </div>
     </div>

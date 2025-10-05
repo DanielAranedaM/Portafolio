@@ -1,140 +1,139 @@
 <div class="profile-container">
-    <!-- Header del Perfil -->
-    <div class="profile-header">
-        <div class="profile-photo-large">
-            <span class="profile-initials-large">AB</span>
-        </div>
-        
-        <div class="profile-info">
-            <h1 class="profile-name">Alan Brito</h1>
-            <div class="rating-section">
-                <div class="stars">★★★★★</div>
-                <span class="rating-text">4.9</span>
-            </div>
-        </div>
+  <!-- Header del Perfil -->
+  <div class="profile-header">
+    <div class="profile-photo-large">
+      <!-- Imagen si existe -->
+      <img *ngIf="hasProfileImage" [src]="profileImageUrl" alt="Foto de perfil grande" />
+      <!-- Iniciales si no hay imagen -->
+      <span *ngIf="!hasProfileImage" class="profile-initials-large">{{ userInitials }}</span>
     </div>
 
-    <!-- Descripción -->
-    <div class="section">
-        <h3 class="section-title">Descripción</h3>
-        <p class="description-text">Profesional con más de 15 años de experiencia en jardinería y mantenimiento de espacios verdes. Especialista en diseño de jardines y cuidado de plantas.</p>
+    <div class="profile-info">
+      <h1 class="profile-name">{{ userName }}</h1>
+
+      <!-- Clasificación dinámica -->
+      <div class="rating-section">
+        <div class="stars">
+          <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
+            <ng-container *ngFor="let star of [1,2,3,4,5]">
+              <span *ngIf="userRating >= star">★</span>
+              <span *ngIf="userRating < star && userRating >= star - 0.5">⯨</span>
+              <span *ngIf="userRating < star - 0.5">☆</span>
+            </ng-container>
+          </ng-container>
+          <ng-template #noRating>
+            <span>☆☆☆☆☆</span>
+          </ng-template>
+        </div>
+        <span class="rating-text">
+          {{ userRating !== null ? (userRating | number:'1.1-1') : '0.0' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Descripción -->
+  <div class="section">
+    <h3 class="section-title">Descripción</h3>
+    <p class="description-text">
+      {{ userDescription || '—' }}
+    </p>
+  </div>
+
+  <!-- Contacto -->
+  <div class="section">
+    <h3 class="section-title">Contacto</h3>
+    <div class="contact-buttons">
+      <button class="contact-btn whatsapp-btn" [disabled]="!userPhone">
+        <span>💬</span>
+        WhatsApp: {{ userPhone || 'sin teléfono' }}
+      </button>
+      <button class="contact-btn call-btn" [disabled]="!userPhone">
+        <span>📞</span>
+        Llamar
+      </button>
+    </div>
+  </div>
+
+  <!-- Galería de Fotos -->
+  <div class="section">
+    <div class="gallery-header">
+      <h3 class="section-title" style="margin-bottom: 0;">Galería de Trabajos</h3>
+      <button class="add-photo-btn">
+        <span>📷</span>
+        Agregar Foto
+      </button>
     </div>
 
-    <!-- Contacto -->
-    <div class="section">
-        <h3 class="section-title">Contacto</h3>
-        <div class="contact-buttons">
-            <button class="contact-btn whatsapp-btn">
-                <span>💬</span>
-                WhatsApp: +1 234 567 8900
-            </button>
-            <button class="contact-btn call-btn">
-                <span>📞</span>
-                Llamar
-            </button>
+    <div class="photo-carousel">
+      <button class="carousel-btn">‹</button>
+
+      <div class="photo-grid">
+        <!-- Ejemplo -->
+        <div class="photo-item">
+          <span style="font-size: 24px; color: #4CAF50;">🌱</span>
         </div>
+        <!-- Placeholders -->
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+        <div class="photo-placeholder"><span>➕</span></div>
+      </div>
+
+      <button class="carousel-btn">›</button>
+    </div>
+  </div>
+
+  <!-- Recomendaciones -->
+  <div class="section">
+    <h3 class="section-title">Recomendaciones</h3>
+
+    <div class="review-item">
+      <div class="review-header">
+        <span class="review-author">Elena Nito</span>
+        <div class="review-rating">★★★★★</div>
+      </div>
+      <p class="review-text">"Excelente trabajo en mi jardín. Muy profesional y puntual."</p>
+      <span class="review-date">15/11/2024</span>
     </div>
 
-    <!-- Galería de Fotos -->
-    <div class="section">
-        <div class="gallery-header">
-            <h3 class="section-title" style="margin-bottom: 0;">Galería de Trabajos</h3>
-            <button class="add-photo-btn">
-                <span>📷</span>
-                Agregar Foto
-            </button>
-        </div>
-        
-        <div class="photo-carousel">
-            <button class="carousel-btn">‹</button>
-            
-            <div class="photo-grid">
-                <!-- Ejemplos de fotos -->
-                <div class="photo-item">
-                    <span style="font-size: 24px; color: #4CAF50;">🌱</span>
-                </div>
-                <!-- Placeholders -->         
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>             
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-                <div class="photo-placeholder">
-                    <span>➕</span>
-                </div>
-            </div>
-            
-            <button class="carousel-btn">›</button>
-        </div>
+    <div class="review-item">
+      <div class="review-header">
+        <span class="review-author">Armando Casas</span>
+        <div class="review-rating">★★★★★</div>
+      </div>
+      <p class="review-text">"Recomiendo 100%. Transformó completamente mi patio."</p>
+      <span class="review-date">08/11/2024</span>
     </div>
 
-    <!-- Recomendaciones -->
-    <div class="section">
-        <h3 class="section-title">Recomendaciones</h3>
-        
-        <div class="review-item">
-            <div class="review-header">
-                <span class="review-author">Elena Nito</span>
-                <div class="review-rating">★★★★★</div>
-            </div>
-            <p class="review-text">"Excelente trabajo en mi jardín. Muy profesional y puntual."</p>
-            <span class="review-date">15/11/2024</span>
-        </div>
-        
-        <div class="review-item">
-            <div class="review-header">
-                <span class="review-author">Armando Casas</span>
-                <div class="review-rating">★★★★★</div>
-            </div>
-            <p class="review-text">"Recomiendo 100%. Transformó completamente mi patio."</p>
-            <span class="review-date">08/11/2024</span>
-        </div>
-        
-        <div class="review-item">
-            <div class="review-header">
-                <span class="review-author">María García</span>
-                <div class="review-rating">★★★★☆</div>
-            </div>
-            <p class="review-text">"Muy buen servicio, cumplió con los tiempos acordados."</p>
-            <span class="review-date">02/11/2024</span>
-        </div>
+    <div class="review-item">
+      <div class="review-header">
+        <span class="review-author">María García</span>
+        <div class="review-rating">★★★★☆</div>
+      </div>
+      <p class="review-text">"Muy buen servicio, cumplió con los tiempos acordados."</p>
+      <span class="review-date">02/11/2024</span>
     </div>
+  </div>
 
-    <!-- Botones de Acción -->
-    <div class="action-buttons">
-        <button class="action-btn btn-primary">
-            🔧 Solicitar Servicio
-        </button>
-        <button class="action-btn btn-secondary">
-            ← Volver al Menú
-        </button>
-        <button class="action-btn btn-danger">
-            🚪 Cerrar Sesión
-        </button>
-    </div>
+  <!-- Botones de Acción -->
+  <div class="action-buttons">
+    <button class="action-btn btn-primary">
+      🔧 Solicitar Servicio
+    </button>
+    <button class="action-btn btn-secondary" (click)="goBack()">
+      ← Volver al Menú
+    </button>
+    <button class="action-btn btn-danger" (click)="logout()">
+      🚪 Cerrar Sesión
+    </button>
+  </div>
 </div>

@@ -28,20 +28,38 @@
         </div>
         
         <!-- Nombre de Usuario -->
-        <div class="user-name">Alan Brito</div>
-        
-        <!-- Clasificación -->
+        <div class="user-name">{{ userName }}</div>
+
+        <!-- Clasificación dinámica -->
         <div class="rating-section">
-            <div class="stars">★★★★★</div>
-            <span class="rating-text">4.9</span>
+            <div class="stars">
+                <!-- Mostrar estrellas dinámicamente -->
+                <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
+                <ng-container *ngFor="let star of [1,2,3,4,5]">
+                    <span *ngIf="userRating >= star">★</span>
+                    <span *ngIf="userRating < star && userRating >= star - 0.5">⯨</span>
+                    <span *ngIf="userRating < star - 0.5">☆</span>
+                </ng-container>
+                </ng-container>
+
+                <!-- Si no hay evaluación -->
+                <ng-template #noRating>
+                <span>☆☆☆☆☆</span>
+                </ng-template>
+            </div>
+
+            <span class="rating-text">
+                {{ userRating !== null ? (userRating | number:'1.1-1') : '0.0' }}
+            </span>
         </div>
+
     </div>
 
     <!-- Descripción -->
     <div class="description-section">
         <h3 class="section-title">Descripción</h3>
         <p class="description-text">
-            Profesional con más de 15 años de experiencia en jardinería y mantenimiento de espacios verdes. Especialista en diseño de jardines y cuidado de plantas.
+            {{ userDescription || '—' }}
         </p>
     </div>
 
@@ -78,7 +96,7 @@
   </div>
 </div>
 
-<!-- MODAL DE CÁMARA - ESTE ERA EL QUE FALTABA -->
+<!-- MODAL DE CÁMARA -->
 <div *ngIf="cameraModalVisible" class="camera-modal" (click)="onCameraBackdropClick($event)">
   <div class="camera-container" (click)="$event.stopPropagation()">
     <div class="camera-header">

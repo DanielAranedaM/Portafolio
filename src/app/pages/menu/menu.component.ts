@@ -1,299 +1,245 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
+import { UsersService } from '../../core/services/users.service';
+import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
+import { API_URL } from '../../core/tokens/api-url.token';
+
 @Component({
   selector: 'app-menu',
-  imports: [CommonModule], //Para poder usar ngClass
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './menu.component.html',
-  styleUrl: './menu.component.css'
+  styleUrls: ['./menu.component.css']
 })
-
 export class MenuComponent implements OnInit {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private usersService: UsersService,
+    @Inject(API_URL) private apiUrl: string
+  ) {}
+
+  // ------------------ Estado / props ------------------
+  logoutModalVisible = false;
+  userRole = ''; // 'proveedor' | 'cliente'
+
+  userName = 'Usuario';
+  userDescription: string | null = null;
+  userRating: number | null = null;
+
+  sidebarVisible = true;
+
+  photoModalVisible = false;
+  cameraModalVisible = false;
+  profileImageUrl: string | null = null;   // URL absoluta para <img>
+  userInitials = 'US';
+  currentStream: MediaStream | null = null;
 
   ngOnInit(): void {
-    // Obtener el rol del usuario desde localStorage
+    // (Opcional) Rol desde localStorage como fallback
     const userData = localStorage.getItem('userData');
     if (userData) {
       try {
         const user = JSON.parse(userData);
         this.userRole = user.role || '';
-        console.log('Usuario logueado:', user);
-        console.log('Rol del usuario:', this.userRole);
-      } catch (error) {
-        console.error('Error al parsear userData:', error);
+      } catch {
         this.userRole = '';
       }
-    } else {
-      console.log('No hay datos de usuario en localStorage');
-      this.userRole = '';
     }
+
+    // Cargar datos reales del usuario
+    this.loadMe();
   }
 
-  logoutModalVisible: boolean = false;
-  userRole: string = ''; // Rol del usuario (proveedor o solicitante)
+  private loadMe(): void {
+    this.usersService.getMe().subscribe({
+      next: (me: UsuarioDetalleDTO) => {
+        // Foto (API puede devolver ruta relativa '/uploads/...'):
+        this.profileImageUrl = me.fotoPerfilUrl ? this.makeAbsoluteUrl(me.fotoPerfilUrl) : null;
 
-  //-------------------------------Navegación------------------------------
-  //Navegar a Editar Perfil
-  routePerfil() {
-    this.router.navigate(['/perfil']);
+        // Nombre / iniciales
+        this.userName = me.nombre || 'Usuario';
+        this.userInitials = this.computeInitials(this.userName);
+
+        // Descripción
+        this.userDescription = me.descripcion ?? null;
+
+        // Evaluación (rating)
+        this.userRating = typeof me.evaluacion === 'number' ? me.evaluacion : null;
+
+        // Rol desde flags del backend
+        if (typeof me.esProveedor === 'boolean' || typeof me.esCliente === 'boolean') {
+          this.userRole = me.esProveedor ? 'proveedor' : 'cliente';
+        }
+
+        console.log('GET /Usuario/Me ->', me);
+      },
+      error: (err) => {
+        console.error('Error al obtener /Usuario/Me:', err);
+      }
+    });
   }
 
-  //Navegar a Registrar Servicio
-  routeRegistrarServicio() {
-    this.router.navigate(['/registrar-servicio']);
+  private computeInitials(fullName: string): string {
+    if (!fullName?.trim()) return 'US';
+    const parts = fullName.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] ?? '' : '';
+    return (first + last).toUpperCase();
   }
 
-  // Getter para verificar si el usuario es proveedor
-  get isProveedor(): boolean {
-    return this.userRole === 'proveedor';
+  private makeAbsoluteUrl(ruta: string): string {
+    // Si ya es URL absoluta, la dejamos; si es relativa (empieza con /uploads)
+    // concatenamos la base de la API.
+    if (/^https?:\/\//i.test(ruta)) return ruta;
+    return `${this.apiUrl}${ruta}`;
   }
 
-  //---------------------------SideBar-------------------------------------
-  //Estado de sidebar
-  sidebarVisible: boolean = true;
+  // ------------------ Navegación ------------------
+  routePerfil() { this.router.navigate(['/perfil']); }
+  routeRegistrarServicio() { this.router.navigate(['/registrar-servicio']); }
+  get isProveedor(): boolean { return this.userRole === 'proveedor'; }
 
-  //mostrar y/u ocultar barra lateral
-  toggleSidebar(): void{
-    this.sidebarVisible = !this.sidebarVisible; //se invierte el valor booleano actual
-  }
+  // ------------------ Sidebar ------------------
+  toggleSidebar(): void { this.sidebarVisible = !this.sidebarVisible; }
+  get toggleIcon(): string { return this.sidebarVisible ? '☰' : '👤'; }
+  get toggleTitle(): string { return this.sidebarVisible ? 'Ocultar perfil' : 'Mostrar perfil'; }
+  get sidebarClasses(): string { return this.sidebarVisible ? 'sidebar' : 'sidebar hidden'; }
+  get mainContentClasses(): string { return this.sidebarVisible ? 'main-content' : 'main-content expanded'; }
+  get toggleButtonClasses(): string { return this.sidebarVisible ? 'toggle-sidebar' : 'toggle-sidebar sidebar-hidden'; }
 
-  //getter para el icono del toggle
-  // muestra el icono ☰ si esta visible y 👤 si esta oculto
-  get toggleIcon(): string{
-    return this.sidebarVisible ? '☰' : '👤';
-  }
+  // ------------------ Foto / Cámara ------------------
+  openPhotoModal(): void { this.photoModalVisible = true; }
+  closePhotoModal(): void { this.photoModalVisible = false; }
 
-  //getter para el titulo del btn toggle
-  //muestra el texto en el boton "ocultar perfil" o "mostrar perfil" dependiendo dl caso
-  get toggleTitle(): string {
-    return this.sidebarVisible ? 'Ocultar perfil' : 'Mostrar perfil';
-  }
-
-  //Getter para las clases CSS de la sidebar
-  //devuelve las clases css para  sidebar normal
-  get sidebarClasses(): string {
-    return this.sidebarVisible ? 'sidebar' : 'sidebar hidden';
-  }
-
-  //Getter para las clases CSS del contenido principal
-  get mainContentClasses(): string {
-    return this.sidebarVisible ? 'main-content' : 'main-content expanded';
-  }
-
-  //Getter para las clases CSS del botón toggle
-  get toggleButtonClasses(): string {
-    return this.sidebarVisible ? 'toggle-sidebar' : 'toggle-sidebar sidebar-hidden';
-  }
-
-  //-----------------------------Foto-------------------------------------
-  // Estado del modal de foto
-  photoModalVisible: boolean = false;
-  
-  // Estado del modal de cámara
-  cameraModalVisible: boolean = false;
-  
-  // URL de la imagen de perfil (null si no hay imagen)
-  profileImageUrl: string | null = null;
-  
-  // Iniciales del usuario (se muestran cuando no hay foto)
-  userInitials: string = 'AB';
-
-  // Stream de video de la cámara
-  currentStream: MediaStream | null = null;
-
-  // Abrir modal para seleccionar foto
-  openPhotoModal(): void {
-    this.photoModalVisible = true;
-  }
-
-  // Cerrar modal de foto
-  closePhotoModal(): void {
-    this.photoModalVisible = false;
-  }
-
-  // MÉTODO CORREGIDO - Activar cámara real (para tomar foto)
   async takePhoto(): Promise<void> {
     try {
-      // Verificar si el navegador soporta getUserMedia
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (!navigator.mediaDevices?.getUserMedia) {
         alert('Tu navegador no soporta acceso a la cámara');
         return;
       }
-
       this.closePhotoModal();
-      
-      // Solicitar acceso a la cámara
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'user', // Cámara frontal por defecto
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
       });
-      
-      // Crear y mostrar el modal de cámara
       this.showCameraModal(stream);
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al acceder a la cámara:', error);
-      
-      // Manejo de errores específicos
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          alert('Acceso a la cámara denegado. Por favor permite el acceso y vuelve a intentar.');
-        } else if (error.name === 'NotFoundError') {
-          alert('No se encontró ninguna cámara en tu dispositivo.');
-        } else if (error.name === 'NotReadableError') {
-          alert('La cámara está siendo usada por otra aplicación.');
-        } else {
-          alert('Error al acceder a la cámara: ' + error.message);
-        }
-      }
+      if (error?.name === 'NotAllowedError') alert('Acceso a la cámara denegado.');
+      else if (error?.name === 'NotFoundError') alert('No se encontró una cámara.');
+      else if (error?.name === 'NotReadableError') alert('La cámara está en uso por otra app.');
+      else alert('Error al acceder a la cámara.');
     }
   }
 
-  // Activar input de archivo (para subir desde galería)
   uploadPhoto(): void {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.click();
-    }
+    if (fileInput) fileInput.click();
     this.closePhotoModal();
   }
 
-  // Manejar la subida de foto (desde cámara o archivo)
   handlePhotoUpload(event: Event): void {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    
-    if (file) {
-      // Verificar que sea una imagen
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-          // Guardar la URL de la imagen
-          this.profileImageUrl = e.target?.result as string;
-        };
-        
-        reader.readAsDataURL(file);
-      } else {
-        alert('Por favor selecciona un archivo de imagen válido');
-      }
+    if (!file) { target.value = ''; return; }
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona un archivo de imagen válido');
+      target.value = '';
+      return;
     }
-    
-    // Limpiar el input para permitir seleccionar el mismo archivo otra vez
+
+    this.usersService.subirMiFoto(file, file.name).subscribe({
+      next: (foto) => {
+        this.profileImageUrl = this.makeAbsoluteUrl(foto.ruta);
+      },
+      error: (e) => {
+        console.error('Error subiendo foto:', e);
+        alert('No se pudo subir la foto');
+      }
+    });
+
     target.value = '';
   }
 
-  // Eliminar foto de perfil (volver a mostrar iniciales)
   removePhoto(): void {
-    this.profileImageUrl = null;
-    this.closePhotoModal();
+    this.usersService.eliminarMiFotoActual().subscribe({
+      next: () => {
+        this.profileImageUrl = null;
+        this.closePhotoModal();
+      },
+      error: (e) => {
+        console.error('Error eliminando foto:', e);
+        alert('No se pudo eliminar la foto');
+      }
+    });
   }
 
-  // Getter para verificar si hay foto de perfil
-  get hasProfileImage(): boolean {
-    return this.profileImageUrl !== null;
-  }
+  get hasProfileImage(): boolean { return this.profileImageUrl !== null; }
 
-  // Método para manejar clics fuera del modal (cerrar modal)
   onModalBackdropClick(event: Event): void {
-    // Solo cerrar si se hace clic en el backdrop, no en el contenido del modal
-    if (event.target === event.currentTarget) {
-      this.closePhotoModal();
-    }
+    if (event.target === event.currentTarget) this.closePhotoModal();
   }
-
-  // Método para manejar clics fuera del modal de cámara
   onCameraBackdropClick(event: Event): void {
-    // Solo cerrar si se hace clic en el backdrop, no en el contenido del modal
-    if (event.target === event.currentTarget) {
-      this.closeCameraModal();
-    }
+    if (event.target === event.currentTarget) this.closeCameraModal();
   }
 
-  // Mostrar modal de cámara
   showCameraModal(stream: MediaStream): void {
     this.currentStream = stream;
     this.cameraModalVisible = true;
-    
-    // Esperar a que el modal se renderice
     setTimeout(() => {
       const video = document.getElementById('cameraVideo') as HTMLVideoElement;
-      if (video) {
-        video.srcObject = stream;
-        video.play();
-      }
+      if (video) { video.srcObject = stream; video.play(); }
     }, 100);
   }
 
-  // Cerrar modal de cámara y detener stream
   closeCameraModal(): void {
     this.cameraModalVisible = false;
-    
-    // Detener el stream de video
     if (this.currentStream) {
-      this.currentStream.getTracks().forEach(track => track.stop());
+      this.currentStream.getTracks().forEach(t => t.stop());
       this.currentStream = null;
     }
   }
 
-  // Capturar foto desde el video
   capturePhoto(): void {
     const video = document.getElementById('cameraVideo') as HTMLVideoElement;
     const canvas = document.getElementById('photoCanvas') as HTMLCanvasElement;
-    
     if (video && canvas) {
-      const context = canvas.getContext('2d');
-      if (context) {
-        // Configurar el tamaño del canvas igual al video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Dibujar el frame actual del video en el canvas
-        context.drawImage(video, 0, 0);
-        
-        // Convertir a imagen base64
-        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // Guardar la foto
-        this.profileImageUrl = photoDataUrl;
-        
-        // Cerrar modal de cámara
-        this.closeCameraModal();
-      }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const blob = this.dataUrlToBlob(dataUrl);
+
+      this.usersService.subirMiFoto(blob, 'captura.jpg').subscribe({
+        next: (foto) => {
+          this.profileImageUrl = this.makeAbsoluteUrl(foto.ruta);
+          this.closeCameraModal();
+        },
+        error: (e) => {
+          console.error('Error subiendo foto:', e);
+          alert('No se pudo subir la foto');
+        }
+      });
     }
   }
 
-  // Cambiar entre cámara frontal y trasera (móvil)
   async switchCamera(): Promise<void> {
     if (this.currentStream) {
-      // Detener stream actual
-      this.currentStream.getTracks().forEach(track => track.stop());
-      
+      this.currentStream.getTracks().forEach(t => t.stop());
       try {
-        // Alternar entre front y back camera
         const currentFacingMode = this.currentStream.getVideoTracks()[0].getSettings().facingMode;
         const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-        
-        const newStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: newFacingMode,
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: newFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
         });
-        
         this.currentStream = newStream;
-        
         const video = document.getElementById('cameraVideo') as HTMLVideoElement;
-        if (video) {
-          video.srcObject = newStream;
-        }
-        
+        if (video) video.srcObject = newStream;
       } catch (error) {
         console.error('Error al cambiar cámara:', error);
         alert('No se pudo cambiar la cámara');
@@ -301,82 +247,50 @@ export class MenuComponent implements OnInit {
     }
   }
 
-  //-----------------------------Logout Modal-------------------------------------
-  //Abre el modal de confirmación para cerrar sesión
-  openLogoutModal(): void {
-    this.logoutModalVisible = true;
-  }
-
-  //Cierra el modal de confirmación
-  closeLogoutModal(): void {
-    this.logoutModalVisible = false;
-  }
-
-  //Confirma el cierre de sesión y redirige al login
+  // ------------------ Logout ------------------
+  openLogoutModal(): void { this.logoutModalVisible = true; }
+  closeLogoutModal(): void { this.logoutModalVisible = false; }
   confirmLogout(): void {
     try {
-      // Limpiar datos de sesión
       this.clearSessionData();
-      
-      // Cerrar el modal
       this.closeLogoutModal();
-      
-      // Redirigir al login y esperar a que se complete la navegación
-      this.router.navigate(['/login']).then(() => {
-        console.log('Sesión cerrada exitosamente');
-      }).catch(error => {
-        console.error('Error al navegar:', error);
-      });
+      this.router.navigate(['/login']).catch(err => console.error('Error al navegar:', err));
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
   }
-
-  //Método para limpiar datos de sesión
   private clearSessionData(): void {
-    // Limpiar localStorage
     localStorage.removeItem('userToken');
     localStorage.removeItem('userData');
     localStorage.removeItem('userPreferences');
     localStorage.removeItem('auth_token');
-    
-    // Limpiar sessionStorage
     sessionStorage.clear();
   }
 
-  //-----------------------------Servicios y Búsquedas------------------------------------- 
-  // Función para buscar servicios
+  // ------------------ Búsquedas ------------------
   buscarServicio(): void {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
-    if (searchInput) {
-      const query = searchInput.value.trim();
-      
-      if (query) {
-        console.log('Buscando:', query);
-        // Aquí agregarías la lógica de búsqueda
-        // Por ejemplo: this.router.navigate(['/buscar'], { queryParams: { q: query } });
-      } else {
-        alert('Por favor ingresa un término de búsqueda');
-      }
-    }
+    if (!searchInput) return;
+    const query = searchInput.value.trim();
+    if (query) console.log('Buscando:', query);
+    else alert('Por favor ingresa un término de búsqueda');
   }
-
-  // Función para seleccionar un servicio
-  seleccionarServicio(servicio: string): void {
-    console.log('Servicio seleccionado:', servicio);
-    // Aquí agregarías la lógica para manejar la selección de servicio
-    // Por ejemplo: this.router.navigate(['/servicio', servicio]);
-  }
-
-  // Función para búsquedas recientes
+  seleccionarServicio(servicio: string): void { console.log('Servicio seleccionado:', servicio); }
   buscarReciente(termino: string): void {
-    console.log('Búsqueda reciente:', termino);
-    // Aquí agregarías la lógica para las búsquedas recientes
-    // Por ejemplo: realizar la búsqueda automáticamente
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
-    if (searchInput) {
-      searchInput.value = termino;
-      this.buscarServicio();
-    }
+    if (!searchInput) return;
+    searchInput.value = termino;
+    this.buscarServicio();
+  }
+
+  // ------------------ Helpers ------------------
+  private dataUrlToBlob(dataUrl: string): Blob {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
   }
 }

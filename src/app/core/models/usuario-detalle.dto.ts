@@ -9,4 +9,6 @@ export interface UsuarioDetalleDTO {
   descripcion?: string | null;
   direccion?: DireccionDTO | null;   // viene desde SQL
   fotoPerfilUrl?: string | null;
+  esCliente?: boolean;
+  esProveedor?: boolean;
 }

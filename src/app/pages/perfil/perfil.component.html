@@ -1,6 +1,17 @@
 <div class="profile-container">
+
   <!-- Header del Perfil -->
-  <div class="profile-header">
+  <div class="profile-header" style="position: relative;">
+    <!-- Botón Editar Perfil (esquina superior derecha) -->
+    <button
+      class="add-photo-btn stronger"
+      (click)="toggleEdit()"
+      [disabled]="!dataLoaded || saving"
+      title="Editar perfil"
+      style="position:absolute; top: 15px; right: 15px;">
+      ✏️ Editar perfil
+    </button>
+
     <div class="profile-photo-large">
       <!-- Imagen si existe -->
       <img *ngIf="hasProfileImage" [src]="profileImageUrl" alt="Foto de perfil grande" />
@@ -55,8 +66,8 @@
     </div>
   </div>
 
-  <!-- Galería de Fotos -->
-  <div class="section">
+  <!-- Galería de Fotos (SOLO proveedor) -->
+  <div class="section" *ngIf="isProveedor">
     <div class="gallery-header">
       <h3 class="section-title" style="margin-bottom: 0;">Galería de Trabajos</h3>
       <button class="add-photo-btn">
@@ -67,13 +78,11 @@
 
     <div class="photo-carousel">
       <button class="carousel-btn">‹</button>
-
       <div class="photo-grid">
-        <!-- Ejemplo -->
+        <!-- tus ítems/placeholder tal como están -->
         <div class="photo-item">
           <span style="font-size: 24px; color: #4CAF50;">🌱</span>
         </div>
-        <!-- Placeholders -->
         <div class="photo-placeholder"><span>➕</span></div>
         <div class="photo-placeholder"><span>➕</span></div>
         <div class="photo-placeholder"><span>➕</span></div>
@@ -87,14 +96,14 @@
         <div class="photo-placeholder"><span>➕</span></div>
         <div class="photo-placeholder"><span>➕</span></div>
       </div>
-
       <button class="carousel-btn">›</button>
     </div>
   </div>
 
   <!-- Recomendaciones -->
   <div class="section">
-    <h3 class="section-title">Recomendaciones</h3>
+    <h3 class="section-title">{{ isCliente ? 'Valoración' : 'Recomendaciones' }}</h3>
+
 
     <div class="review-item">
       <div class="review-header">
@@ -135,5 +144,186 @@
     <button class="action-btn btn-danger" (click)="logout()">
       🚪 Cerrar Sesión
     </button>
+  </div>
+</div>
+
+<!-- =================== MODAL EDICIÓN PERFIL =================== -->
+<div
+  *ngIf="editMode"
+  style="
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;">
+
+  <!-- Contenedor del modal (NO se cierra al hacer click fuera) -->
+  <div
+    style="
+      width: min(760px, 94vw);
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column;
+      max-height: 90vh;">
+
+    <!-- Header modal -->
+    <div
+      style="
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: #fff; padding: 16px 20px;
+        display:flex; align-items:center; justify-content:space-between;">
+      <h3 style="margin:0; font-size: 18px;">Editar perfil</h3>
+      <button
+        class="add-photo-btn"
+        (click)="toggleEdit()"
+        style="background: rgba(255,255,255,0.15);">
+        ✖ Cerrar
+      </button>
+    </div>
+
+    <!-- Body con scroll -->
+    <div style="overflow-y: auto;">
+      <form
+        [formGroup]="form"
+        (ngSubmit)="save()"
+        (keydown.enter)="$event.preventDefault()"
+        style="padding: 20px;">
+
+        <!-- Foto -->
+        <div class="section" style="margin:0 0 16px 0;">
+          <div class="section-title">Foto de perfil</div>
+          <div style="display:flex; align-items:center; gap:16px; flex-wrap: wrap;">
+            <div class="profile-photo-large" style="margin:0;">
+              <img *ngIf="hasProfileImage" [src]="profileImageUrl" alt="Foto actual" />
+              <span *ngIf="!hasProfileImage" class="profile-initials-large">{{ userInitials }}</span>
+            </div>
+            <input type="file" accept="image/*" (change)="onFilePicked($event)">
+          </div>
+        </div>
+
+        <!-- Datos de usuario -->
+        <div class="section" style="margin:0 0 16px 0;">
+          <div class="section-title">Datos básicos</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div>
+              <label>Nombre *</label>
+              <input type="text" formControlName="nombre" maxlength="200"
+                     style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                   *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.touched || form.get('nombre')?.dirty)">
+                <span *ngIf="form.get('nombre')?.errors?.['required']">El nombre es requerido.</span>
+                <span *ngIf="form.get('nombre')?.errors?.['maxlength']">Máximo 200 caracteres.</span>
+              </div>
+            </div>
+
+            <div>
+              <label>Correo *</label>
+              <input type="email" formControlName="correo" maxlength="255"
+                     style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                   *ngIf="form.get('correo')?.invalid && (form.get('correo')?.touched || form.get('correo')?.dirty)">
+                <span *ngIf="form.get('correo')?.errors?.['required']">El correo es requerido.</span>
+                <span *ngIf="form.get('correo')?.errors?.['email']">Formato de correo inválido.</span>
+                <span *ngIf="form.get('correo')?.errors?.['maxlength']">Máximo 255 caracteres.</span>
+              </div>
+            </div>
+
+            <div>
+              <label>Teléfono (9 dígitos, sin +56) *</label>
+              <input type="text" formControlName="telefono" inputmode="numeric" maxlength="9" placeholder="9XXXXXXXX"
+                    style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                  *ngIf="form.get('telefono')?.invalid && (form.get('telefono')?.touched || form.get('telefono')?.dirty)">
+                <span *ngIf="form.get('telefono')?.errors?.['required']">El teléfono es requerido.</span>
+                <span *ngIf="form.get('telefono')?.errors?.['pattern']">Debe tener exactamente 9 dígitos (sin +56).</span>
+              </div>
+            </div>
+
+            <div style="grid-column: 1 / -1;">
+              <label>Descripción (máx. 300)</label>
+
+              <div class="input-with-counter">
+                <textarea rows="3" formControlName="descripcion" maxlength="300"
+                          style="width:100%; padding:10px 50px 36px 10px; border-radius:10px; border:1px solid #ddd;"></textarea>
+                <div class="char-counter">{{ descCount }}/300</div>
+              </div>
+
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                  *ngIf="form.get('descripcion')?.invalid && (form.get('descripcion')?.touched || form.get('descripcion')?.dirty || submitted)">
+                <span *ngIf="form.get('descripcion')?.errors?.['maxlength']">Máximo 300 caracteres.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="section" style="margin:0 0 16px 0; position: relative;">
+          <div class="section-title">Dirección</div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div style="grid-column: 1 / -1; position: relative;">
+              <label>Dirección *</label>
+              <input #dirInput
+                    type="text"
+                    formControlName="direccionDescripcion"
+                    maxlength="300"
+                    (input)="onDireccionInput(dirInput.value)"
+                    (focus)="abrirSugerenciasSiHay()"
+                    (blur)="cerrarSugerencias()"
+                    (keydown.enter)="$event.preventDefault()"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="Busca y selecciona una sugerencia (OSM)"
+                    style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+
+              <!-- SUGERENCIAS OSM -->
+              <div *ngIf="mostrandoSugerencias"
+                  style="position:absolute; left:0; right:0; top:100%; z-index:10; background:#fff; border:1px solid #ddd; border-radius:10px; max-height:220px; overflow-y:auto; box-shadow:0 6px 20px rgba(0,0,0,0.15);">
+                <div *ngFor="let s of sugerencias"
+                    (mousedown)="seleccionarSugerencia(s)"
+                    style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f1f1f1;">
+                  {{ s.display_name }}
+                </div>
+                <div *ngIf="sugerencias.length === 0" style="padding:10px 12px; color:#6c757d;">Sin resultados</div>
+              </div>
+
+              <!-- Validación -->
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                  *ngIf="(form.get('direccionDescripcion')?.invalid && (form.get('direccionDescripcion')?.touched || form.get('direccionDescripcion')?.dirty || submitted))">
+                <span *ngIf="form.get('direccionDescripcion')?.errors?.['required']">La dirección es requerida.</span>
+                <span *ngIf="form.get('direccionDescripcion')?.errors?.['maxlength']">Máximo 300 caracteres.</span>
+              </div>
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                  *ngIf="submitted && addressChanged && !direccionSeleccionada">
+                Debes seleccionar una dirección válida de las sugerencias.
+              </div>
+
+            </div>
+
+            <div>
+              <label>Código Postal</label>
+              <input type="text" formControlName="codigoPostal" maxlength="20"
+                    style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+              <div class="description-text" style="color:#f44336; margin-top:6px;"
+                  *ngIf="form.get('codigoPostal')?.invalid && (form.get('codigoPostal')?.touched || form.get('codigoPostal')?.dirty || submitted)">
+                <span *ngIf="form.get('codigoPostal')?.errors?.['maxlength']">Máximo 20 caracteres.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top: 10px;">
+          <button type="button" class="action-btn btn-secondary" (click)="toggleEdit()" [disabled]="saving">Cancelar</button>
+          <button type="submit" class="action-btn btn-primary" [disabled]="!dataLoaded || form.invalid || saving">
+            {{ saving ? 'Guardando...' : '💾 Guardar cambios' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
   </div>
 </div>

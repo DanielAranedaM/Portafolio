@@ -38,7 +38,9 @@ export class PerfilComponent implements OnInit {
   }> = [];
   mostrandoSugerencias = false;
   direccionSeleccionada: { place_id: number; display_name: string; postcode?: string } | null = null;
-
+  osmLat: number | null = null;
+  osmLon: number | null = null;
+  
   // Subject manual evitando RxJS extra (mantener simple):
   direccionTimer: any = null;
 
@@ -227,17 +229,19 @@ export class PerfilComponent implements OnInit {
     const payload: ModificarUsuarioDTO = {
       nombre: (v.nombre ?? '').trim(),
       descripcion: (v.descripcion ?? '').trim() || null,
-      telefono: String(v.telefono ?? '').trim(), // 9 dígitos (requerido)
+      telefono: String(v.telefono ?? '').trim(),
       correo: (v.correo ?? '').trim(),
 
-      // si no tenía, mandamos 0 y el backend crea la dirección y la asocia
       idDireccion: Number(this.direccionId || 0),
       direccionDescripcion: newDesc,
-      // CP opcional: prioriza input, si no hay toma del OSM
       codigoPostal: newCP || this.direccionSeleccionada?.postcode || null,
 
       ...(addressChanged && this.osmComuna != null ? { comuna: this.osmComuna } : {}),
       ...(addressChanged && this.osmRegion != null ? { region: this.osmRegion } : {}),
+
+      // NUEVO: sólo si cambia/crea dirección enviamos coords
+      ...(addressChanged && this.osmLat != null ? { latitud: this.osmLat } : {}),
+      ...(addressChanged && this.osmLon != null ? { longitud: this.osmLon } : {}),
     };
 
     this.saving = true;
@@ -307,16 +311,16 @@ export class PerfilComponent implements OnInit {
       console.error('Error al cerrar sesión:', e);
     }
   }
-  
+
   onDireccionInput(texto: string): void {
     this.direccionSeleccionada = null;
     this.mostrandoSugerencias = false;
-    this.osmComuna = null;
-    this.osmRegion = null;
 
-    // invalidar comuna/region ocultas si cambia el texto
+    // invalidar valores OSM si cambia el texto
     this.osmComuna = null;
     this.osmRegion = null;
+    this.osmLat = null;
+    this.osmLon = null;
 
     const q = (texto ?? '');
     if (this.direccionTimer) clearTimeout(this.direccionTimer);
@@ -351,28 +355,31 @@ export class PerfilComponent implements OnInit {
   }
 
   seleccionarSugerencia(item: any): void {
-    // tomar comuna desde city/town/village/suburb/municipality/county
     const addr = item?.address || {};
     const comuna =
       addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county || null;
-
-    // tomar región desde region/state
     const region = addr.region || addr.state || null;
 
-    // guardar para el payload oculto
+    // Guardar comuna/región normalizadas
     this.osmComuna = comuna?.toString() ?? null;
     this.osmRegion = region?.toString() ?? null;
 
-    // también codigo postal si viene
+    // NUEVO: lat/lon desde OSM (strings -> number)
+    const lat = item?.lat != null ? Number(item.lat) : null;
+    const lon = item?.lon != null ? Number(item.lon) : null;
+    this.osmLat = isFinite(lat as number) ? (lat as number) : null;
+    this.osmLon = isFinite(lon as number) ? (lon as number) : null;
+
+    // Código postal
     const postcode = addr.postcode || '';
 
-    // Rellenar campos visibles
     this.direccionSeleccionada = {
       place_id: item.place_id,
       display_name: item.display_name,
       postcode
     };
 
+    // Rellenar campos visibles
     this.form.patchValue({
       direccionDescripcion: item.display_name,
       codigoPostal: postcode || this.form.value.codigoPostal || ''

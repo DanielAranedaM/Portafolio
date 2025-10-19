@@ -11,5 +11,6 @@ export interface ModificarUsuarioDTO {
   comuna?: string | null;
   region?: string | null;
   codigoPostal?: string | null;
-  
+  latitud?: number | null;
+  longitud?: number | null;
 }

@@ -37,10 +37,15 @@ export class UsersService {
     form.append('IdDireccion', String(dto.idDireccion));
     form.append('DireccionDescripcion', dto.direccionDescripcion);
     if (dto.codigoPostal != null) form.append('CodigoPostal', dto.codigoPostal);
-
-    // NUEVO: se envían ocultos si existen (extraídos de OSM)
     if (dto.comuna != null) form.append('Comuna', dto.comuna);
     if (dto.region != null) form.append('Region', dto.region);
+
+    // ⚠️ AQUÍ EL CAMBIO: enviar con coma decimal si hay valor
+    const toEsDecimal = (n: number) =>
+      n.toLocaleString('es-CL', { useGrouping: false, maximumFractionDigits: 6 });
+
+    if (dto.latitud != null)  form.append('Latitud',  toEsDecimal(dto.latitud));
+    if (dto.longitud != null) form.append('Longitud', toEsDecimal(dto.longitud));
 
     if (archivo) form.append('Archivo', archivo, fileName);
 

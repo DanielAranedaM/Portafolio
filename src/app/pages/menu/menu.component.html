@@ -158,40 +158,55 @@
         </section>
 
         <section class="services-grid">
-            <div class="service-card" (click)="seleccionarServicio('jardineria')">
-                <div class="service-icon">🌱</div>
-                <h3 class="service-title">Jardinería</h3>
-                <p class="service-description">Cuidado y mantenimiento de jardines, poda de plantas y diseño de espacios verdes.</p>
+            <!-- Loading / error -->
+            <div *ngIf="categoriasLoading" class="service-card" style="opacity:.7; pointer-events:none;">
+                <div class="service-icon">⏳</div>
+                <h3 class="service-title">Cargando categorías...</h3>
+                <p class="service-description">Espera un momento</p>
             </div>
 
-            <div class="service-card" (click)="seleccionarServicio('limpieza')">
-                <div class="service-icon">🧹</div>
-                <h3 class="service-title">Limpieza</h3>
-                <p class="service-description">Servicios de limpieza para hogares, oficinas y espacios comerciales.</p>
+            <div *ngIf="!categoriasLoading && categoriasError" class="service-card" style="border-color:#f44336;">
+                <div class="service-icon">⚠️</div>
+                <h3 class="service-title">Error</h3>
+                <p class="service-description">{{ categoriasError }}</p>
             </div>
 
-            <div class="service-card" (click)="seleccionarServicio('plomeria')">
-                <div class="service-icon">🔧</div>
-                <h3 class="service-title">Plomería</h3>
-                <p class="service-description">Reparación de tuberías, instalaciones sanitarias y servicios de fontanería.</p>
+            <!-- Listado dinámico -->
+            <div
+                class="service-card"
+                *ngFor="let cat of categorias"
+                (click)="seleccionarCategoria(cat)"
+                title="Ver servicios cercanos en {{cat.nombre}}">
+                <div class="service-icon">🧩</div>
+                <h3 class="service-title">{{ cat.nombre }}</h3>
+                <p class="service-description">{{ cat.descripcion || '—' }}</p>
             </div>
+        </section>
+        
+        <section *ngIf="serviciosLoading" class="recent-searches">
+            <h3 class="recent-title">Buscando servicios cercanos...</h3>
+        </section>
 
-            <div class="service-card" (click)="seleccionarServicio('electricidad')">
-                <div class="service-icon">⚡</div>
-                <h3 class="service-title">Electricidad</h3>
-                <p class="service-description">Instalaciones eléctricas, reparaciones y mantenimiento de sistemas eléctricos.</p>
+        <section *ngIf="!serviciosLoading && !serviciosError && serviciosDeCategoria && serviciosDeCategoria.length === 0" class="recent-searches">
+            <h3 class="recent-title">Sin resultados</h3>
+            <div class="search-item">
+                <div class="search-item-icon">😔</div>
+                <span class="search-item-text">
+                No encontramos servicios en esta categoría cerca de ti por ahora.
+                Intenta con otra categoría o vuelve a intentarlo más tarde.
+                </span>
             </div>
+        </section>
 
-            <div class="service-card" (click)="seleccionarServicio('computacion')">
-                <div class="service-icon">💻</div>
-                <h3 class="service-title">Clases de Computación</h3>
-                <p class="service-description">Enseñanza de informática básica, internet y uso de dispositivos tecnológicos.</p>
-            </div>
-
-            <div class="service-card" (click)="seleccionarServicio('pintura')">
-                <div class="service-icon">🎨</div>
-                <h3 class="service-title">Pintura</h3>
-                <p class="service-description">Servicios de pintura para interiores y exteriores, restauración de superficies.</p>
+        <section *ngIf="!serviciosLoading && serviciosDeCategoria?.length" class="recent-searches">
+            <h3 class="recent-title">Servicios cercanos</h3>
+            <div class="search-item" *ngFor="let s of serviciosDeCategoria">
+                <div class="search-item-icon">🔎</div>
+                <span class="search-item-text">
+                {{ s.titulo }} — {{ s.categoriaNombre || ('Cat #' + s.idCategoriaServicio) }}
+                <ng-container *ngIf="s.proveedorNombre"> · por {{ s.proveedorNombre }}</ng-container>
+                <ng-container *ngIf="s.precioBase"> · $ {{ s.precioBase | number:'1.0-0' }}</ng-container>
+                </span>
             </div>
         </section>
 

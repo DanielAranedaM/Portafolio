@@ -5,6 +5,10 @@ import { Router } from '@angular/router';
 import { UsersService } from '../../core/services/users.service';
 import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
 import { API_URL } from '../../core/tokens/api-url.token';
+import { CategoriasService } from '../../core/services/categorias.service';
+import { CategoriaDTO } from '../../core/models/categoria.dto';
+import { ServicioDTO } from '../../core/models/servicio.dto';
+import { ServicesService } from '../../core/services/services.service';
 
 @Component({
   selector: 'app-menu',
@@ -17,12 +21,21 @@ export class MenuComponent implements OnInit {
   constructor(
     private router: Router,
     private usersService: UsersService,
+    private categoriasService: CategoriasService,
+    private servicesService: ServicesService,
     @Inject(API_URL) private apiUrl: string
   ) {}
 
   // ------------------ Estado / props ------------------
   logoutModalVisible = false;
   userRole = ''; // 'proveedor' | 'cliente'
+
+  categorias: CategoriaDTO[] = [];
+  categoriasLoading = false;
+  categoriasError: string | null = null;
+  serviciosDeCategoria: ServicioDTO[] = [];
+  serviciosLoading = false;
+  serviciosError: string | null = null;
 
   userName = 'Usuario';
   userDescription: string | null = null;
@@ -50,6 +63,66 @@ export class MenuComponent implements OnInit {
 
     // Cargar datos reales del usuario
     this.loadMe();
+    this.loadCategorias();
+  }
+
+  private loadCategorias(): void {
+    this.categoriasLoading = true;
+    this.categoriasError = null;
+
+    this.categoriasService.getAll().subscribe({
+      next: (cats) => {
+        console.log('GET /api/Categoria ->', cats);
+        this.categorias = cats ?? [];
+      },
+      error: (err) => {
+        console.error('Error cargando categorías:', err);
+        this.categoriasError = 'No se pudieron cargar las categorías.';
+      }
+    }).add(() => {
+      this.categoriasLoading = false;
+    });
+  }
+
+  seleccionarCategoria(cat: CategoriaDTO): void {
+    if (!cat?.idCategoriaServicio) return;
+
+    this.serviciosLoading = true;
+    this.serviciosError = null;
+    this.serviciosDeCategoria = [];
+
+    this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
+      next: (servs: ServicioDTO[] | any) => {
+        console.log('Servicios cercanos por categoría:', cat, servs);
+
+        // Caso backend mensaje (tu ServicesService ya lanza error,
+        // pero por si llega "message" en next por algún proxy raro)
+        if (servs && servs.message) {
+          this.serviciosDeCategoria = [];
+          this.serviciosError = servs.message;
+          return;
+        }
+
+        // Caso lista vacía -> mensaje amable
+        if (Array.isArray(servs) && servs.length === 0) {
+          this.serviciosDeCategoria = [];
+          this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
+          return;
+        }
+
+        this.serviciosError = null;
+        this.serviciosDeCategoria = servs ?? [];
+      },
+      error: (err) => {
+        console.error('Error obteniendo servicios por categoría:', err);
+        // si viene mensaje desde el backend o desde el map() del service, úsalo
+        this.serviciosDeCategoria = [];
+        this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
+      }
+    }).add(() => {
+      this.serviciosLoading = false;
+    });
+
   }
 
   private loadMe(): void {

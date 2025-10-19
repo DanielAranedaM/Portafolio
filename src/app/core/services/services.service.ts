@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { API_URL } from '../tokens/api-url.token';
 import { CreateServiceDTO } from '../models/create-Service.dto';
 import { ServicioDTO } from '../models/servicio.dto';
@@ -43,4 +43,20 @@ export class ServicesService {
     }
     return throwError(() => err);
   };
+
+  getByCategoryNearMe(categoryId: number): Observable<ServicioDTO[]> {
+    return this.http
+      .get<ServicioDTO[] | { message: string }>(`${this.base}/GetByCategory/${categoryId}`)
+      .pipe(
+        map((res: any) => {
+          // Si el backend devolvió un mensaje en lugar de una lista
+          if (res && res.message) {
+            throw new Error(res.message);
+          }
+          return res as ServicioDTO[];
+        }),
+        catchError(this.handleError)
+      );
+  }
+
 }

@@ -174,6 +174,37 @@ export class MenuComponent implements OnInit {
   routeRegistrarServicio() { this.router.navigate(['/registrar-servicio']); }
   get isProveedor(): boolean { return this.userRole === 'proveedor'; }
 
+  // Nuevos métodos de navegación para la barra lateral
+  navigateToMyServices(): void {
+    // TODO: Implementar navegación a "Mis servicios"
+    console.log('Navegando a Mis servicios...');
+    alert('Funcionalidad "Mis servicios" próximamente disponible');
+  }
+
+  navigateToMyReviews(): void {
+    // TODO: Implementar navegación a "Mis reseñas"
+    console.log('Navegando a Mis reseñas...');
+    alert('Funcionalidad "Mis reseñas" próximamente disponible');
+  }
+
+  navigateToSavedServices(): void {
+    // TODO: Implementar navegación a "Servicios Guardados"
+    console.log('Navegando a Servicios Guardados...');
+    alert('Funcionalidad "Servicios Guardados" próximamente disponible');
+  }
+
+  navigateToNotifications(): void {
+    // TODO: Implementar navegación a "Notificaciones"
+    console.log('Navegando a Notificaciones...');
+    alert('Funcionalidad "Notificaciones" próximamente disponible');
+  }
+
+  navigateToSettings(): void {
+    // TODO: Implementar navegación a "Configuración"
+    console.log('Navegando a Configuración...');
+    alert('Funcionalidad "Configuración" próximamente disponible');
+  }
+
   // ------------------ Sidebar ------------------
   toggleSidebar(): void { this.sidebarVisible = !this.sidebarVisible; }
   get toggleIcon(): string { return this.sidebarVisible ? '☰' : '👤'; }

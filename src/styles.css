@@ -1,7 +1,25 @@
+/* Variable global para tamaño base de fuente (escala accesible) */
+:root {
+    --base-font-size: 16px; /* valor por defecto */
+}
+html { font-size: var(--base-font-size); }
+
 /* You can add global styles to this file, and also import other style files */
 body {
-    width: 100dvw;
+    width: 100vw;
     height: 100vh;
     margin: 0;
     background-image: url("../src/assets/imagen/Fondo.png");
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Helvetica Neue", "Apple Color Emoji", "Segoe UI Emoji";
+    color: #212529;
+}
+
+/* Solo para login: centrar y ocultar scroll */
+.login-centered-bg {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

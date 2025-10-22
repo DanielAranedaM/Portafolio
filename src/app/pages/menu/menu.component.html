@@ -6,83 +6,114 @@
   {{ toggleIcon }}
 </button>
 
-<!-- Barra lateral de perfil -->
+<!-- Barra lateral de navegación -->
 <aside [class]="sidebarClasses">
-  <br>
-  <br>
-    <div class="welcome-section">
-        <!-- Titulo -->
-        <h2 class="welcome-title">Bienvenido Usuario</h2>
-        
-        <!-- Foto Perfil CON FUNCIONALIDAD -->
-        <div class="profile-photo" (click)="openPhotoModal()">
-          <!-- Imagen si existe -->
-          <img 
-            *ngIf="hasProfileImage" 
-            [src]="profileImageUrl" 
-            alt="Foto de perfil">
-          <!-- Iniciales si no hay imagen -->
-          <span *ngIf="!hasProfileImage" id="profileInitials">{{ userInitials }}</span>
-          <!-- Overlay de cámara -->
-          <div class="camera-overlay">📷</div>
-        </div>
-        
-        <!-- Nombre de Usuario -->
-        <div class="user-name">{{ userName }}</div>
-
-        <!-- Clasificación dinámica -->
-        <div class="rating-section">
-            <div class="stars">
-                <!-- Mostrar estrellas dinámicamente -->
-                <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
-                <ng-container *ngFor="let star of [1,2,3,4,5]">
-                    <span *ngIf="userRating >= star">★</span>
-                    <span *ngIf="userRating < star && userRating >= star - 0.5">⯨</span>
-                    <span *ngIf="userRating < star - 0.5">☆</span>
-                </ng-container>
-                </ng-container>
-
-                <!-- Si no hay evaluación -->
-                <ng-template #noRating>
-                <span>☆☆☆☆☆</span>
-                </ng-template>
-            </div>
-
-            <span class="rating-text">
-                {{ userRating !== null ? (userRating | number:'1.1-1') : '0.0' }}
-            </span>
-        </div>
-
+  
+  <!-- Sección de foto de perfil -->
+  <div class="profile-photo-section">
+    <!-- Título de bienvenida -->
+    <h2 class="welcome-title">Bienvenido Usuario</h2>
+    
+    <!-- Foto Perfil CON FUNCIONALIDAD -->
+    <div class="profile-photo-large" (click)="openPhotoModal()">
+      <!-- Imagen si existe -->
+      <img 
+        *ngIf="hasProfileImage" 
+        [src]="profileImageUrl" 
+        alt="Foto de perfil">
+      <!-- Iniciales si no hay imagen -->
+      <span *ngIf="!hasProfileImage" class="profile-initials-large">{{ userInitials }}</span>
+      <!-- Overlay de cámara -->
+      <div class="camera-overlay">📷</div>
     </div>
-
-    <!-- Descripción -->
-    <div class="description-section">
-        <h3 class="section-title">Descripción</h3>
-        <p class="description-text">
-            {{ userDescription || '—' }}
-        </p>
-    </div>
-
-    <!-- Recomendaciones -->
-    <div class="reviews-section">
-        <h3 class="section-title">Recomendaciones</h3>
-        <div class="review-item">
-            <div class="review-author">Elena Nito</div>
-            <p class="review-text">"Excelente trabajo en mi jardín. Muy profesional y puntual."</p>
+    
+    <!-- Información del usuario -->
+    <div class="profile-info">
+      <h3 class="profile-name">{{ userName }}</h3>
+      
+      <!-- Clasificación solo para proveedores -->
+      <div class="rating-section" *ngIf="userRole === 'proveedor'">
+        <div class="stars">
+          <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
+            <ng-container *ngFor="let star of [1,2,3,4,5]">
+              <span *ngIf="userRating >= star">★</span>
+              <span *ngIf="userRating < star && userRating >= star - 0.5">⯨</span>
+              <span *ngIf="userRating < star - 0.5">☆</span>
+            </ng-container>
+          </ng-container>
+          <ng-template #noRating>
+            <span>☆☆☆☆☆</span>
+          </ng-template>
         </div>
-        <div class="review-item">
-            <div class="review-author">Armando Casas</div>
-            <p class="review-text">"Recomiendo 100%. Transformó completamente mi patio."</p>
-        </div>
+        <span class="rating-text">
+          {{ userRating !== null ? (userRating | number:'1.1-1') : '0.0' }}
+        </span>
+      </div>
     </div>
+  </div>
 
-    <!-- Btns de Acción -->
-    <div class="action-buttons">
-        <button class="action-btn btn-primary" (click)="routePerfil()">✏️ Editar Perfil</button>
-        <button *ngIf="isProveedor" class="action-btn btn-success" (click)="routeRegistrarServicio()">➕ Publicar Servicio</button>
-        <button class="action-btn btn-secondary">📷 Subir Fotos</button>
-        <button class="action-btn btn-danger" (click)="openLogoutModal()">🚪 Cerrar Sesión</button>
-    </div>
+  <!-- Menú de navegación según el rol -->
+  <nav class="profile-navigation">
+    
+    <!-- Opciones para Proveedor -->
+    <ng-container *ngIf="userRole === 'proveedor'">
+      <button class="nav-btn" (click)="routePerfil()">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Mi Perfil</span>
+      </button>
+      
+      <button class="nav-btn" (click)="navigateToMyServices()">
+        <span class="nav-icon">🔧</span>
+        <span class="nav-text">Mis Servicios</span>
+      </button>
+      
+      <button class="nav-btn" (click)="routeRegistrarServicio()">
+        <span class="nav-icon">➕</span>
+        <span class="nav-text">Publicar Servicio</span>
+      </button>
+      
+      <button class="nav-btn" (click)="navigateToMyReviews()">
+        <span class="nav-icon">⭐</span>
+        <span class="nav-text">Mis Reseñas</span>
+      </button>
+      
+      <button class="nav-btn" (click)="navigateToSettings()">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text">Configuración</span>
+      </button>
+    </ng-container>
+
+    <!-- Opciones para Cliente -->
+    <ng-container *ngIf="userRole === 'cliente'">
+      <button class="nav-btn" (click)="routePerfil()">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Mi Perfil</span>
+      </button>
+      
+      <button class="nav-btn" (click)="navigateToSavedServices()">
+        <span class="nav-icon">💾</span>
+        <span class="nav-text">Servicios Guardados</span>
+      </button>
+      
+      <button class="nav-btn" (click)="navigateToNotifications()">
+        <span class="nav-icon">🔔</span>
+        <span class="nav-text">Notificaciones</span>
+      </button>
+      
+      <button class="nav-btn" (click)="navigateToSettings()">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text">Configuración</span>
+      </button>
+    </ng-container>
+
+    <!-- Cerrar sesión (común para ambos) -->
+    <button class="nav-btn logout-btn" (click)="openLogoutModal()">
+      <span class="nav-icon">🚪</span>
+      <span class="nav-text">Cerrar Sesión</span>
+    </button>
+    
+  </nav>
+  
 </aside>
 
 <!-- MODAL PARA SELECCIONAR FOTO -->

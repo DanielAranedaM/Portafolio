@@ -3,9 +3,27 @@ img, svg {
     width: 40px;
 }
 
+.a11y-safe-right {
+    /* Reservar espacio para controles A-/A/A+ fijados en top-right */
+    margin-right: 9rem; /* más separación hacia la izquierda */
+}
+
 .login-btn {
-    background-color: green;
-    color: white;
+    background-color: #198754; /* Bootstrap success */
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.login-btn:hover {
+    filter: brightness(0.95);
+}
+
+/* Ajustes responsivos para navbar/botón */
+@media (max-width: 576px) {
+    .a11y-safe-right { margin-right: 0; }
+    .login-btn { font-size: 0.9rem; padding: 0.35rem 0.8rem; }
 }
 
 /* Hero Section */

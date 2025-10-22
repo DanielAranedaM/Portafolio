@@ -1,4 +1,12 @@
 
+.login-centered-bg {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .login-container {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -7,7 +15,7 @@
     width: 300px;
     min-height: 250px;
     min-width: 26rem;
-    margin: 15dvh auto auto auto;
+    margin: 0;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 

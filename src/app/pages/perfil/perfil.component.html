@@ -1,147 +1,236 @@
-<div class="profile-container">
+<div class="profile-container-modern">
 
   <!-- Header del Perfil -->
-  <div class="profile-header" style="position: relative;">
-    <!-- Botón Editar Perfil (esquina superior derecha) -->
-    <button
-      class="add-photo-btn stronger"
-      (click)="toggleEdit()"
-      [disabled]="!dataLoaded || saving"
-      title="Editar perfil"
-      style="position:absolute; top: 15px; right: 15px;">
-      ✏️ Editar perfil
-    </button>
-
-    <div class="profile-photo-large">
-      <!-- Imagen si existe -->
-      <img *ngIf="hasProfileImage" [src]="profileImageUrl" alt="Foto de perfil grande" />
-      <!-- Iniciales si no hay imagen -->
-      <span *ngIf="!hasProfileImage" class="profile-initials-large">{{ userInitials }}</span>
+  <div class="profile-header-modern">
+    <div class="profile-photo-section">
+      <div class="profile-photo-large">
+        <img *ngIf="hasProfileImage" [src]="profileImageUrl" alt="Foto de perfil" />
+        <span *ngIf="!hasProfileImage" class="profile-initials-large">{{ userInitials }}</span>
+      </div>
     </div>
 
-    <div class="profile-info">
-      <h1 class="profile-name">{{ userName }}</h1>
-
-      <!-- Clasificación dinámica -->
-      <div class="rating-section">
-        <div class="stars">
+    <div class="profile-info-section">
+      <h1 class="profile-name-modern">{{ userName }}</h1>
+      
+      <!-- Rating -->
+      <div class="rating-section-modern">
+        <div class="stars-modern">
           <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
             <ng-container *ngFor="let star of [1,2,3,4,5]">
-              <span *ngIf="userRating >= star">★</span>
-              <span *ngIf="userRating < star && userRating >= star - 0.5">⯨</span>
-              <span *ngIf="userRating < star - 0.5">☆</span>
+              <span *ngIf="userRating >= star" class="star-filled">★</span>
+              <span *ngIf="userRating < star && userRating >= star - 0.5" class="star-half">⯨</span>
+              <span *ngIf="userRating < star - 0.5" class="star-empty">☆</span>
             </ng-container>
           </ng-container>
           <ng-template #noRating>
-            <span>☆☆☆☆☆</span>
+            <span class="star-empty">☆☆☆☆☆</span>
           </ng-template>
         </div>
-        <span class="rating-text">
+        <span class="rating-text-modern">
           {{ userRating !== null ? (userRating | number:'1.1-1') : '0.0' }}
         </span>
       </div>
     </div>
+
+    <!-- Botón de configuración más claro -->
+    <button 
+      class="config-btn-clear-modern" 
+      (click)="toggleEdit()"
+      [disabled]="!dataLoaded || saving"
+      title="Editar mis datos">
+      <i class="config-icon">⚙️</i>
+      <span class="config-text">Editar Perfil</span>
+    </button>
   </div>
 
-  <!-- Descripción -->
-  <div class="section">
-    <h3 class="section-title">Descripción</h3>
-    <p class="description-text">
-      {{ userDescription || '—' }}
-    </p>
+  <!-- Descripción fuera del header -->
+  <div class="description-section-separate">
+    <div class="section-header-simple">
+      <h2 class="section-title-simple">
+        <i class="section-icon">📝</i>
+        Sobre mí
+      </h2>
+    </div>
+    
+    <div *ngIf="!editingDescription" class="description-display-separate" (click)="startEditDescription()">
+      <p class="description-text-separate">
+        {{ userDescription || 'Cuéntanos sobre tu experiencia, especialidades y lo que te hace único...' }}
+      </p>
+      <div class="edit-hint-modern">
+        <i class="edit-icon-modern">✏️</i>
+        <span>Haz clic para editar</span>
+      </div>
+    </div>
+    
+    <div *ngIf="editingDescription" class="description-edit-separate">
+      <textarea 
+        [(ngModel)]="tempDescription" 
+        placeholder="Describe tu experiencia, especialidades y lo que te hace único como profesional..."
+        maxlength="300"
+        class="description-textarea-separate">
+      </textarea>
+      <div class="edit-actions-separate">
+        <button (click)="saveDescription()" class="btn-save-separate">
+          <i>✓</i> Guardar Cambios
+        </button>
+        <button (click)="cancelEditDescription()" class="btn-cancel-separate">
+          <i>✗</i> Cancelar
+        </button>
+      </div>
+      <div class="char-counter-separate">{{ (tempDescription || '').length }}/300 caracteres</div>
+    </div>
   </div>
 
-  <!-- Contacto -->
-  <div class="section">
-    <h3 class="section-title">Contacto</h3>
-    <div class="contact-buttons">
-      <button class="contact-btn whatsapp-btn" [disabled]="!userPhone">
-        <span>💬</span>
-        WhatsApp: {{ userPhone || 'sin teléfono' }}
-      </button>
-      <button class="contact-btn call-btn" [disabled]="!userPhone">
-        <span>📞</span>
-        Llamar
+  <!-- Contacto Simplificado -->
+  <div class="contact-section-modern">
+    <div class="contact-card">
+      <i class="contact-icon">💬</i>
+      <div class="contact-info">
+        <span class="contact-label">WhatsApp</span>
+        <span class="contact-value">{{ userPhone || 'No registrado' }}</span>
+      </div>
+      <button 
+        class="contact-btn-modern whatsapp" 
+        [disabled]="!userPhone"
+        (click)="openWhatsApp()">
+        Contactar
       </button>
     </div>
   </div>
 
-  <!-- Galería de Fotos (SOLO proveedor) -->
-  <div class="section" *ngIf="isProveedor">
-    <div class="gallery-header">
-      <h3 class="section-title" style="margin-bottom: 0;">Galería de Trabajos</h3>
-      <button class="add-photo-btn">
-        <span>📷</span>
-        Agregar Foto
+  <!-- Mis Servicios con Pestañas -->
+  <div class="services-section-modern" *ngIf="isProveedor">
+    <div class="section-header-modern">
+      <h2 class="section-title-modern">
+        <i class="section-icon">�</i>
+        Mis Servicios
+      </h2>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="tabs-modern">
+      <button 
+        class="tab-btn-modern" 
+        [class.active]="activeTab === 'servicios'"
+        (click)="setActiveTab('servicios')">
+        📋 Servicios Activos
+      </button>
+      <button 
+        class="tab-btn-modern" 
+        [class.active]="activeTab === 'recomendaciones'"
+        (click)="setActiveTab('recomendaciones')">
+        � Recomendaciones
       </button>
     </div>
 
-    <div class="photo-carousel">
-      <button class="carousel-btn">‹</button>
-      <div class="photo-grid">
-        <!-- tus ítems/placeholder tal como están -->
-        <div class="photo-item">
-          <span style="font-size: 24px; color: #4CAF50;">🌱</span>
+    <!-- Contenido de pestañas -->
+    <div class="tab-content-modern">
+      <!-- Servicios Activos -->
+      <div *ngIf="activeTab === 'servicios'" class="tab-panel-modern">
+        <div *ngIf="userServices.length > 0; else noServices" class="services-grid-modern">
+          <div *ngFor="let service of userServices" class="service-card-modern">
+            <div class="service-header">
+              <h4 class="service-title">{{ service.nombreServicio }}</h4>
+              <span class="service-category">{{ service.categoria }}</span>
+            </div>
+            <p class="service-description">{{ service.descripcion | slice:0:100 }}{{ service.descripcion.length > 100 ? '...' : '' }}</p>
+            <div class="service-footer">
+              <span class="service-date">Publicado: {{ service.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+              <div class="service-actions">
+                <button class="service-btn edit">✏️ Editar</button>
+                <button class="service-btn view">👁️ Ver</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
-        <div class="photo-placeholder"><span>➕</span></div>
+        
+        <ng-template #noServices>
+          <div class="empty-state-modern">
+            <i class="empty-icon">📝</i>
+            <h3>No tienes servicios publicados</h3>
+            <p>Publica tu primer servicio para que los clientes puedan encontrarte</p>
+            <button class="btn-primary-modern" (click)="goToRegisterService()">
+              ➕ Publicar Servicio
+            </button>
+          </div>
+        </ng-template>
       </div>
-      <button class="carousel-btn">›</button>
+
+      <!-- Recomendaciones -->
+      <div *ngIf="activeTab === 'recomendaciones'" class="tab-panel-modern">
+        <div *ngIf="userRecommendations.length > 0; else noRecommendations" class="recommendations-list-modern">
+          <div *ngFor="let rec of userRecommendations" class="recommendation-card-modern">
+            <div class="recommendation-header">
+              <div class="client-info">
+                <span class="client-name">{{ rec.clientName }}</span>
+                <div class="recommendation-rating">
+                  <span *ngFor="let star of [1,2,3,4,5]" 
+                        [class]="rec.rating >= star ? 'star-filled' : 'star-empty'">★</span>
+                </div>
+              </div>
+              <span class="recommendation-date">{{ rec.date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="recommendation-text">{{ rec.comment }}</p>
+          </div>
+        </div>
+
+        <ng-template #noRecommendations>
+          <div class="empty-state-modern">
+            <i class="empty-icon">🌟</i>
+            <h3>Aún no tienes recomendaciones</h3>
+            <p>Cuando completes servicios, los clientes podrán dejarte recomendaciones</p>
+          </div>
+        </ng-template>
+      </div>
     </div>
   </div>
 
-  <!-- Recomendaciones -->
-  <div class="section">
-    <h3 class="section-title">{{ isCliente ? 'Valoración' : 'Recomendaciones' }}</h3>
-
-
-    <div class="review-item">
-      <div class="review-header">
-        <span class="review-author">Elena Nito</span>
-        <div class="review-rating">★★★★★</div>
-      </div>
-      <p class="review-text">"Excelente trabajo en mi jardín. Muy profesional y puntual."</p>
-      <span class="review-date">15/11/2024</span>
+  <!-- Galería de Trabajos -->
+  <div class="gallery-section-modern" *ngIf="isProveedor">
+    <div class="section-header-modern">
+      <h2 class="section-title-modern">
+        <i class="section-icon">🖼️</i>
+        Galería de Trabajos
+      </h2>
+      <button class="add-photo-btn-modern" (click)="addPhoto()">
+        📷 Agregar Foto
+      </button>
     </div>
 
-    <div class="review-item">
-      <div class="review-header">
-        <span class="review-author">Armando Casas</span>
-        <div class="review-rating">★★★★★</div>
+    <div *ngIf="galleryPhotos.length > 0; else noPhotos" class="gallery-grid-modern">
+      <div *ngFor="let photo of galleryPhotos; let i = index" class="gallery-item-modern">
+        <img [src]="photo.url" [alt]="photo.description" class="gallery-image">
+        <div class="gallery-overlay">
+          <button class="gallery-action delete" (click)="removePhoto(i)">🗑️</button>
+          <button class="gallery-action view" (click)="viewPhoto(photo)">🔍</button>
+        </div>
       </div>
-      <p class="review-text">"Recomiendo 100%. Transformó completamente mi patio."</p>
-      <span class="review-date">08/11/2024</span>
     </div>
 
-    <div class="review-item">
-      <div class="review-header">
-        <span class="review-author">María García</span>
-        <div class="review-rating">★★★★☆</div>
+    <ng-template #noPhotos>
+      <div class="empty-state-modern gallery-empty">
+        <i class="empty-icon">📸</i>
+        <h3>No tienes fotos de trabajos</h3>
+        <p>Agrega fotos de tus trabajos para que los clientes vean la calidad de tu trabajo</p>
+        <button class="btn-primary-modern" (click)="addPhoto()">
+          📷 Subir Primera Foto
+        </button>
       </div>
-      <p class="review-text">"Muy buen servicio, cumplió con los tiempos acordados."</p>
-      <span class="review-date">02/11/2024</span>
-    </div>
+    </ng-template>
   </div>
 
   <!-- Botones de Acción -->
-  <div class="action-buttons">
-    <button class="action-btn btn-primary">
-      🔧 Solicitar Servicio
+  <div class="action-buttons-modern">
+    <button class="action-btn-modern primary" *ngIf="isCliente" (click)="goToServices()">
+      � Buscar Servicios
     </button>
-    <button class="action-btn btn-secondary" (click)="goBack()">
+    <button class="action-btn-modern primary" *ngIf="isProveedor" (click)="goToRegisterService()">
+      ➕ Publicar Servicio
+    </button>
+    <button class="action-btn-modern secondary" (click)="goBack()">
       ← Volver al Menú
     </button>
-    <button class="action-btn btn-danger" (click)="logout()">
+    <button class="action-btn-modern danger" (click)="logout()">
       🚪 Cerrar Sesión
     </button>
   </div>

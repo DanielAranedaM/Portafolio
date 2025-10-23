@@ -77,7 +77,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       nombreServicio: ['', [Validators.required, Validators.minLength(3)]],
       categoria: ['', Validators.required], // value será un ID numérico
       descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      precio: ['', [Validators.required, Validators.min(0)]],
+      precio: [''], // Campo opcional - podrá ser agregado más tarde
       direccionDescripcion: ['']
     });
   }
@@ -100,7 +100,9 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
     this.usersService.getMe().subscribe({
       next: (user) => {
         const desc = (user?.direccion?.descripcion ?? '').toString().trim();
-        if (desc) this.form.patchValue({ direccionDescripcion: desc });
+        if (desc) {
+          this.form.patchValue({ direccionDescripcion: desc });
+        }
       },
       error: (err) => {
         console.warn('No se pudo precargar dirección desde API:', err);
@@ -175,6 +177,22 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
   }
   // ======= /OSM =======
 
+  // Método auxiliar para obtener el nombre de la categoría
+  getCategoriaName(categoriaId: number | string): string {
+    if (!categoriaId) return '';
+    
+    // Si las categorías aún no han cargado
+    if (!this.categorias || this.categorias.length === 0) {
+      return 'Cargando...';
+    }
+    
+    // Convertir a number si es string
+    const id = typeof categoriaId === 'string' ? parseInt(categoriaId, 10) : categoriaId;
+    
+    const categoria = this.categorias.find(c => c.idCategoriaServicio === id);
+    return categoria ? categoria.nombre : 'Categoría no encontrada';
+  }
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const files: FileList | null = input.files;
@@ -206,7 +224,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       case 1:
         return !!(this.form.get('nombreServicio')?.valid && this.form.get('categoria')?.valid);
       case 2:
-        return !!(this.form.get('descripcion')?.valid && this.form.get('precio')?.valid);
+        return !!(this.form.get('descripcion')?.valid);
       case 3:
         return true;
       default:

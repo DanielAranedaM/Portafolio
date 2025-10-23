@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 import { UsersService } from '../../core/services/users.service';
 import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
@@ -11,7 +11,7 @@ import { ModificarUsuarioDTO } from '../../core/models/modificar-usuario.dto';
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css']
 })
@@ -58,6 +58,64 @@ export class PerfilComponent implements OnInit {
   userPhone: string | null = null;
   profileImageUrl: string | null = null;
   userInitials = 'US';
+
+  // Nuevas propiedades para la interfaz moderna
+  editingDescription = false;
+  tempDescription = '';
+  activeTab = 'servicios';
+  userServices: any[] = [];
+  userRecommendations: any[] = [];
+  galleryPhotos: any[] = [];
+
+  // Datos de ejemplo (mientras no hay API)
+  private initializeExampleData() {
+    // Servicios de ejemplo
+    this.userServices = [
+      {
+        nombreServicio: 'Limpieza del hogar',
+        categoria: 'Aseo y Limpieza',
+        descripcion: 'Servicio completo de limpieza para hogares, incluye pisos, baños, cocina y dormitorios. Trabajo con productos de calidad.',
+        fechaCreacion: new Date('2024-10-15')
+      },
+      {
+        nombreServicio: 'Jardinería básica',
+        categoria: 'Jardinería',
+        descripcion: 'Mantención de jardines, poda de plantas, riego y cuidado general de áreas verdes.',
+        fechaCreacion: new Date('2024-09-20')
+      }
+    ];
+
+    // Recomendaciones de ejemplo
+    this.userRecommendations = [
+      {
+        clientName: 'Elena Nito',
+        rating: 5,
+        comment: 'Excelente trabajo en mi jardín. Muy profesional y puntual.',
+        date: new Date('2024-11-15')
+      },
+      {
+        clientName: 'Armando Casas',
+        rating: 5,
+        comment: 'Recomiendo 100%. Transformó completamente mi patio.',
+        date: new Date('2024-11-08')
+      },
+      {
+        clientName: 'María García',
+        rating: 4,
+        comment: 'Muy buen servicio, cumplió con los tiempos acordados.',
+        date: new Date('2024-11-02')
+      }
+    ];
+
+    // Galería de ejemplo
+    this.galleryPhotos = [
+      {
+        url: '/assets/imagen/trabajo1.jpg',
+        description: 'Jardín terminado',
+        id: 1
+      }
+    ];
+  }
 
   // Edición
   editMode = false;
@@ -112,6 +170,9 @@ export class PerfilComponent implements OnInit {
         this.form.markAsPristine();
         this.form.markAsUntouched();
         this.dataLoaded = true; // <<<<<< habilita botones
+        
+        // Inicializar datos de ejemplo para la nueva interfaz
+        this.initializeExampleData();
       },
       error: (err) => {
         console.error('Error cargando perfil:', err);
@@ -408,6 +469,68 @@ export class PerfilComponent implements OnInit {
     const newCP   = (v.codigoPostal ?? '').trim();
     return newDesc !== (this.initialDireccionDescripcion ?? '') ||
           newCP   !== (this.initialCodigoPostal ?? '');
+  }
+
+  // =================== NUEVOS MÉTODOS PARA INTERFAZ MODERNA ===================
+
+  // Edición de descripción inline
+  startEditDescription(): void {
+    this.editingDescription = true;
+    this.tempDescription = this.userDescription || '';
+  }
+
+  saveDescription(): void {
+    if (this.tempDescription.length <= 300) {
+      this.userDescription = this.tempDescription.trim();
+      this.editingDescription = false;
+      // Aquí iría la llamada a la API para guardar
+      console.log('Guardando descripción:', this.userDescription);
+    }
+  }
+
+  cancelEditDescription(): void {
+    this.editingDescription = false;
+    this.tempDescription = '';
+  }
+
+  // Manejo de pestañas
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
+  }
+
+  // Contacto
+  openWhatsApp(): void {
+    if (this.userPhone) {
+      const message = encodeURIComponent('Hola! Vi tu perfil en El Dato y me interesa conocer más sobre tus servicios.');
+      window.open(`https://wa.me/56${this.userPhone}?text=${message}`, '_blank');
+    }
+  }
+
+  // Navegación
+  goToRegisterService(): void {
+    this.router.navigate(['/registrar-servicio']);
+  }
+
+  goToServices(): void {
+    this.router.navigate(['/home']); // O la ruta que tengas para buscar servicios
+  }
+
+  // Galería
+  addPhoto(): void {
+    console.log('Agregar foto - implementar modal de subida');
+    // Aquí iría la lógica para subir fotos
+  }
+
+  removePhoto(index: number): void {
+    if (confirm('¿Estás seguro de que quieres eliminar esta foto?')) {
+      this.galleryPhotos.splice(index, 1);
+      console.log('Foto eliminada:', index);
+    }
+  }
+
+  viewPhoto(photo: any): void {
+    console.log('Ver foto:', photo);
+    // Aquí iría un modal para ver la foto en grande
   }
 
 }

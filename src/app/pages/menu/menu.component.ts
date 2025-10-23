@@ -15,7 +15,7 @@ import { ServicesService } from '../../core/services/services.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css']
+  styleUrls: ['./menu.component.css', './proveedor-dashboard.css']
 })
 export class MenuComponent implements OnInit {
   constructor(
@@ -43,6 +43,16 @@ export class MenuComponent implements OnInit {
 
   sidebarVisible = true;
 
+  // Datos para dashboard de proveedor
+  proveedorStats = {
+    serviciosActivos: 0,
+    contactosEsteMes: 0,
+    totalResenas: 0
+  };
+
+  misServicios: any[] = [];
+  ultimasResenas: any[] = [];
+
   photoModalVisible = false;
   cameraModalVisible = false;
   profileImageUrl: string | null = null;   // URL absoluta para <img>
@@ -64,6 +74,67 @@ export class MenuComponent implements OnInit {
     // Cargar datos reales del usuario
     this.loadMe();
     this.loadCategorias();
+    this.loadProveedorData();
+  }
+
+  private loadProveedorData(): void {
+    // Datos simulados para el MVP - TODO: Conectar con API real
+    this.proveedorStats = {
+      serviciosActivos: 12,
+      contactosEsteMes: 25,
+      totalResenas: 18
+    };
+
+    this.misServicios = [
+      {
+        id: 1,
+        titulo: 'Plomería Urgente',
+        categoria: 'Plomería',
+        vistas: 45,
+        contactos: 12,
+        fechaPublicacion: '2025-10-15'
+      },
+      {
+        id: 2,
+        titulo: 'Limpieza de Hogar',
+        categoria: 'Aseo y Limpieza',
+        vistas: 32,
+        contactos: 8,
+        fechaPublicacion: '2025-10-10'
+      },
+      {
+        id: 3,
+        titulo: 'Reparación de Electrodomésticos',
+        categoria: 'Reparaciones',
+        vistas: 28,
+        contactos: 5,
+        fechaPublicacion: '2025-10-08'
+      }
+    ];
+
+    this.ultimasResenas = [
+      {
+        id: 1,
+        rating: 5,
+        comentario: 'Excelente servicio, muy profesional y puntual',
+        nombreCliente: 'María González',
+        fecha: '2025-10-21'
+      },
+      {
+        id: 2,
+        rating: 4,
+        comentario: 'Muy buen trabajo, recomendado',
+        nombreCliente: 'Juan Pérez',
+        fecha: '2025-10-18'
+      },
+      {
+        id: 3,
+        rating: 5,
+        comentario: 'Súper atento y dejó todo impecable',
+        nombreCliente: 'Ana Martínez',
+        fecha: '2025-10-15'
+      }
+    ];
   }
 
   private loadCategorias(): void {
@@ -173,6 +244,32 @@ export class MenuComponent implements OnInit {
   routePerfil() { this.router.navigate(['/perfil']); }
   routeRegistrarServicio() { this.router.navigate(['/registrar-servicio']); }
   get isProveedor(): boolean { return this.userRole === 'proveedor'; }
+  get isCliente(): boolean { return this.userRole === 'cliente'; }
+
+  // Métodos para acciones del dashboard de proveedor
+  verDetalleServicio(servicio: any): void {
+    console.log('Ver detalle de servicio:', servicio);
+    alert(`Ver detalles de: ${servicio.titulo}`);
+    // TODO: Navegar a página de detalle del servicio
+  }
+
+  editarServicio(servicio: any): void {
+    console.log('Editar servicio:', servicio);
+    alert(`Editar: ${servicio.titulo}`);
+    // TODO: Navegar a página de edición del servicio
+  }
+
+  verTodasResenas(): void {
+    console.log('Ver todas las reseñas');
+    alert('Ver todas las reseñas - Próximamente');
+    // TODO: Navegar a página de reseñas
+  }
+
+  renderStars(rating: number): string {
+    const filled = '★'.repeat(rating);
+    const empty = '☆'.repeat(5 - rating);
+    return filled + empty;
+  }
 
   // Nuevos métodos de navegación para la barra lateral
   navigateToMyServices(): void {

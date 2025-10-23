@@ -1,239 +1,256 @@
-
-<div class="rs-main-bg">
-  <div class="rs-card">
+<div class="rs-bg">
+  <div class="rs-container">
+    
+    <!-- Header principal prominente -->
     <div class="rs-header">
       <span class="rs-icon">🛠️</span>
-      <div>
-        <h1>Registrar Servicio</h1>
-        <p class="rs-subtitle">Publica tu servicio en 3 simples pasos</p>
-      </div>
+      <h1>Registrar Servicio</h1>
+      <p class="rs-subtitle">Publica tu servicio en 3 pasos simples y claros</p>
     </div>
 
-    <!-- Stepper visual mejorado -->
-    <div class="step-indicator d-flex justify-content-center mb-4">
+    <!-- Stepper horizontal prominente -->
+    <div class="rs-stepper-wide">
       <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
-        <span class="step-number"><i class="bi bi-1-circle"></i> 1</span>
+        <span class="step-number">1</span>
         <span class="step-label">Información Básica</span>
+        <div class="step-line"></div>
       </div>
-      <div class="step-line"></div>
       <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
-        <span class="step-number"><i class="bi bi-2-circle"></i> 2</span>
-        <span class="step-label">Detalles</span>
+        <span class="step-number">2</span>
+        <span class="step-label">Detalles del Servicio</span>
+        <div class="step-line"></div>
       </div>
-      <div class="step-line"></div>
       <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
-        <span class="step-number"><i class="bi bi-3-circle"></i> 3</span>
-        <span class="step-label">Imágenes</span>
+        <span class="step-number">3</span>
+        <span class="step-label">Imágenes y Ubicación</span>
       </div>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <!-- Paso 1 -->
-      <div *ngIf="currentStep === 1" class="step-content">
-        <h3><i class="bi bi-info-circle"></i> Información Básica</h3>
-        <div class="mb-3">
-          <label for="nombreServicio" class="form-label">Nombre del Servicio</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-pencil"></i></span>
-            <input type="text" class="form-control form-control-lg" id="nombreServicio" formControlName="nombreServicio" placeholder="Ej: Limpieza del hogar">
+    <!-- Formulario distribuido -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="rs-form-wide">
+      
+      <!-- PASO 1: Información Básica -->
+      <section *ngIf="currentStep === 1" class="rs-section">
+        <h2 class="rs-section-title">
+          <i class="bi bi-info-circle"></i>
+          Información Básica del Servicio
+        </h2>
+        
+        <div class="rs-row">
+          <div class="rs-col">
+            <label for="nombreServicio" class="form-label-xl">¿Cuál es el nombre de tu servicio?</label>
+            <input 
+              type="text" 
+              class="form-control-xl" 
+              id="nombreServicio" 
+              formControlName="nombreServicio" 
+              placeholder="Ejemplo: Limpieza del hogar, Jardinería, Plomería"
+            >
+            <div *ngIf="form.get('nombreServicio')?.invalid && form.get('nombreServicio')?.touched" class="text-danger">
+              <i class="bi bi-exclamation-circle"></i> 
+              El nombre del servicio es requerido (mínimo 3 caracteres)
+            </div>
           </div>
-          <div *ngIf="form.get('nombreServicio')?.invalid && form.get('nombreServicio')?.touched" class="text-danger">
-            <i class="bi bi-exclamation-circle"></i> Nombre requerido (mínimo 3 caracteres)
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="categoria" class="form-label">Categoría</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-tags"></i></span>
-            <select class="form-select form-select-lg" id="categoria" formControlName="categoria">
-              <option value="">Selecciona una categoría</option>
+          
+          <div class="rs-col">
+            <label for="categoria" class="form-label-xl">¿A qué categoría pertenece?</label>
+            <select class="form-select-xl" id="categoria" formControlName="categoria">
+              <option value="">Selecciona la categoría más adecuada</option>
               <option *ngFor="let c of categorias" [value]="c.idCategoriaServicio">
                 {{ c.nombre }}
               </option>
             </select>
-          </div>
-          <div *ngIf="cargandoCategorias" class="form-text">Cargando categorías…</div>
-          <div *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="text-danger">
-            <i class="bi bi-exclamation-circle"></i> Categoría requerida
-          </div>
-        </div>
-      </div>
-
-      <!-- Paso 2 -->
-      <div *ngIf="currentStep === 2" class="step-content">
-        <h3><i class="bi bi-list-check"></i> Detalles del Servicio</h3>
-        <div class="mb-3">
-          <label for="descripcion" class="form-label">Descripción</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-            <textarea
-              class="form-control form-control-lg"
-              id="descripcion"
-              formControlName="descripcion"
-              rows="7"
-              placeholder="Escribe con detalle qué harás, qué incluye y qué no incluye. Agrega precios por tramo (ej: 10 m², 50 m²), tiempos aproximados y si llevas tus materiales."
-            ></textarea>
-          </div>
-          <div class="rs-char-counter" aria-live="polite">
-            {{ (form.value.descripcion?.length || 0) }} caracteres escritos – Sugerencia: apunta a 120–200 para una mejor comprensión.
-          </div>
-          <div *ngIf="form.get('descripcion')?.invalid && form.get('descripcion')?.touched" class="text-danger">
-            <i class="bi bi-exclamation-circle"></i> Descripción requerida (mínimo 10 caracteres)
+            <div *ngIf="cargandoCategorias" class="text-muted">Cargando categorías disponibles...</div>
+            <div *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="text-danger">
+              <i class="bi bi-exclamation-circle"></i> 
+              Debes seleccionar una categoría
+            </div>
           </div>
         </div>
+      </section>
 
-        <!-- Tip amigable para adultos mayores -->
-        <div class="rs-tip" role="note" aria-label="Consejos para describir el servicio">
+      <!-- PASO 2: Detalles del Servicio -->
+      <section *ngIf="currentStep === 2" class="rs-section">
+        <h2 class="rs-section-title">
+          <i class="bi bi-list-check"></i>
+          Detalles de tu Servicio
+        </h2>
+        
+        <!-- Panel de ayuda arriba, visible para todos -->
+        <div class="rs-tip-panel">
           <div class="rs-tip-title">
             <i class="bi bi-lightbulb"></i>
-            Consejos para describir muy bien tu servicio
+            Consejos para una buena descripción
           </div>
-          <ul class="rs-tip-list">
-            <li>
-              Explica en palabras simples qué harás y en qué lugares lo realizas
-              (ej.: casa, jardín, condominio, departamento sin ascensor).
-            </li>
-            <li>
-              Detalla qué incluye y qué no incluye. Ej.: “Incluye: corte, orillado y limpieza básica; No incluye: retiro de escombros”.
-            </li>
-            <li>
-              Indica precios por tramos o tamaños para evitar confusiones.
-              También puedes indicar precio por hora y precio mínimo de visita.
-            </li>
-            <li>
-              Señala si llevas tus materiales y herramientas, o si los debe tener el cliente.
-            </li>
-            <li>
-              Agrega tiempos aproximados y disponibilidad (días y horarios).
-            </li>
-            <li>
-              Escribe el radio de atención (ej.: dentro de 5 km de mi domicilio).
-            </li>
-          </ul>
-
-          <div class="rs-examples">
-            <div class="rs-example-card">
-              <div class="rs-example-title"><i class="bi bi-scissors"></i> Corte de pasto</div>
+          <div class="rs-tip-content">
+            <ul class="rs-tip-list">
+              <li>Usa palabras simples y claras</li>
+              <li>Explica qué incluye y qué no incluye</li>
+              <li>Menciona precios por diferentes tamaños</li>
+              <li>Indica si llevas materiales o herramientas</li>
+              <li>Señala tiempo estimado de trabajo</li>
+              <li>Especifica tu radio de atención</li>
+            </ul>
+            
+            <div class="rs-examples">
+              <strong>Ejemplo para Corte de Pasto:</strong>
               <ul>
-                <li>Hasta 10 m²: $10.000</li>
-                <li>Hasta 50 m²: $30.000</li>
-                <li>Más de 50 m²: a conversar según tamaño</li>
+                <li>Jardín pequeño (hasta 50m²): $15.000</li>
+                <li>Jardín mediano (hasta 100m²): $25.000</li>
+                <li>Jardín grande (más de 100m²): precio a conversar</li>
               </ul>
-              <div class="rs-example-note">Incluye orillado y barrido simple. No incluye retiro de sacos.</div>
+              <small>Incluye orillado y barrido. No incluye retiro de residuos.</small>
             </div>
-            <div class="rs-example-card">
-              <div class="rs-example-title"><i class="bi bi-brush"></i> Pintura de habitación</div>
-              <ul>
-                <li>Hasta 9 m²: $35.000 (mano de obra)</li>
-                <li>10–20 m²: $60.000</li>
-              </ul>
-              <div class="rs-example-note">Materiales a cargo del cliente, puedo asesorar en la compra.</div>
-            </div>
-            <div class="rs-example-card">
-              <div class="rs-example-title"><i class="bi bi-lightning"></i> Cambio de ampolletas</div>
-              <ul>
-                <li>1 unidad: $5.000</li>
-                <li>2–5 unidades: $12.000</li>
-              </ul>
-              <div class="rs-example-note">No incluye ampolletas. Tiempo aprox.: 15–30 min.</div>
-            </div>
-          </div>
-
-          <div class="rs-template">
-            <div class="rs-template-title"><i class="bi bi-card-checklist"></i> Plantilla sugerida</div>
-            <ol>
-              <li><strong>Incluye:</strong> …</li>
-              <li><strong>No incluye:</strong> …</li>
-              <li><strong>Precios por tramo:</strong> …</li>
-              <li><strong>Materiales/herramientas:</strong> …</li>
-              <li><strong>Tiempo aproximado:</strong> …</li>
-              <li><strong>Disponibilidad y sector:</strong> …</li>
-            </ol>
           </div>
         </div>
-      </div>
+        
+        <!-- Área de texto centrada y prominente -->
+        <div class="rs-row">
+          <div class="rs-col">
+            <label for="descripcion" class="form-label-xl">Describe tu servicio en detalle</label>
+            <textarea
+              class="form-control-xl rs-textarea-xl"
+              id="descripcion"
+              formControlName="descripcion"
+              placeholder="Explica qué incluye tu servicio, materiales que usas, tiempo que tomas, precios por diferentes tamaños, etc."
+            ></textarea>
+            <div class="rs-char-counter">
+              {{ (form.value.descripcion?.length || 0) }} caracteres escritos
+              <br><small>Recomendamos escribir entre 120-300 caracteres para una mejor descripción</small>
+            </div>
+            <div *ngIf="form.get('descripcion')?.invalid && form.get('descripcion')?.touched" class="text-danger">
+              <i class="bi bi-exclamation-circle"></i> 
+              La descripción es requerida (mínimo 10 caracteres)
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <!-- Paso 3 -->
-      <div *ngIf="currentStep === 3" class="step-content">
-        <h3><i class="bi bi-image"></i> Imágenes y Confirmación</h3>
-        <div class="mb-3" style="position: relative;">
-          <label for="ubicacion" class="form-label">Ubicación (desde tu perfil)</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+      <!-- PASO 3: Imágenes y Ubicación -->
+      <section *ngIf="currentStep === 3" class="rs-section">
+        <h2 class="rs-section-title">
+          <i class="bi bi-image"></i>
+          Imágenes y Ubicación
+        </h2>
+        
+        <div class="rs-row">
+          <div class="rs-col">
+            <label for="ubicacion" class="form-label-xl">¿Dónde prestas tu servicio?</label>
             <input
-              #direccionInput
               type="text"
-              class="form-control form-control-lg"
+              class="form-control-xl"
               id="ubicacion"
               autocomplete="off"
-              placeholder="Escribe tu dirección"
-              (keydown.enter)="$event.preventDefault()"
-              (input)="onDireccionInput(direccionInput.value)"
-              (focus)="abrirSugerenciasSiHay()"
-              (blur)="onDireccionBlur()"
+              placeholder="Escribe tu dirección o zona de trabajo"
               [value]="form.value.direccionDescripcion || ''"
+              (input)="onDireccionInput($any($event.target).value)"
             />
+            <small class="text-muted">Puedes usar tu dirección guardada o escribir una nueva zona de trabajo</small>
           </div>
-          <small class="text-muted">Puedes usar tu dirección precargada o escribir una nueva.</small>
-          <ul class="list-group sugerencias" *ngIf="mostrandoSugerencias">
-            <li
-              class="list-group-item sugerencia-item"
-              *ngFor="let s of sugerencias"
-              (mousedown)="seleccionarSugerencia(s, direccionInput)"
-            >
-              {{ s.display_name }}
-            </li>
-            <li class="list-group-item sugerencia-atribucion">
-              Resultados por Nominatim — © OpenStreetMap contributors
-            </li>
-          </ul>
-        </div>
-
-        <div class="mb-3">
-          <label for="imagenes" class="form-label">Adjuntar Imágenes del Servicio</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-images"></i></span>
-            <input
-              type="file"
-              class="form-control form-control-lg"
-              id="imagenes"
-              multiple
-              accept="image/*"
-              (change)="onFileSelected($event)"
-            />
-          </div>
-          <small class="text-muted">Puedes seleccionar múltiples imágenes (máx. 5)</small>
-          <div *ngIf="selectedFiles.length > 0" class="mt-3">
-            <h6>Imágenes seleccionadas:</h6>
-            <div class="rs-img-preview">
+          
+          <div class="rs-col">
+            <label for="imagenes" class="form-label-xl">Fotos de tu trabajo</label>
+            <div class="rs-file-area">
+              <i class="bi bi-images" style="font-size: 3rem; color: #007bff; margin-bottom: 1rem; display: block;"></i>
+              <input
+                type="file"
+                class="form-control-xl"
+                id="imagenes"
+                multiple
+                accept="image/*"
+                (change)="onFileSelected($event)"
+              />
+              <small class="text-muted">Selecciona hasta 5 fotos de trabajos anteriores</small>
+            </div>
+            
+            <div *ngIf="selectedFiles.length > 0" class="rs-img-preview">
               <div *ngFor="let file of selectedFiles; let i = index" class="rs-img-item">
-                <span class="rs-img-name"><i class="bi bi-file-image"></i> {{ file.name }}</span>
-                <span class="rs-img-size">({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
-                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeFile(i)"><i class="bi bi-trash"></i></button>
+                <span class="rs-img-name">
+                  <i class="bi bi-file-image"></i> 
+                  {{ file.name }}
+                </span>
+                <span class="rs-img-size">
+                  ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
+                </span>
+                <button 
+                  type="button" 
+                  class="btn btn-sm btn-outline-danger" 
+                  (click)="removeFile(i)"
+                >
+                  <i class="bi bi-trash"></i> Quitar
+                </button>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="mb-3">
-          <h5><i class="bi bi-clipboard-data"></i> Resumen:</h5>
-          <div class="rs-resumen">
-            <p><i class="bi bi-pencil"></i> <strong>Nombre:</strong> {{ form.value.nombreServicio }}</p>
-            <p><i class="bi bi-tags"></i> <strong>Categoría:</strong> {{ form.value.categoria }}</p>
-            <p><i class="bi bi-card-text"></i> <strong>Descripción:</strong> {{ form.value.descripcion }}</p>
-            <p><i class="bi bi-currency-dollar"></i> <strong>Precio:</strong> {{ form.value.precio }}</p>
-            <p><i class="bi bi-geo-alt"></i> <strong>Ubicación:</strong> {{ form.value.direccionDescripcion }}</p>
-            <p><i class="bi bi-images"></i> <strong>Imágenes:</strong> {{ selectedFiles.length }} seleccionadas</p>
+        
+        <!-- Resumen final -->
+        <div class="rs-resumen-wide">
+          <h3 class="rs-resumen-title">
+            <i class="bi bi-clipboard-check"></i>
+            Resumen de tu servicio
+          </h3>
+          <div class="rs-resumen-grid">
+            <div class="rs-resumen-item">
+              <i class="bi bi-pencil"></i>
+              <strong>Servicio:</strong><br>
+              {{ form.value.nombreServicio || 'No especificado' }}
+            </div>
+            <div class="rs-resumen-item">
+              <i class="bi bi-tags"></i>
+              <strong>Categoría:</strong><br>
+              {{ getCategoriaName(form.value.categoria) || 'No seleccionada' }}
+            </div>
+            <div class="rs-resumen-item">
+              <i class="bi bi-card-text"></i>
+              <strong>Descripción:</strong><br>
+              {{ (form.value.descripcion || 'Sin descripción').substring(0, 100) }}{{ (form.value.descripcion || '').length > 100 ? '...' : '' }}
+            </div>
+            <div class="rs-resumen-item">
+              <i class="bi bi-geo-alt"></i>
+              <strong>Ubicación:</strong><br>
+              {{ form.value.direccionDescripcion || 'No especificada' }}
+            </div>
+            <div class="rs-resumen-item">
+              <i class="bi bi-images"></i>
+              <strong>Fotos:</strong><br>
+              {{ selectedFiles.length }} imagen{{ selectedFiles.length !== 1 ? 'es' : '' }} seleccionada{{ selectedFiles.length !== 1 ? 's' : '' }}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Navegación -->
-      <div class="d-flex justify-content-between mt-4">
-        <button type="button" class="btn btn-secondary btn-lg" (click)="prevStep()" [disabled]="currentStep === 1"><i class="bi bi-arrow-left"></i> Anterior</button>
-        <button type="button" class="btn btn-primary btn-lg" (click)="nextStep()" [disabled]="!isStepValid(currentStep)" *ngIf="currentStep < totalSteps">Siguiente <i class="bi bi-arrow-right"></i></button>
-        <button type="submit" class="btn btn-success btn-lg" [disabled]="!form.valid" *ngIf="currentStep === totalSteps"><i class="bi bi-check-circle"></i> Registrar Servicio</button>
+      <!-- Navegación prominente -->
+      <div class="rs-nav-wide">
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-xl" 
+          (click)="prevStep()" 
+          [disabled]="currentStep === 1"
+        >
+          <i class="bi bi-arrow-left"></i> Paso Anterior
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-primary btn-xl" 
+          (click)="nextStep()" 
+          [disabled]="!isStepValid(currentStep)" 
+          *ngIf="currentStep < totalSteps"
+        >
+          Siguiente Paso <i class="bi bi-arrow-right"></i>
+        </button>
+        
+        <button 
+          type="submit" 
+          class="btn btn-success btn-xl" 
+          [disabled]="!form.valid" 
+          *ngIf="currentStep === totalSteps"
+        >
+          <i class="bi bi-check-circle"></i> Publicar Servicio
+        </button>
       </div>
+      
     </form>
   </div>
 </div>

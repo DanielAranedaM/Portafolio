@@ -185,10 +185,16 @@
     <!-- Barra de búsqueda -->
     <section class="search-section">
       <div class="search-bar">
-        <input type="text" placeholder="¿Qué Dato necesitas hoy?" id="searchInput">
+        <input
+          type="text"
+          placeholder="¿Qué Dato necesitas hoy?"
+          id="searchInput"
+          (keyup.enter)="buscarServicio()"
+        >
         <button class="search-btn" (click)="buscarServicio()">Buscar</button>
       </div>
     </section>
+
 
     <!-- CATEGORÍAS (COLAPSABLES) -->
     <section class="services-grid">

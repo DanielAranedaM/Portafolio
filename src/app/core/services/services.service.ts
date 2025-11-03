@@ -58,5 +58,23 @@ export class ServicesService {
         catchError(this.handleError)
       );
   }
+  
+  searchServices(query: string, categoryId?: number): Observable<ServicioDTO[]> {
+    if (!query?.trim()) {
+      return throwError(() => new Error('Debe indicar un texto de búsqueda.'));
+    }
 
+    const params: any = { q: query.trim() };
+    if (categoryId && categoryId > 0) params.categoryId = categoryId;
+
+    return this.http
+      .get<ServicioDTO[] | { message: string }>(`${this.base}/BuscarServicio`, { params })
+      .pipe(
+        map((res: any) => {
+          if (res && res.message) throw new Error(res.message);
+          return res as ServicioDTO[];
+        }),
+        catchError(this.handleError)
+      );
+  }
 }

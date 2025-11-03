@@ -59,7 +59,23 @@ export class MenuComponent implements OnInit {
   userInitials = 'US';
   currentStream: MediaStream | null = null;
 
-  ngOnInit(): void {
+  searchLoading = false;
+  searchError: string | null = null;
+  searchResults: ServicioDTO[] = [];
+  selectedCategoryIdForSearch: number | null = null; // si decides aplicar categoría al buscar
+
+  // --- modo y estado unificado de resultados ---
+  resultMode: 'search' | 'category' | null = null; // quién llenó la lista
+  results: ServicioDTO[] = [];
+  loading = false;
+  error: string | null = null;
+
+  // --- colapsar/expandir categorías ---
+  categoriasCollapsed = false;
+  toggleCategorias(): void { this.categoriasCollapsed = !this.categoriasCollapsed; }
+  get categoriasArrowIcon(): string { return this.categoriasCollapsed ? '▸' : '▾'; }
+
+    ngOnInit(): void {
     // (Opcional) Rol desde localStorage como fallback
     const userData = localStorage.getItem('userData');
     if (userData) {
@@ -158,42 +174,26 @@ export class MenuComponent implements OnInit {
   seleccionarCategoria(cat: CategoriaDTO): void {
     if (!cat?.idCategoriaServicio) return;
 
-    this.serviciosLoading = true;
-    this.serviciosError = null;
-    this.serviciosDeCategoria = [];
+    this.resultMode = 'category';
+    this.loading = true;
+    this.error = null;
+    this.results = [];
 
     this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
-      next: (servs: ServicioDTO[] | any) => {
-        console.log('Servicios cercanos por categoría:', cat, servs);
-
-        // Caso backend mensaje (tu ServicesService ya lanza error,
-        // pero por si llega "message" en next por algún proxy raro)
-        if (servs && servs.message) {
-          this.serviciosDeCategoria = [];
-          this.serviciosError = servs.message;
-          return;
-        }
-
-        // Caso lista vacía -> mensaje amable
+      next: (servs) => {
+        this.results = servs ?? [];
         if (Array.isArray(servs) && servs.length === 0) {
-          this.serviciosDeCategoria = [];
-          this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
-          return;
+          this.error = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
         }
-
-        this.serviciosError = null;
-        this.serviciosDeCategoria = servs ?? [];
       },
       error: (err) => {
         console.error('Error obteniendo servicios por categoría:', err);
-        // si viene mensaje desde el backend o desde el map() del service, úsalo
-        this.serviciosDeCategoria = [];
-        this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
+        this.results = [];
+        this.error = err?.message || 'No se pudieron cargar los servicios.';
       }
     }).add(() => {
-      this.serviciosLoading = false;
+      this.loading = false;
     });
-
   }
 
   private loadMe(): void {
@@ -473,9 +473,28 @@ export class MenuComponent implements OnInit {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
     if (!searchInput) return;
     const query = searchInput.value.trim();
-    if (query) console.log('Buscando:', query);
-    else alert('Por favor ingresa un término de búsqueda');
+    if (!query) { alert('Por favor ingresa un término de búsqueda'); return; }
+
+    this.resultMode = 'search';
+    this.loading = true;
+    this.error = null;
+    this.results = [];
+
+    this.servicesService.searchServices(query).subscribe({
+      next: (items) => {
+        this.results = items ?? [];
+        if (this.results.length === 0) this.error = 'Sin resultados';
+      },
+      error: (err) => {
+        console.error('Error al buscar servicios:', err);
+        this.results = [];
+        this.error = err?.message || 'No se pudo realizar la búsqueda';
+      }
+    }).add(() => {
+      this.loading = false;
+    });
   }
+
   seleccionarServicio(servicio: string): void { console.log('Servicio seleccionado:', servicio); }
   buscarReciente(termino: string): void {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;

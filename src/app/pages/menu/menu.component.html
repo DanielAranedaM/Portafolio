@@ -173,248 +173,264 @@
 <!-- Contenido principal -->
 <main [class]="mainContentClasses">
     
-    <!-- ========== DASHBOARD PARA CLIENTES ========== -->
-    <div *ngIf="isCliente" class="platform-container">
-        <header class="platform-header">
-            <div class="logo">
-                <div class="logo-icon">🔍</div>
-                <h1 class="logo-text">EL DATO</h1>
-            </div>
-        </header>
+  <!-- ========== DASHBOARD PARA CLIENTES ========== -->
+  <div *ngIf="isCliente" class="platform-container">
+    <header class="platform-header">
+      <div class="logo">
+        <div class="logo-icon">🔍</div>
+        <h1 class="logo-text">EL DATO</h1>
+      </div>
+    </header>
 
-        <!-- Barra de busqueda -->
-        <section class="search-section">
-            <div class="search-bar">
-                <input type="text" placeholder="¿Qué Dato necesitas hoy?" id="searchInput">
-                <button class="search-btn" (click)="buscarServicio()">Buscar</button>
-            </div>
-        </section>
+    <!-- Barra de búsqueda -->
+    <section class="search-section">
+      <div class="search-bar">
+        <input type="text" placeholder="¿Qué Dato necesitas hoy?" id="searchInput">
+        <button class="search-btn" (click)="buscarServicio()">Buscar</button>
+      </div>
+    </section>
 
-        <section class="services-grid">
-            <!-- Loading / error -->
-            <div *ngIf="categoriasLoading" class="service-card" style="opacity:.7; pointer-events:none;">
-                <div class="service-icon">⏳</div>
-                <h3 class="service-title">Cargando categorías...</h3>
-                <p class="service-description">Espera un momento</p>
-            </div>
+    <!-- CATEGORÍAS (COLAPSABLES) -->
+    <section class="services-grid">
+      <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <h3 class="section-title" style="margin:0; display:flex; align-items:center; gap:8px;">
+          <span>🧩</span> <span>Categorías</span>
+        </h3>
+        <button class="nav-btn" (click)="toggleCategorias()" title="Mostrar/Ocultar categorías" style="display:flex; align-items:center; gap:6px;">
+          <span>{{ categoriasArrowIcon }}</span>
+          <span>{{ categoriasCollapsed ? 'Mostrar' : 'Ocultar' }}</span>
+        </button>
+      </div>
 
-            <div *ngIf="!categoriasLoading && categoriasError" class="service-card" style="border-color:#f44336;">
-                <div class="service-icon">⚠️</div>
-                <h3 class="service-title">Error</h3>
-                <p class="service-description">{{ categoriasError }}</p>
-            </div>
+      <!-- Loading / error de categorías -->
+      <div *ngIf="categoriasLoading" class="service-card" style="opacity:.7; pointer-events:none;">
+        <div class="service-icon">⏳</div>
+        <h3 class="service-title">Cargando categorías...</h3>
+        <p class="service-description">Espera un momento</p>
+      </div>
 
-            <!-- Listado dinámico -->
-            <div
-                class="service-card"
-                *ngFor="let cat of categorias"
-                (click)="seleccionarCategoria(cat)"
-                title="Ver servicios cercanos en {{cat.nombre}}">
-                <div class="service-icon">🧩</div>
-                <h3 class="service-title">{{ cat.nombre }}</h3>
-                <p class="service-description">{{ cat.descripcion || '—' }}</p>
-            </div>
-        </section>
-        
-        <section *ngIf="serviciosLoading" class="recent-searches">
-            <h3 class="recent-title">Buscando servicios cercanos...</h3>
-        </section>
+      <div *ngIf="!categoriasLoading && categoriasError" class="service-card" style="border-color:#f44336;">
+        <div class="service-icon">⚠️</div>
+        <h3 class="service-title">Error</h3>
+        <p class="service-description">{{ categoriasError }}</p>
+      </div>
 
-        <section *ngIf="!serviciosLoading && !serviciosError && serviciosDeCategoria && serviciosDeCategoria.length === 0" class="recent-searches">
-            <h3 class="recent-title">Sin resultados</h3>
-            <div class="search-item">
-                <div class="search-item-icon">😔</div>
-                <span class="search-item-text">
-                No encontramos servicios en esta categoría cerca de ti por ahora.
-                Intenta con otra categoría o vuelve a intentarlo más tarde.
-                </span>
-            </div>
-        </section>
+      <!-- Listado dinámico (solo si NO está colapsado) -->
+      <ng-container *ngIf="!categoriasCollapsed">
+        <div
+          class="service-card"
+          *ngFor="let cat of categorias"
+          (click)="seleccionarCategoria(cat)"
+          title="Ver servicios cercanos en {{cat.nombre}}">
+          <div class="service-icon">🧩</div>
+          <h3 class="service-title">{{ cat.nombre }}</h3>
+          <p class="service-description">{{ cat.descripcion || '—' }}</p>
+        </div>
+      </ng-container>
+    </section>
 
-        <section *ngIf="!serviciosLoading && serviciosDeCategoria?.length" class="recent-searches">
-            <h3 class="recent-title">Servicios cercanos</h3>
-            <div class="search-item" *ngFor="let s of serviciosDeCategoria">
-                <div class="search-item-icon">🔎</div>
-                <span class="search-item-text">
-                {{ s.titulo }} — {{ s.categoriaNombre || ('Cat #' + s.idCategoriaServicio) }}
-                <ng-container *ngIf="s.proveedorNombre"> · por {{ s.proveedorNombre }}</ng-container>
-                <ng-container *ngIf="s.precioBase"> · $ {{ s.precioBase | number:'1.0-0' }}</ng-container>
-                </span>
-            </div>
-        </section>
+    <!-- RESULTADOS UNIFICADOS (tanto búsqueda como categoría) -->
+    <section *ngIf="loading" class="recent-searches">
+      <h3 class="recent-title">
+        {{ resultMode === 'category' ? 'Buscando servicios cercanos...' : 'Buscando…' }}
+      </h3>
+    </section>
 
-        <section class="recent-searches">
-            <h3 class="recent-title">Búsquedas Recientes</h3>
-            <div class="search-item" (click)="buscarReciente('jardineria')">
-                <div class="search-item-icon">🌱</div>
-                <span class="search-item-text">Jardinería en mi zona</span>
-            </div>
-            <div class="search-item" (click)="buscarReciente('limpieza')">
-                <div class="search-item-icon">🧹</div>
-                <span class="search-item-text">Limpieza semanal</span>
-            </div>
-            <div class="search-item" (click)="buscarReciente('plomeria')">
-                <div class="search-item-icon">🔧</div>
-                <span class="search-item-text">Plomero urgente</span>
-            </div>
-        </section>
-    </div>
+    <section *ngIf="!loading && error" class="recent-searches">
+      <h3 class="recent-title">Resultado</h3>
+      <div class="search-item">
+        <div class="search-item-icon">⚠️</div>
+        <span class="search-item-text">{{ error }}</span>
+      </div>
+    </section>
 
-    <!-- ========== DASHBOARD PARA PROVEEDORES ========== -->
-    <div *ngIf="isProveedor" class="proveedor-dashboard">
-        <!-- Header del Dashboard -->
-        <header class="proveedor-header">
-            <div class="proveedor-title-section">
-                <div class="proveedor-icon">👷</div>
-                <div>
-                    <h1 class="proveedor-title">Mi Negocio</h1>
-                    <p class="proveedor-subtitle">Panel del Proveedor</p>
-                </div>
-            </div>
-        </header>
+    <section *ngIf="!loading && !error && results.length" class="recent-searches">
+      <h3 class="recent-title">
+        {{ resultMode === 'category' ? 'Servicios cercanos' : 'Resultados' }}
+      </h3>
+      <div class="search-item" *ngFor="let s of results">
+        <div class="search-item-icon">🔎</div>
+        <span class="search-item-text">
+          {{ s.titulo }} — {{ s.categoriaNombre || ('Cat #' + s.idCategoriaServicio) }}
+          <ng-container *ngIf="s.proveedorNombre"> · por {{ s.proveedorNombre }}</ng-container>
+          <ng-container *ngIf="s.precioBase"> · $ {{ s.precioBase | number:'1.0-0' }}</ng-container>
+        </span>
+      </div>
+    </section>
 
-        <!-- Tarjetas de Estadísticas -->
-        <section class="stats-section">
-            <div class="stat-card">
-                <div class="stat-icon services-icon">🔧</div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ proveedorStats.serviciosActivos }}</div>
-                    <div class="stat-label">Servicios Activos</div>
-                </div>
-            </div>
+    <!-- Búsquedas recientes -->
+    <section class="recent-searches">
+      <h3 class="recent-title">Búsquedas Recientes</h3>
+      <div class="search-item" (click)="buscarReciente('jardineria')">
+        <div class="search-item-icon">🌱</div>
+        <span class="search-item-text">Jardinería en mi zona</span>
+      </div>
+      <div class="search-item" (click)="buscarReciente('limpieza')">
+        <div class="search-item-icon">🧹</div>
+        <span class="search-item-text">Limpieza semanal</span>
+      </div>
+      <div class="search-item" (click)="buscarReciente('plomeria')">
+        <div class="search-item-icon">🔧</div>
+        <span class="search-item-text">Plomero urgente</span>
+      </div>
+    </section>
+  </div>
 
-            <div class="stat-card">
-                <div class="stat-icon contacts-icon">📞</div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ proveedorStats.contactosEsteMes }}</div>
-                    <div class="stat-label">Contactos Este Mes</div>
-                </div>
-            </div>
+  <!-- ========== DASHBOARD PARA PROVEEDORES ========== -->
+  <div *ngIf="isProveedor" class="proveedor-dashboard">
+    <!-- Header del Dashboard -->
+    <header class="proveedor-header">
+      <div class="proveedor-title-section">
+        <div class="proveedor-icon">👷</div>
+        <div>
+          <h1 class="proveedor-title">Mi Negocio</h1>
+          <p class="proveedor-subtitle">Panel del Proveedor</p>
+        </div>
+      </div>
+    </header>
 
-            <div class="stat-card">
-                <div class="stat-icon rating-icon">⭐</div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ userRating || '0.0' }}</div>
-                    <div class="stat-label">Rating ({{ proveedorStats.totalResenas }})</div>
-                </div>
-            </div>
-        </section>
+    <!-- Tarjetas de Estadísticas -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-icon services-icon">🔧</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ proveedorStats.serviciosActivos }}</div>
+          <div class="stat-label">Servicios Activos</div>
+        </div>
+      </div>
 
-        <!-- Botón Principal de Acción -->
-        <section class="main-action-section">
-            <button class="btn-main-action" (click)="routeRegistrarServicio()">
-                <span class="btn-icon">➕</span>
-                <span class="btn-text">Publicar Nuevo Servicio</span>
+      <div class="stat-card">
+        <div class="stat-icon contacts-icon">📞</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ proveedorStats.contactosEsteMes }}</div>
+          <div class="stat-label">Contactos Este Mes</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon rating-icon">⭐</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ userRating || '0.0' }}</div>
+          <div class="stat-label">Rating ({{ proveedorStats.totalResenas }})</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botón Principal de Acción -->
+    <section class="main-action-section">
+      <button class="btn-main-action" (click)="routeRegistrarServicio()">
+        <span class="btn-icon">➕</span>
+        <span class="btn-text">Publicar Nuevo Servicio</span>
+      </button>
+    </section>
+
+    <!-- Mis Servicios Publicados -->
+    <section class="services-list-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon">📋</span>
+          Mis Servicios Publicados
+        </h2>
+      </div>
+
+      <div class="services-list" *ngIf="misServicios.length > 0; else noServices">
+        <div class="service-item" *ngFor="let servicio of misServicios">
+          <div class="service-item-header">
+            <div class="service-item-title-section">
+              <h3 class="service-item-title">{{ servicio.titulo }}</h3>
+              <span class="service-item-category">{{ servicio.categoria }}</span>
+            </div>
+          </div>
+          
+          <div class="service-item-stats">
+            <div class="service-stat">
+              <span class="service-stat-icon">👁️</span>
+              <span class="service-stat-value">{{ servicio.vistas }} vistas</span>
+            </div>
+            <div class="service-stat">
+              <span class="service-stat-icon">📞</span>
+              <span class="service-stat-value">{{ servicio.contactos }} contactos</span>
+            </div>
+          </div>
+
+          <div class="service-item-actions">
+            <button class="service-btn btn-view" (click)="verDetalleServicio(servicio)">
+              👁️ Ver
             </button>
-        </section>
+            <button class="service-btn btn-edit" (click)="editarServicio(servicio)">
+              ✏️ Editar
+            </button>
+          </div>
+        </div>
+      </div>
 
-        <!-- Mis Servicios Publicados -->
-        <section class="services-list-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <span class="title-icon">📋</span>
-                    Mis Servicios Publicados
-                </h2>
-            </div>
+      <ng-template #noServices>
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h3 class="empty-title">No tienes servicios publicados</h3>
+          <p class="empty-text">Publica tu primer servicio para que los clientes puedan encontrarte</p>
+          <button class="btn-empty-action" (click)="routeRegistrarServicio()">
+            ➕ Publicar Mi Primer Servicio
+          </button>
+        </div>
+      </ng-template>
+    </section>
 
-            <div class="services-list" *ngIf="misServicios.length > 0; else noServices">
-                <div class="service-item" *ngFor="let servicio of misServicios">
-                    <div class="service-item-header">
-                        <div class="service-item-title-section">
-                            <h3 class="service-item-title">{{ servicio.titulo }}</h3>
-                            <span class="service-item-category">{{ servicio.categoria }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="service-item-stats">
-                        <div class="service-stat">
-                            <span class="service-stat-icon">👁️</span>
-                            <span class="service-stat-value">{{ servicio.vistas }} vistas</span>
-                        </div>
-                        <div class="service-stat">
-                            <span class="service-stat-icon">📞</span>
-                            <span class="service-stat-value">{{ servicio.contactos }} contactos</span>
-                        </div>
-                    </div>
+    <!-- Reseñas Recientes -->
+    <section class="reviews-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon">⭐</span>
+          Reseñas Recientes
+        </h2>
+        <button class="btn-view-all" (click)="verTodasResenas()">Ver todas →</button>
+      </div>
 
-                    <div class="service-item-actions">
-                        <button class="service-btn btn-view" (click)="verDetalleServicio(servicio)">
-                            👁️ Ver
-                        </button>
-                        <button class="service-btn btn-edit" (click)="editarServicio(servicio)">
-                            ✏️ Editar
-                        </button>
-                    </div>
-                </div>
-            </div>
+      <div class="reviews-list" *ngIf="ultimasResenas.length > 0; else noReviews">
+        <div class="review-item" *ngFor="let resena of ultimasResenas">
+          <div class="review-header">
+            <div class="review-stars">{{ renderStars(resena.rating) }}</div>
+            <div class="review-date">{{ resena.fecha | date:'dd/MM/yyyy' }}</div>
+          </div>
+          <p class="review-comment">"{{ resena.comentario }}"</p>
+          <p class="review-author">- {{ resena.nombreCliente }}</p>
+        </div>
+      </div>
 
-            <ng-template #noServices>
-                <div class="empty-state">
-                    <div class="empty-icon">📝</div>
-                    <h3 class="empty-title">No tienes servicios publicados</h3>
-                    <p class="empty-text">Publica tu primer servicio para que los clientes puedan encontrarte</p>
-                    <button class="btn-empty-action" (click)="routeRegistrarServicio()">
-                        ➕ Publicar Mi Primer Servicio
-                    </button>
-                </div>
-            </ng-template>
-        </section>
-
-        <!-- Reseñas Recientes -->
-        <section class="reviews-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <span class="title-icon">⭐</span>
-                    Reseñas Recientes
-                </h2>
-                <button class="btn-view-all" (click)="verTodasResenas()">Ver todas →</button>
-            </div>
-
-            <div class="reviews-list" *ngIf="ultimasResenas.length > 0; else noReviews">
-                <div class="review-item" *ngFor="let resena of ultimasResenas">
-                    <div class="review-header">
-                        <div class="review-stars">{{ renderStars(resena.rating) }}</div>
-                        <div class="review-date">{{ resena.fecha | date:'dd/MM/yyyy' }}</div>
-                    </div>
-                    <p class="review-comment">"{{ resena.comentario }}"</p>
-                    <p class="review-author">- {{ resena.nombreCliente }}</p>
-                </div>
-            </div>
-
-            <ng-template #noReviews>
-                <div class="empty-state-small">
-                    <div class="empty-icon-small">🌟</div>
-                    <p class="empty-text-small">Aún no tienes reseñas. Cuando completes servicios, los clientes podrán dejarte sus comentarios.</p>
-                </div>
-            </ng-template>
-        </section>
-    </div>
+      <ng-template #noReviews>
+        <div class="empty-state-small">
+          <div class="empty-icon-small">🌟</div>
+          <p class="empty-text-small">Aún no tienes reseñas. Cuando completes servicios, los clientes podrán dejarte sus comentarios.</p>
+        </div>
+      </ng-template>
+    </section>
+  </div>
 
 </main>
 
 <!-- MODAL DE CONFIRMACIÓN PARA CERRAR SESIÓN -->
 <div *ngIf="logoutModalVisible" class="logout-modal-overlay" (click)="closeLogoutModal()">
-    <div class="logout-modal-content" (click)="$event.stopPropagation()">
-        <div class="logout-modal-header">
-            <div class="logout-modal-icon">
-                <span class="logout-icon">🚪</span>
-            </div>
-            <button class="close-logout-btn" (click)="closeLogoutModal()">×</button>
-        </div>
-        
-        <div class="logout-modal-body">
-            <h3>¿Cerrar Sesión?</h3>
-            <p>¿Estás seguro de que deseas cerrar tu sesión?</p>
-            <p class="logout-warning">Tendrás que iniciar sesión nuevamente para acceder a tu cuenta.</p>
-        </div>
-        
-        <div class="logout-modal-footer">
-            <button class="logout-btn-cancel" (click)="closeLogoutModal()">
-                Cancelar
-            </button>
-            <button class="logout-btn-confirm" (click)="confirmLogout()">
-                Sí, Cerrar Sesión
-            </button>
-        </div>
+  <div class="logout-modal-content" (click)="$event.stopPropagation()">
+    <div class="logout-modal-header">
+      <div class="logout-modal-icon">
+        <span class="logout-icon">🚪</span>
+      </div>
+      <button class="close-logout-btn" (click)="closeLogoutModal()">×</button>
     </div>
+    
+    <div class="logout-modal-body">
+      <h3>¿Cerrar Sesión?</h3>
+      <p>¿Estás seguro de que deseas cerrar tu sesión?</p>
+      <p class="logout-warning">Tendrás que iniciar sesión nuevamente para acceder a tu cuenta.</p>
+    </div>
+    
+    <div class="logout-modal-footer">
+      <button class="logout-btn-cancel" (click)="closeLogoutModal()">
+        Cancelar
+      </button>
+      <button class="logout-btn-confirm" (click)="confirmLogout()">
+        Sí, Cerrar Sesión
+      </button>
+    </div>
+  </div>
 </div>

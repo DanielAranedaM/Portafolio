@@ -260,3 +260,27 @@
   .summary-cards { grid-template-columns: 1fr 1fr; }
   .form-grid, .detail-grid { grid-template-columns: 1fr; }
 }
+
+/* Botón grande de actualizar */
+.btn-refresh {
+  background: #28a745;            /* verde */
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(40,167,69,.25);
+  transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
+  margin-left: 10px;
+}
+.btn-refresh:active { transform: translateY(1px); }
+.btn-refresh:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Sello de última actualización (opcional) */
+.header-actions .last-updated {
+  color: #e8f5e9;
+  margin-left: 12px;
+  font-weight: 600;
+  opacity: .9;
+}

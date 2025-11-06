@@ -285,9 +285,7 @@ export class MenuComponent implements OnInit {
   }
 
   navigateToSavedServices(): void {
-    // TODO: Implementar navegación a "Servicios Guardados"
-    console.log('Navegando a Servicios Guardados...');
-    alert('Funcionalidad "Servicios Guardados" próximamente disponible');
+    this.router.navigate(['/historial-solicitud'])
   }
 
   navigateToNotifications(): void {

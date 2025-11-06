@@ -1,0 +1,156 @@
+<div class="requests-container" role="region" aria-label="Solicitudes agendadas">
+  <!-- Header -->
+  <header class="requests-header" role="banner">
+    <div class="header-main">
+      <h1 class="header-title">📅 Solicitudes Agendadas</h1>
+      <p class="header-subtitle">
+        Revisa y gestiona tus servicios. Vista simple y clara.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-back" aria-label="Volver al inicio">
+        ← Volver al inicio
+      </button>
+    </div>
+  </header>
+
+  <!-- Resumen (números de ejemplo, estático) -->
+  <section class="summary-cards" aria-label="Resumen de estados">
+    <div class="summary-card">
+      <div class="summary-value">12</div>
+      <div class="summary-label">Totales</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">6</div>
+      <div class="summary-label">Agendados</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">4</div>
+      <div class="summary-label">Completados cliente</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">2</div>
+      <div class="summary-label">Finalizados</div>
+    </div>
+  </section>
+
+  <!-- Tabla -->
+  <section class="section requests-table-section" aria-label="Tabla de solicitudes">
+    <h2 class="section-title">Listado</h2>
+
+    <div class="table-wrapper" role="table" aria-label="Solicitudes">
+      <div class="table-scroll">
+        <table class="requests-table">
+          <thead>
+            <tr>
+              <th scope="col">N°</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">Proveedor</th>
+              <th scope="col">Fecha agendamiento</th>
+              <th scope="col">Precio cobrado</th>
+              <th scope="col">Fecha completado cliente</th>
+              <th scope="col">Fecha finalizado</th>
+              <th scope="col">Notas</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="col-actions">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Fila de ejemplo 1 -->
+            <tr>
+              <td data-label="N°">000145</td>
+              <td data-label="Cliente">María González</td>
+              <td data-label="Proveedor">Juan Pérez</td>
+              <td data-label="Fecha agendamiento">12/10/2025 10:30</td>
+              <td data-label="Precio cobrado">$ 35.000</td>
+              <td data-label="Fecha completado cliente">—</td>
+              <td data-label="Fecha finalizado">—</td>
+              <td data-label="Notas" class="col-notas" title="Instalación de lámparas en comedor y pasillo.">
+                Instalación de lámparas en comedor y pasillo.
+              </td>
+              <td data-label="Estado">
+                <span class="badge badge-agendado">Agendado</span>
+              </td>
+              <td class="col-actions" data-label="Acciones">
+                <button class="action-chip btn-complete">✓ Completar</button>
+                <button class="action-chip btn-finish" disabled>✔ Finalizar</button>
+              </td>
+            </tr>
+
+            <!-- Fila de ejemplo 2 -->
+            <tr>
+              <td data-label="N°">000146</td>
+              <td data-label="Cliente">Carlos Medina</td>
+              <td data-label="Proveedor">ServiPlom SPA</td>
+              <td data-label="Fecha agendamiento">09/10/2025 15:00</td>
+              <td data-label="Precio cobrado">$ 48.000</td>
+              <td data-label="Fecha completado cliente">10/10/2025 18:20</td>
+              <td data-label="Fecha finalizado">11/10/2025 09:05</td>
+              <td data-label="Notas" class="col-notas" title="Cambio de flexibles y revisión de fuga bajo lavamanos.">
+                Cambio de flexibles y revisión de fuga bajo lavamanos.
+              </td>
+              <td data-label="Estado">
+                <span class="badge badge-finalizado">Finalizado</span>
+              </td>
+              <td class="col-actions" data-label="Acciones">
+                <button class="action-chip btn-complete" disabled>✓ Completar</button>
+                <button class="action-chip btn-finish">✔ Finalizar</button>
+              </td>
+            </tr>
+
+            <!-- Puedes duplicar filas de ejemplo según necesites -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tarjetas móviles (mismo contenido, estático) -->
+      <div class="cards-mobile">
+        <article class="req-card">
+          <header class="req-card-header">
+            <span class="req-number">N° 000145</span>
+            <span class="badge badge-agendado">Agendado</span>
+          </header>
+
+          <dl class="req-data">
+            <div><dt>Cliente</dt><dd>María González</dd></div>
+            <div><dt>Proveedor</dt><dd>Juan Pérez</dd></div>
+            <div><dt>Agendado</dt><dd>12/10/2025 10:30</dd></div>
+            <div><dt>Precio</dt><dd>$ 35.000</dd></div>
+            <div><dt>Completado cliente</dt><dd>—</dd></div>
+            <div><dt>Finalizado</dt><dd>—</dd></div>
+            <div class="req-notas"><dt>Notas</dt><dd>Instalación de lámparas en comedor y pasillo.</dd></div>
+          </dl>
+
+          <footer class="req-actions">
+            <button class="action-chip btn-complete">✓ Completar</button>
+            <button class="action-chip btn-finish" disabled>✔ Finalizar</button>
+          </footer>
+        </article>
+
+        <article class="req-card">
+          <header class="req-card-header">
+            <span class="req-number">N° 000146</span>
+            <span class="badge badge-finalizado">Finalizado</span>
+          </header>
+
+          <dl class="req-data">
+            <div><dt>Cliente</dt><dd>Carlos Medina</dd></div>
+            <div><dt>Proveedor</dt><dd>ServiPlom SPA</dd></div>
+            <div><dt>Agendado</dt><dd>09/10/2025 15:00</dd></div>
+            <div><dt>Precio</dt><dd>$ 48.000</dd></div>
+            <div><dt>Completado cliente</dt><dd>10/10/2025 18:20</dd></div>
+            <div><dt>Finalizado</dt><dd>11/10/2025 09:05</dd></div>
+            <div class="req-notas"><dt>Notas</dt><dd>Cambio de flexibles y revisión de fuga bajo lavamanos.</dd></div>
+          </dl>
+
+          <footer class="req-actions">
+            <button class="action-chip btn-complete" disabled>✓ Completar</button>
+            <button class="action-chip btn-finish">✔ Finalizar</button>
+          </footer>
+        </article>
+      </div>
+    </div>
+  </section>
+</div>

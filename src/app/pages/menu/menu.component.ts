@@ -90,68 +90,47 @@ export class MenuComponent implements OnInit {
     // Cargar datos reales del usuario
     this.loadMe();
     this.loadCategorias();
-    this.loadProveedorData();
   }
 
   private loadProveedorData(): void {
-    // Datos simulados para el MVP - TODO: Conectar con API real
-    this.proveedorStats = {
-      serviciosActivos: 12,
-      contactosEsteMes: 25,
-      totalResenas: 18
-    };
+    if (!this.isProveedor) return;
 
-    this.misServicios = [
-      {
-        id: 1,
-        titulo: 'Plomería Urgente',
-        categoria: 'Plomería',
-        vistas: 45,
-        contactos: 12,
-        fechaPublicacion: '2025-10-15'
-      },
-      {
-        id: 2,
-        titulo: 'Limpieza de Hogar',
-        categoria: 'Aseo y Limpieza',
-        vistas: 32,
-        contactos: 8,
-        fechaPublicacion: '2025-10-10'
-      },
-      {
-        id: 3,
-        titulo: 'Reparación de Electrodomésticos',
-        categoria: 'Reparaciones',
-        vistas: 28,
-        contactos: 5,
-        fechaPublicacion: '2025-10-08'
-      }
-    ];
+    this.servicesService.getDashboardDataForProveedor().subscribe({
+      next: (data) => {
+        console.log('GET /api/Services/DashboardProveedor ->', data);
 
-    this.ultimasResenas = [
-      {
-        id: 1,
-        rating: 5,
-        comentario: 'Excelente servicio, muy profesional y puntual',
-        nombreCliente: 'María González',
-        fecha: '2025-10-21'
+        // KPIs del header
+        const serviciosActivos = Array.isArray(data) ? data.length : 0;
+        const contactosAgendados = Array.isArray(data)
+          ? data.reduce((sum, s) => sum + (s.contactosAgendados || 0), 0)
+          : 0;
+
+        this.proveedorStats = {
+          serviciosActivos,
+          contactosEsteMes: contactosAgendados,  // usamos total de agendados como “contactos”
+          totalResenas: this.userRating ? Math.round(this.userRating) : 0
+        };
+
+        // Lista “Mis Servicios Publicados”
+        this.misServicios = (data || []).map(s => ({
+          id: s.idServicio,
+          titulo: s.titulo,
+          categoria: s.categoriaNombre || `Cat #${s.idCategoriaServicio}`,
+          contactos: s.contactosAgendados || 0,
+          fechaPublicacion: s.fechaPublicacion,
+          urlFoto: s.urlFotoPrincipal
+            ? this.makeAbsoluteUrl(s.urlFotoPrincipal)
+            : '/assets/imagen/default-service.png'
+        }));
       },
-      {
-        id: 2,
-        rating: 4,
-        comentario: 'Muy buen trabajo, recomendado',
-        nombreCliente: 'Juan Pérez',
-        fecha: '2025-10-18'
-      },
-      {
-        id: 3,
-        rating: 5,
-        comentario: 'Súper atento y dejó todo impecable',
-        nombreCliente: 'Ana Martínez',
-        fecha: '2025-10-15'
+      error: (err) => {
+        console.error('Error DashboardProveedor:', err);
+        this.proveedorStats = { serviciosActivos: 0, contactosEsteMes: 0, totalResenas: 0 };
+        this.misServicios = [];
       }
-    ];
+    });
   }
+
 
   private loadCategorias(): void {
     this.categoriasLoading = true;
@@ -216,7 +195,10 @@ export class MenuComponent implements OnInit {
         if (typeof me.esProveedor === 'boolean' || typeof me.esCliente === 'boolean') {
           this.userRole = me.esProveedor ? 'proveedor' : 'cliente';
         }
-
+        
+        if (this.userRole === 'proveedor') {
+          this.loadProveedorData();
+        }
         console.log('GET /Usuario/Me ->', me);
       },
       error: (err) => {

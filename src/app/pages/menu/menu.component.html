@@ -305,16 +305,16 @@
       <div class="stat-card">
         <div class="stat-icon services-icon">🔧</div>
         <div class="stat-content">
-          <div class="stat-number">{{ proveedorStats.serviciosActivos }}</div>
-          <div class="stat-label">Servicios Activos</div>
+        <div class="stat-number">{{ proveedorStats.serviciosActivos }}</div>
+        <div class="stat-label">Servicios Activos</div>
         </div>
       </div>
 
       <div class="stat-card">
         <div class="stat-icon contacts-icon">📞</div>
         <div class="stat-content">
-          <div class="stat-number">{{ proveedorStats.contactosEsteMes }}</div>
-          <div class="stat-label">Contactos Este Mes</div>
+        <div class="stat-number">{{ proveedorStats.contactosEsteMes }}</div>
+        <div class="stat-label">Contactos Este Mes</div>
         </div>
       </div>
 
@@ -344,36 +344,23 @@
         </h2>
       </div>
 
-      <div class="services-list" *ngIf="misServicios.length > 0; else noServices">
-        <div class="service-item" *ngFor="let servicio of misServicios">
-          <div class="service-item-header">
-            <div class="service-item-title-section">
-              <h3 class="service-item-title">{{ servicio.titulo }}</h3>
-              <span class="service-item-category">{{ servicio.categoria }}</span>
-            </div>
+    <div class="services-list" *ngIf="misServicios.length > 0; else noServices">
+      <div class="service-item" *ngFor="let servicio of misServicios">
+        <div class="service-item-header">
+          <div class="service-item-title-section">
+            <h3 class="service-item-title">{{ servicio.titulo }}</h3>
+            <span class="service-item-category">{{ servicio.categoria }}</span>
           </div>
-          
-          <div class="service-item-stats">
-            <div class="service-stat">
-              <span class="service-stat-icon">👁️</span>
-              <span class="service-stat-value">{{ servicio.vistas }} vistas</span>
-            </div>
-            <div class="service-stat">
-              <span class="service-stat-icon">📞</span>
-              <span class="service-stat-value">{{ servicio.contactos }} contactos</span>
-            </div>
-          </div>
-
-          <div class="service-item-actions">
-            <button class="service-btn btn-view" (click)="verDetalleServicio(servicio)">
-              👁️ Ver
-            </button>
-            <button class="service-btn btn-edit" (click)="editarServicio(servicio)">
-              ✏️ Editar
-            </button>
+        </div>
+              
+        <div class="service-item-stats">
+          <div class="service-stat">
+            <span class="service-stat-icon">📞</span>
+            <span class="service-stat-value">{{ servicio.contactos }} contactos</span>
           </div>
         </div>
       </div>
+    </div>
 
       <ng-template #noServices>
         <div class="empty-state">

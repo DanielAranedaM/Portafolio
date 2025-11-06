@@ -77,4 +77,8 @@ export class ServicesService {
         catchError(this.handleError)
       );
   }
+  
+  getDashboardDataForProveedor(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/DashboardProveedor`);
+  }
 }

@@ -9,6 +9,7 @@ import { CategoriasService } from '../../core/services/categorias.service';
 import { CategoriaDTO } from '../../core/models/categoria.dto';
 import { ServicioDTO } from '../../core/models/servicio.dto';
 import { ServicesService } from '../../core/services/services.service';
+import { CalificacionesService } from '../../core/services/calificaciones.service';
 
 @Component({
   selector: 'app-menu',
@@ -23,6 +24,7 @@ export class MenuComponent implements OnInit {
     private usersService: UsersService,
     private categoriasService: CategoriasService,
     private servicesService: ServicesService,
+    private califsService: CalificacionesService, 
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -69,6 +71,7 @@ export class MenuComponent implements OnInit {
   results: ServicioDTO[] = [];
   loading = false;
   error: string | null = null;
+  me: UsuarioDetalleDTO | null = null;
 
   // --- colapsar/expandir categorías ---
   categoriasCollapsed = false;
@@ -122,6 +125,21 @@ export class MenuComponent implements OnInit {
             ? this.makeAbsoluteUrl(s.urlFotoPrincipal)
             : '/assets/imagen/default-service.png'
         }));
+        this.califsService.getUltimasResenas(this.me?.idUsuario ?? 0).subscribe({
+          next: (resenas) => {
+            const src = resenas ?? [];
+            this.ultimasResenas = src.slice(0, 3).map(r => ({
+              rating: r.cantEstrellas,
+              comentario: r.comentario ?? '—',
+              fecha: r.fecha,
+              nombreCliente: r.autorNombre ?? 'Anónimo'
+            }));
+          },
+          error: (e) => {
+            console.error('Error al obtener reseñas recientes:', e);
+            this.ultimasResenas = [];
+          }
+        });
       },
       error: (err) => {
         console.error('Error DashboardProveedor:', err);
@@ -178,32 +196,21 @@ export class MenuComponent implements OnInit {
   private loadMe(): void {
     this.usersService.getMe().subscribe({
       next: (me: UsuarioDetalleDTO) => {
-        // Foto (API puede devolver ruta relativa '/uploads/...'):
+        this.me = me; // 👈 guarda el usuario aquí
         this.profileImageUrl = me.fotoPerfilUrl ? this.makeAbsoluteUrl(me.fotoPerfilUrl) : null;
-
-        // Nombre / iniciales
         this.userName = me.nombre || 'Usuario';
         this.userInitials = this.computeInitials(this.userName);
-
-        // Descripción
         this.userDescription = me.descripcion ?? null;
-
-        // Evaluación (rating)
         this.userRating = typeof me.evaluacion === 'number' ? me.evaluacion : null;
 
-        // Rol desde flags del backend
         if (typeof me.esProveedor === 'boolean' || typeof me.esCliente === 'boolean') {
           this.userRole = me.esProveedor ? 'proveedor' : 'cliente';
         }
-        
         if (this.userRole === 'proveedor') {
           this.loadProveedorData();
         }
-        console.log('GET /Usuario/Me ->', me);
       },
-      error: (err) => {
-        console.error('Error al obtener /Usuario/Me:', err);
-      }
+      error: (err) => console.error('Error al obtener /Usuario/Me:', err)
     });
   }
 
@@ -242,9 +249,7 @@ export class MenuComponent implements OnInit {
   }
 
   verTodasResenas(): void {
-    console.log('Ver todas las reseñas');
-    alert('Ver todas las reseñas - Próximamente');
-    // TODO: Navegar a página de reseñas
+    this.router.navigate(['/calificaciones']); 
   }
 
   renderStars(rating: number): string {
@@ -261,9 +266,7 @@ export class MenuComponent implements OnInit {
   }
 
   navigateToMyReviews(): void {
-    // TODO: Implementar navegación a "Mis reseñas"
-    console.log('Navegando a Mis reseñas...');
-    alert('Funcionalidad "Mis reseñas" próximamente disponible');
+    this.router.navigate(['/calificaciones']); 
   }
 
   navigateToSavedServices(): void {
@@ -493,4 +496,25 @@ export class MenuComponent implements OnInit {
     while (n--) u8arr[n] = bstr.charCodeAt(n);
     return new Blob([u8arr], { type: mime });
   }
+
+    // --------- Helpers de rating (estrellas con medias) ----------
+  private clampRating(v: number | null | undefined): number {
+    return typeof v === 'number' ? Math.max(0, Math.min(5, v)) : 0;
+  }
+
+  getStarStates(avg: number | null): ('full' | 'half' | 'empty')[] {
+    const v = this.clampRating(avg);
+    const states: ('full'|'half'|'empty')[] = [];
+    for (let i = 1; i <= 5; i++) {
+      if (v >= i) states.push('full');
+      else if (v >= i - 0.5) states.push('half');
+      else states.push('empty');
+    }
+    return states;
+  }
+
+  starIcon(state: 'full'|'half'|'empty'): string {
+    return state === 'full' ? '★' : state === 'half' ? '⯨' : '☆';
+  }
+
 }

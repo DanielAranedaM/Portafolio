@@ -33,12 +33,10 @@
       
       <!-- Clasificación solo para proveedores -->
       <div class="rating-section" *ngIf="userRole === 'proveedor'">
-        <div class="stars">
+        <div class="stars" [attr.aria-label]="'Calificación ' + (userRating ?? 0 | number:'1.1-1') + ' de 5'">
           <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
-            <ng-container *ngFor="let star of [1,2,3,4,5]">
-              <span *ngIf="userRating >= star">★</span>
-              <span *ngIf="userRating < star && userRating >= star - 0.5">⯨</span>
-              <span *ngIf="userRating < star - 0.5">☆</span>
+            <ng-container *ngFor="let s of getStarStates(userRating)">
+              <span>{{ starIcon(s) }}</span>
             </ng-container>
           </ng-container>
           <ng-template #noRating>
@@ -46,7 +44,7 @@
           </ng-template>
         </div>
         <span class="rating-text">
-          {{ userRating !== null ? (userRating | number:'1.1-1') : '0.0' }}
+          {{ (userRating ?? 0) | number:'1.1-1' }}
         </span>
       </div>
     </div>
@@ -104,7 +102,12 @@
         <span class="nav-icon">🔔</span>
         <span class="nav-text">Notificaciones</span>
       </button>
-      
+            
+      <button class="nav-btn" (click)="navigateToMyReviews()">
+        <span class="nav-icon">⭐</span>
+        <span class="nav-text">Mis Reseñas</span>
+      </button>
+
       <button class="nav-btn" (click)="navigateToSettings()">
         <span class="nav-icon">⚙️</span>
         <span class="nav-text">Configuración</span>

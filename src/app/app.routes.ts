@@ -7,6 +7,7 @@ import { RecuperarPassComponent } from './pages/recuperar-pass/recuperar-pass.co
 import { PerfilComponent } from './pages/perfil/perfil.component';
 import { RegistrarServicioComponent } from './pages/registrar-servicio/registrar-servicio.component';
 import { HistorialSolicitudComponent } from './pages/historial-solicitud/historial-solicitud/historial-solicitud.component';
+import { CalificacionesComponent } from './pages/Calificaciones/calificaciones/calificaciones.component';
 
 export const routes: Routes = [
     {
@@ -45,6 +46,10 @@ export const routes: Routes = [
     {
         path: 'historial-solicitud',
         component: HistorialSolicitudComponent
+    },
+    {
+        path: 'calificaciones',
+        component: CalificacionesComponent
     },
     {
         path: '**',

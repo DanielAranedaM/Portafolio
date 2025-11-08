@@ -1,0 +1,339 @@
+<div class="reviews-container" role="region" aria-label="Gestión de reseñas">
+  <!-- Header -->
+  <header class="reviews-header" role="banner">
+    <div class="header-main">
+      <h1 class="header-title">⭐ Reseñas</h1>
+      <p class="header-subtitle">Todo en un solo lugar. Claro y fácil de leer.</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-back" aria-label="Volver al inicio" (click)="goHome()">
+        ← Volver al inicio
+      </button>
+      <button class="btn btn-refresh" title="Actualizar reseñas" aria-label="Actualizar" (click)="refresh()">
+        🔄 Actualizar
+      </button>
+      <!-- Si quieres mostrar última actualización, puedes agregar un small con una fecha -->
+      <!-- <small class="last-updated">Última actualización: {{ lastUpdated | date:'dd/MM/yyyy, h:mm a' }}</small> -->
+    </div>
+  </header>
+
+  <!-- CARD GRANDE contenedora -->
+  <section class="section reviews-card" aria-label="Panel de reseñas">
+    <!-- Acción principal -->
+    <div class="reviews-primary-action">
+        <button class="action-chip btn-finish"
+                (click)="openSelectModal()"
+                aria-haspopup="dialog">
+            ⭐ {{ primaryCtaText }}
+        </button>
+    </div>
+
+    <!-- Pestañas -->
+    <nav class="tabs-simple" role="tablist" aria-label="Secciones de reseñas">
+        <button
+            id="tab-recibidas"
+            role="tab"
+            class="tab-btn-simple"
+            [class.active]="activeTab === 'recibidas'"
+            [attr.aria-selected]="activeTab === 'recibidas'"
+            attr.aria-controls="panel-recibidas"
+            (click)="setActiveTab('recibidas')">
+            📥 Lo que me reseñaron
+        </button>
+
+        <button
+            id="tab-enviadas"
+            role="tab"
+            class="tab-btn-simple"
+            [class.active]="activeTab === 'enviadas'"
+            [attr.aria-selected]="activeTab === 'enviadas'"
+            attr.aria-controls="panel-enviadas"
+            (click)="setActiveTab('enviadas')">
+            📤 Lo que yo reseñé
+        </button>
+
+
+    </nav>
+
+    <!-- =================== Panel: Recibidas =================== -->
+    <div
+      id="panel-recibidas"
+      role="tabpanel"
+      aria-labelledby="tab-recibidas"
+      class="tab-panel-simple"
+      [hidden]="activeTab !== 'recibidas'">
+
+      <!-- Loading / error -->
+      <div class="empty-simple" *ngIf="loadingRecibidas">
+        <div class="empty-emoji">⏳</div>
+        <p>Cargando reseñas recibidas…</p>
+      </div>
+      <div class="empty-simple" *ngIf="!loadingRecibidas && errorRecibidas">
+        <div class="empty-emoji">⚠️</div>
+        <p>{{ errorRecibidas }}</p>
+      </div>
+
+      <!-- Lista -->
+      <div class="list-simple" *ngIf="!loadingRecibidas && !errorRecibidas">
+        <article class="review-row" *ngFor="let r of recibidas" aria-label="Reseña recibida">
+          <div class="review-col author">
+            <div class="avatar-circle">
+              {{ (r.autorNombre || ('U' + r.idUsuario)).slice(0,1).toUpperCase() }}
+            </div>
+            <div>
+              <div class="author-name">{{ r.autorNombre || ('Usuario #' + r.idUsuario) }}</div>
+              <div class="review-date">{{ r.fecha | date:'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+
+          <div class="review-col rating" [attr.aria-label]="'Calificación ' + r.cantEstrellas + ' de 5'">
+            {{ renderStars(r.cantEstrellas) }}
+          </div>
+
+          <div class="review-col text">
+            {{ r.comentario || '—' }}
+          </div>
+
+          <div class="review-col actions">
+            <button class="action-chip btn-detail" (click)="openReportModal()" aria-haspopup="dialog">
+              🚩 Reportar
+            </button>
+          </div>
+        </article>
+
+        <!-- Vacío -->
+        <div class="empty-simple" *ngIf="recibidas.length === 0">
+          <div class="empty-emoji">📝</div>
+          <h3>No tienes reseñas aún</h3>
+          <p>Cuando te califiquen, aparecerán aquí.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================== Panel: Enviadas =================== -->
+    <div
+      id="panel-enviadas"
+      role="tabpanel"
+      aria-labelledby="tab-enviadas"
+      class="tab-panel-simple"
+      [hidden]="activeTab !== 'enviadas'">
+
+      <!-- Loading / error -->
+      <div class="empty-simple" *ngIf="loadingEnviadas">
+        <div class="empty-emoji">⏳</div>
+        <p>Cargando tus reseñas…</p>
+      </div>
+      <div class="empty-simple" *ngIf="!loadingEnviadas && errorEnviadas">
+        <div class="empty-emoji">⚠️</div>
+        <p>{{ errorEnviadas }}</p>
+      </div>
+
+      <!-- Lista -->
+      <div class="list-simple" *ngIf="!loadingEnviadas && !errorEnviadas">
+        <article class="review-row" *ngFor="let r of enviadas" aria-label="Reseña enviada">
+          <div class="review-col author">
+            <div class="avatar-circle alt">
+              {{ (r.receptorNombre || ('U' + (r.receptorUsuarioId || ''))).toString().slice(0,1).toUpperCase() }}
+            </div>
+            <div>
+              <div class="author-name">
+                Cliente: {{ r.receptorNombre || ('Usuario #' + (r.receptorUsuarioId || '')) }}
+              </div>
+              <div class="review-date">{{ r.fecha | date:'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+
+          <div class="review-col rating" [attr.aria-label]="'Calificación ' + r.cantEstrellas + ' de 5'">
+            {{ renderStars(r.cantEstrellas) }}
+          </div>
+
+          <div class="review-col text">
+            {{ r.comentario || '—' }}
+          </div>
+
+          <div class="review-col actions">
+            <button class="action-chip btn-complete" (click)="openEditModal(r)">✏️ Editar</button>
+          </div>
+        </article>
+
+        <!-- Vacío -->
+        <div class="empty-simple" *ngIf="enviadas.length === 0">
+          <div class="empty-emoji">📤</div>
+          <h3>Aún no has calificado a nadie</h3>
+          <p>Cuando califiques a un cliente, verás tu reseña aquí.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- =================== MODAL: CALIFICAR / EDITAR =================== -->
+<div class="modal-backdrop" [class.is-open]="reportModalOpen">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>{{ isEditing ? '✏️ Editar reseña' : '⭐ Calificar a un cliente' }}</h3>
+      <button class="modal-close" (click)="closeRateModal()" aria-label="Cerrar">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-row" *ngIf="!isEditing">
+          <label>Solicitud asociada *</label>
+          <select [(ngModel)]="rateForm.idSolicitud">
+            <option [ngValue]="null" disabled selected>Selecciona una solicitud…</option>
+            <!-- TODO: Poblar con solicitudes finalizadas del usuario -->
+            <!-- Ejemplo temporal:
+            <option [ngValue]="101">Solicitud #101 - Carlos Díaz</option>
+            -->
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>Calificación *</label>
+          <div class="radio-group" role="radiogroup" aria-label="Seleccionar estrellas">
+            <button
+              class="action-chip"
+              *ngFor="let s of [1,2,3,4,5]"
+              (click)="rateForm.cantEstrellas = s"
+              [attr.aria-pressed]="rateForm.cantEstrellas === s">
+              {{ s <= rateForm.cantEstrellas ? '★' : '☆' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row" style="grid-column: 1 / -1;">
+          <label>Comentario (opcional)</label>
+          <textarea rows="3" [(ngModel)]="rateForm.comentario" placeholder="Escribe un comentario breve…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="action-chip btn-cancel" (click)="closeRateModal()">Cancelar</button>
+      <button class="action-chip btn-finish" (click)="saveRate()">
+        {{ isEditing ? '💾 Guardar cambios' : '💾 Guardar reseña' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL: REPORTAR RESEÑA =================== -->
+<div class="modal-backdrop" [class.is-open]="reportModalOpen">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>🚩 Reportar reseña</h3>
+      <button class="modal-close" (click)="closeReportModal()" aria-label="Cerrar">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Motivo</label>
+          <select [(ngModel)]="reportForm.motivo">
+            <option value="" disabled selected>Selecciona un motivo…</option>
+            <option>Lenguaje ofensivo</option>
+            <option>Información falsa</option>
+            <option>Spam / Publicidad</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-row" style="grid-column: 1 / -1;">
+          <label>Detalle</label>
+          <textarea rows="3" [(ngModel)]="reportForm.detalle" placeholder="Cuéntanos brevemente qué ocurrió…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="action-chip btn-cancel" (click)="closeReportModal()">Cancelar</button>
+      <button class="action-chip btn-detail" (click)="sendReport()">🚩 Enviar reporte</button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL: SELECCIONAR CLIENTE / PROVEEDOR =================== -->
+<div class="modal-backdrop" [class.is-open]="selectModalOpen" [attr.aria-hidden]="!selectModalOpen">
+  <div class="modal-card" role="dialog">
+    <div class="modal-header">
+      <h3>👥 Seleccionar {{ isProveedor ? 'Cliente' : 'Proveedor' }} para Calificar</h3>
+      <button class="modal-close" (click)="selectModalOpen = false">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="selectLoading" class="empty-state-modern">
+        <i class="empty-icon">⏳</i>
+        <p>Cargando lista...</p>
+      </div>
+
+      <div *ngIf="!selectLoading && selectError" class="empty-state-modern" style="color:#d32f2f;">
+        <i class="empty-icon">⚠️</i>
+        <p>{{ selectError }}</p>
+      </div>
+
+      <ul *ngIf="!selectLoading && !selectError && clientesOProveedores.length > 0" class="select-list">
+        <li *ngFor="let p of clientesOProveedores" class="select-item">
+          <button class="select-btn" (click)="selectPerson(p)">
+            {{ p.nombre }}
+          </button>
+        </li>
+      </ul>
+
+      <div *ngIf="!selectLoading && !selectError && clientesOProveedores.length === 0" class="empty-state-modern">
+        <i class="empty-icon">🙁</i>
+        <p>No tienes personas pendientes de calificar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL: CALIFICAR PERSONA =================== -->
+<div class="modal-backdrop" [class.is-open]="rateModalOpen" [attr.aria-hidden]="!rateModalOpen">
+  <div class="modal-card" role="dialog">
+    <div class="modal-header">
+      <h3>
+        ⭐ Calificar {{ isProveedor ? 'Cliente' : 'Proveedor' }}
+        <span *ngIf="selectedPersonName">: {{ selectedPersonName }}</span>
+      </h3>
+      <button class="modal-close" (click)="closeRateModal()">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <!-- Calificación por estrellas -->
+        <div class="form-row" style="grid-column: 1 / -1;">
+          <label>Selecciona la cantidad de estrellas *</label>
+          <div class="radio-group stars-group">
+            <button
+              *ngFor="let s of [1,2,3,4,5]"
+              type="button"
+              (click)="rateForm.cantEstrellas = s"
+              [class.selected]="s <= rateForm.cantEstrellas"
+              [attr.aria-pressed]="rateForm.cantEstrellas === s">
+              {{ s <= rateForm.cantEstrellas ? '★' : '☆' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Comentario -->
+        <div class="form-row" style="grid-column: 1 / -1;">
+          <label>Comentario (opcional)</label>
+          <textarea rows="3" [(ngModel)]="rateForm.comentario"
+                    placeholder="Escribe un comentario breve sobre la atención..."></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="action-chip btn-cancel" (click)="closeRateModal()">Cancelar</button>
+        <button class="action-chip btn-finish"
+                (click)="saveRate()"
+                [disabled]="rateForm.cantEstrellas < 1 || !rateForm.idSolicitud">
+        💾 Guardar reseña
+        </button>
+    </div>
+  </div>
+</div>
+

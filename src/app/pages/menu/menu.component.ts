@@ -10,6 +10,7 @@ import { CategoriasService } from '../../core/services/categorias.service';
 import { CategoriaDTO } from '../../core/models/categoria.dto';
 import { ServicioDTO } from '../../core/models/servicio.dto';
 import { ServicesService } from '../../core/services/services.service';
+import { CalificacionesService } from '../../core/services/calificaciones.service';
 
 @Component({
   selector: 'app-menu',
@@ -24,6 +25,7 @@ export class MenuComponent implements OnInit {
     private usersService: UsersService,
     private categoriasService: CategoriasService,
     private servicesService: ServicesService,
+    private califsService: CalificacionesService, 
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -64,7 +66,24 @@ export class MenuComponent implements OnInit {
   userInitials = 'US';
   currentStream: MediaStream | null = null;
 
-  ngOnInit(): void {
+  searchLoading = false;
+  searchError: string | null = null;
+  searchResults: ServicioDTO[] = [];
+  selectedCategoryIdForSearch: number | null = null; // si decides aplicar categoría al buscar
+
+  // --- modo y estado unificado de resultados ---
+  resultMode: 'search' | 'category' | null = null; // quién llenó la lista
+  results: ServicioDTO[] = [];
+  loading = false;
+  error: string | null = null;
+  me: UsuarioDetalleDTO | null = null;
+
+  // --- colapsar/expandir categorías ---
+  categoriasCollapsed = false;
+  toggleCategorias(): void { this.categoriasCollapsed = !this.categoriasCollapsed; }
+  get categoriasArrowIcon(): string { return this.categoriasCollapsed ? '▸' : '▾'; }
+
+    ngOnInit(): void {
     // (Opcional) Rol desde localStorage como fallback
     const userData = localStorage.getItem('userData');
     if (userData) {
@@ -79,68 +98,62 @@ export class MenuComponent implements OnInit {
     // Cargar datos reales del usuario
     this.loadMe();
     this.loadCategorias();
-    this.loadProveedorData();
   }
 
   private loadProveedorData(): void {
-    // Datos simulados para el MVP - TODO: Conectar con API real
-    this.proveedorStats = {
-      serviciosActivos: 12,
-      contactosEsteMes: 25,
-      totalResenas: 18
-    };
+    if (!this.isProveedor) return;
 
-    this.misServicios = [
-      {
-        id: 1,
-        titulo: 'Plomería Urgente',
-        categoria: 'Plomería',
-        vistas: 45,
-        contactos: 12,
-        fechaPublicacion: '2025-10-15'
-      },
-      {
-        id: 2,
-        titulo: 'Limpieza de Hogar',
-        categoria: 'Aseo y Limpieza',
-        vistas: 32,
-        contactos: 8,
-        fechaPublicacion: '2025-10-10'
-      },
-      {
-        id: 3,
-        titulo: 'Reparación de Electrodomésticos',
-        categoria: 'Reparaciones',
-        vistas: 28,
-        contactos: 5,
-        fechaPublicacion: '2025-10-08'
-      }
-    ];
+    this.servicesService.getDashboardDataForProveedor().subscribe({
+      next: (data) => {
+        console.log('GET /api/Services/DashboardProveedor ->', data);
 
-    this.ultimasResenas = [
-      {
-        id: 1,
-        rating: 5,
-        comentario: 'Excelente servicio, muy profesional y puntual',
-        nombreCliente: 'María González',
-        fecha: '2025-10-21'
+        // KPIs del header
+        const serviciosActivos = Array.isArray(data) ? data.length : 0;
+        const contactosAgendados = Array.isArray(data)
+          ? data.reduce((sum, s) => sum + (s.contactosAgendados || 0), 0)
+          : 0;
+
+        this.proveedorStats = {
+          serviciosActivos,
+          contactosEsteMes: contactosAgendados,  // usamos total de agendados como “contactos”
+          totalResenas: this.userRating ? Math.round(this.userRating) : 0
+        };
+
+        // Lista “Mis Servicios Publicados”
+        this.misServicios = (data || []).map(s => ({
+          id: s.idServicio,
+          titulo: s.titulo,
+          categoria: s.categoriaNombre || `Cat #${s.idCategoriaServicio}`,
+          contactos: s.contactosAgendados || 0,
+          fechaPublicacion: s.fechaPublicacion,
+          urlFoto: s.urlFotoPrincipal
+            ? this.makeAbsoluteUrl(s.urlFotoPrincipal)
+            : '/assets/imagen/default-service.png'
+        }));
+        this.califsService.getUltimasResenas(this.me?.idUsuario ?? 0).subscribe({
+          next: (resenas) => {
+            const src = resenas ?? [];
+            this.ultimasResenas = src.slice(0, 3).map(r => ({
+              rating: r.cantEstrellas,
+              comentario: r.comentario ?? '—',
+              fecha: r.fecha,
+              nombreCliente: r.autorNombre ?? 'Anónimo'
+            }));
+          },
+          error: (e) => {
+            console.error('Error al obtener reseñas recientes:', e);
+            this.ultimasResenas = [];
+          }
+        });
       },
-      {
-        id: 2,
-        rating: 4,
-        comentario: 'Muy buen trabajo, recomendado',
-        nombreCliente: 'Juan Pérez',
-        fecha: '2025-10-18'
-      },
-      {
-        id: 3,
-        rating: 5,
-        comentario: 'Súper atento y dejó todo impecable',
-        nombreCliente: 'Ana Martínez',
-        fecha: '2025-10-15'
+      error: (err) => {
+        console.error('Error DashboardProveedor:', err);
+        this.proveedorStats = { serviciosActivos: 0, contactosEsteMes: 0, totalResenas: 0 };
+        this.misServicios = [];
       }
-    ];
+    });
   }
+
 
   private loadCategorias(): void {
     this.categoriasLoading = true;
@@ -204,65 +217,40 @@ export class MenuComponent implements OnInit {
     this.serviciosDeCategoria = [];
 
     this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
-      next: (servs: ServicioDTO[] | any) => {
-        console.log('Servicios cercanos por categoría:', cat, servs);
-
-        // Caso backend mensaje (tu ServicesService ya lanza error,
-        // pero por si llega "message" en next por algún proxy raro)
-        if (servs && servs.message) {
-          this.serviciosDeCategoria = [];
-          this.serviciosError = servs.message;
-          return;
-        }
-
-        // Caso lista vacía -> mensaje amable
+      next: (servs) => {
+        this.results = servs ?? [];
         if (Array.isArray(servs) && servs.length === 0) {
-          this.serviciosDeCategoria = [];
-          this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
-          return;
+          this.error = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
         }
-
-        this.serviciosError = null;
-        this.serviciosDeCategoria = servs ?? [];
       },
       error: (err) => {
         console.error('Error obteniendo servicios por categoría:', err);
-        // si viene mensaje desde el backend o desde el map() del service, úsalo
-        this.serviciosDeCategoria = [];
-        this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
+        this.results = [];
+        this.error = err?.message || 'No se pudieron cargar los servicios.';
       }
     }).add(() => {
-      this.serviciosLoading = false;
+      this.loading = false;
     });
-
   }
 
   private loadMe(): void {
     this.usersService.getMe().subscribe({
       next: (me: UsuarioDetalleDTO) => {
-        // Foto (API puede devolver ruta relativa '/uploads/...'):
+        this.me = me; // 👈 guarda el usuario aquí
         this.profileImageUrl = me.fotoPerfilUrl ? this.makeAbsoluteUrl(me.fotoPerfilUrl) : null;
-
-        // Nombre / iniciales
         this.userName = me.nombre || 'Usuario';
         this.userInitials = this.computeInitials(this.userName);
-
-        // Descripción
         this.userDescription = me.descripcion ?? null;
-
-        // Evaluación (rating)
         this.userRating = typeof me.evaluacion === 'number' ? me.evaluacion : null;
 
-        // Rol desde flags del backend
         if (typeof me.esProveedor === 'boolean' || typeof me.esCliente === 'boolean') {
           this.userRole = me.esProveedor ? 'proveedor' : 'cliente';
         }
-
-        console.log('GET /Usuario/Me ->', me);
+        if (this.userRole === 'proveedor') {
+          this.loadProveedorData();
+        }
       },
-      error: (err) => {
-        console.error('Error al obtener /Usuario/Me:', err);
-      }
+      error: (err) => console.error('Error al obtener /Usuario/Me:', err)
     });
   }
 
@@ -301,9 +289,7 @@ export class MenuComponent implements OnInit {
   }
 
   verTodasResenas(): void {
-    console.log('Ver todas las reseñas');
-    alert('Ver todas las reseñas - Próximamente');
-    // TODO: Navegar a página de reseñas
+    this.router.navigate(['/calificaciones']); 
   }
 
   renderStars(rating: number): string {
@@ -320,15 +306,11 @@ export class MenuComponent implements OnInit {
   }
 
   navigateToMyReviews(): void {
-    // TODO: Implementar navegación a "Mis reseñas"
-    console.log('Navegando a Mis reseñas...');
-    alert('Funcionalidad "Mis reseñas" próximamente disponible');
+    this.router.navigate(['/calificaciones']); 
   }
 
   navigateToSavedServices(): void {
-    // TODO: Implementar navegación a "Servicios Guardados"
-    console.log('Navegando a Servicios Guardados...');
-    alert('Funcionalidad "Servicios Guardados" próximamente disponible');
+    this.router.navigate(['/historial-solicitud'])
   }
 
   navigateToNotifications(): void {
@@ -514,9 +496,28 @@ export class MenuComponent implements OnInit {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
     if (!searchInput) return;
     const query = searchInput.value.trim();
-    if (query) console.log('Buscando:', query);
-    else alert('Por favor ingresa un término de búsqueda');
+    if (!query) { alert('Por favor ingresa un término de búsqueda'); return; }
+
+    this.resultMode = 'search';
+    this.loading = true;
+    this.error = null;
+    this.results = [];
+
+    this.servicesService.searchServices(query).subscribe({
+      next: (items) => {
+        this.results = items ?? [];
+        if (this.results.length === 0) this.error = 'Sin resultados';
+      },
+      error: (err) => {
+        console.error('Error al buscar servicios:', err);
+        this.results = [];
+        this.error = err?.message || 'No se pudo realizar la búsqueda';
+      }
+    }).add(() => {
+      this.loading = false;
+    });
   }
+
   seleccionarServicio(servicio: string): void { console.log('Servicio seleccionado:', servicio); }
   buscarReciente(termino: string): void {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
@@ -593,4 +594,25 @@ export class MenuComponent implements OnInit {
     while (n--) u8arr[n] = bstr.charCodeAt(n);
     return new Blob([u8arr], { type: mime });
   }
+
+    // --------- Helpers de rating (estrellas con medias) ----------
+  private clampRating(v: number | null | undefined): number {
+    return typeof v === 'number' ? Math.max(0, Math.min(5, v)) : 0;
+  }
+
+  getStarStates(avg: number | null): ('full' | 'half' | 'empty')[] {
+    const v = this.clampRating(avg);
+    const states: ('full'|'half'|'empty')[] = [];
+    for (let i = 1; i <= 5; i++) {
+      if (v >= i) states.push('full');
+      else if (v >= i - 0.5) states.push('half');
+      else states.push('empty');
+    }
+    return states;
+  }
+
+  starIcon(state: 'full'|'half'|'empty'): string {
+    return state === 'full' ? '★' : state === 'half' ? '⯨' : '☆';
+  }
+
 }

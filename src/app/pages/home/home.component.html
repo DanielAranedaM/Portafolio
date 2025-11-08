@@ -1,80 +1,142 @@
 <!-- NavBar -->
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-        <!-- Logo/Marca -->
-        <div class="logo-login">
-            <img class="logo-login-img" src="../../../assets/imagen/logo.png" alt="El Dato" />
+<nav class="navbar">
+    <div class="navbar-container">
+        <!-- Logo -->
+        <div class="navbar-logo">
+            <img src="../../../assets/imagen/logo.png" alt="El Dato" class="logo-img" />
+            <span class="logo-text">El Dato</span>
         </div>
 
-        <!-- Acción Login/Registro (alineado a la derecha y con margen para A11y) -->
-        <div class="d-flex ms-auto align-items-center a11y-safe-right">
-            <button
-                type="button"
-                class="login-btn btn btn-success"
-                (click)="routeLogin()"
-                aria-label="Ir a Iniciar Sesión o Registro"
-            >
-                Iniciar Sesión / Registro
-            </button>
+        <!-- Navegación -->
+        <div class="navbar-links">
+            <a href="#inicio" class="nav-link">Inicio</a>
+            <a href="#como-funciona" class="nav-link">¿Cómo funciona?</a>
+            <a href="#comunidad" class="nav-link">Comunidad</a>
+            <a href="#categorias" class="nav-link">Categorías</a>
         </div>
+
+        <!-- Botón Login -->
+        <button class="login-btn" (click)="routeLogin()">
+            <span class="login-icon">👤</span>
+            Iniciar Sesión
+        </button>
     </div>
-  
 </nav>
 
-<!-- Hero Section -->
+<!-- Hero / Portada -->
 <section class="hero">
-    <div class="hero-container">
-        <h1>Conecta con talento local, rápido y sin complicaciones</h1>
-        <p>Desde jardinería hasta clases de computación: encuentra el profesional que necesitas en tu barrio.</p>
-        <button class="hero-btn" (click)="routeLogin()">Buscar servicios cerca de mi</button>
+  <div class="texto">
+    <h1>
+      Tu comunidad, tus servicios, <br />
+      <span>un solo clic</span>
+    </h1>
+    <p>
+      Conecta con profesionales de confianza en tu barrio. Desde reparaciones
+      hasta clases, encuentra el talento local que necesitas.
+    </p>
+    <div class="botones">
+      <button class="btn btn-primary" (click)="routeLogin()">🔍 Buscar Servicios</button>
+      <button class="btn btn-outline" (click)="routeLogin()">💼 Ofrecer Servicios</button>
     </div>
+
+    <div class="estadisticas">
+      <p><strong>500+</strong> Servicios activos</p>
+      <p><strong>1,200+</strong> Usuarios registrados</p>
+      <p><strong>95%</strong> Satisfacción</p>
+    </div>
+  </div>
+
+  <img
+    src="assets/imagen/community-marketplace.jpg"
+    alt="Marketplace de comunidad - Vecinos ayudándose entre sí"
+    class="hero-img"
+  />
 </section>
 
-<!-- Services Section -->
-<section class="services">
-    <div class="services-container">
-        <h2>Beneficios de nuestros servicios</h2>
-        <div class="services-grid">
-            <div class="service-card">
-                <h3>Trabajo Local</h3>
-                <p>Apoyamos a profesionales de tu comunidad.</p>
-                <span class="service-tag">Local</span>
-            </div>
-            <div class="service-card">
-                <h3>Inclusivo</h3>
-                <p>Cualquier persona puede ofrecer y encontrar servic.</p>
-                <span class="service-tag">Inclusividad</span>
-            </div>
-            <div class="service-card">
-                <h3>Microservicios</h3>
-                <p>Soluciones rápidas y eficientes para cualquier.</p>
-                <span class="service-tag">Finanzas</span>
-            </div>
-        </div>
+<!-- Cómo Funciona -->
+<section class="funciona">
+  <h2>¿Cómo funciona?</h2>
+  <div class="pasos">
+    <div class="paso">
+      <span class="numero">1</span>
+      <h3>Regístrate</h3>
+      <p>Crea tu cuenta como cliente o proveedor.</p>
     </div>
+    <div class="paso">
+      <span class="numero">2</span>
+      <h3>Publica o busca</h3>
+      <p>Ofrece tus servicios o encuentra uno en tu comuna.</p>
+    </div>
+    <div class="paso">
+      <span class="numero">3</span>
+      <h3>Contacta</h3>
+      <p>Comunícate directamente con la otra persona.</p>
+    </div>
+    <div class="paso">
+      <span class="numero">4</span>
+      <h3>Califica</h3>
+      <p>Ayuda a construir una comunidad confiable.</p>
+    </div>
+  </div>
 </section>
 
-<!-- Map Section -->
-<section class="map-section">
-    <div class="map-container">
-        <div class="map-placeholder">
-            Conéctate con expertos en tu área
-        </div>
+<!-- Comunidad -->
+<section class="comunidad">
+  <h2>Nuestra Comunidad</h2>
+  <p>Historias reales de vecinos ayudando vecinos</p>
+
+  <div class="testimonios">
+    <div class="card">
+      <p>👨‍🔧 <strong>Carlos Pérez</strong></p>
+      <p class="rating">★★★★★</p>
+      <p>"Encontré un plomero excelente a dos cuadras de mi casa. Rápido, profesional y a buen precio."</p>
+      <span class="categoria">Plomería</span>
     </div>
+
+    <div class="card">
+      <p>👩‍🌾 <strong>María González</strong></p>
+      <p class="rating">★★★★★</p>
+      <p>"Publiqué mis servicios de jardinería y en una semana ya tenía 5 clientes. ¡Increíble!"</p>
+      <span class="categoria">Jardinería</span>
+    </div>
+
+    <div class="card">
+      <p>👨‍💻 <strong>Roberto Díaz</strong></p>
+      <p class="rating">★★★★★</p>
+      <p>"Ofrezco clases de computación para adultos mayores. Esta plataforma me ayudó a llegar a más personas."</p>
+      <span class="categoria">Computación</span>
+    </div>
+  </div>
 </section>
 
-<!-- Footer -->
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-links">
-            <a href="#">Contacto: info&#64;servicios.com</a>
-            <a href="#">Políticas: términos y condiciones</a>
-        </div>
-        <div class="social-links">
-            Síguenos en: <a href="#">Facebook</a>, <a href="#">Twitter</a>, <a href="#">LinkedIn</a>
-        </div>
+<!-- Categorías Populares -->
+<section class="categorias">
+  <h2>Categorías Populares</h2>
+  <p>Explora los servicios más solicitados en tu comunidad</p>
+
+  <div class="lista-categorias">
+    <div class="cat-card">
+      <span>🔧</span>
+      <h3>Reparaciones</h3>
+      <p>85 servicios</p>
     </div>
-</footer>
+    <div class="cat-card">
+      <span>🌿</span>
+      <h3>Jardinería</h3>
+      <p>63 servicios</p>
+    </div>
+    <div class="cat-card">
+      <span>💅</span>
+      <h3>Estética y Belleza</h3>
+      <p>47 servicios</p>
+    </div>
+    <div class="cat-card">
+      <span>📚</span>
+      <h3>Clases particulares</h3>
+      <p>32 servicios</p>
+    </div>
+  </div>
+</section>
 
 <!-- CHATBOT -->
 <app-chatbot></app-chatbot>

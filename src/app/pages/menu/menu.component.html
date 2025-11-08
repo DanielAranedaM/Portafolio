@@ -3,7 +3,7 @@
   [class]="toggleButtonClasses"
   [title]="toggleTitle"
   (click)="toggleSidebar()">
-  {{ toggleIcon }}
+  <i class="fas" [ngClass]="sidebarVisible ? 'fa-bars' : 'fa-user'"></i>
 </button>
 
 <!-- Barra lateral de navegación -->
@@ -24,7 +24,9 @@
       <!-- Iniciales si no hay imagen -->
       <span *ngIf="!hasProfileImage" class="profile-initials-large">{{ userInitials }}</span>
       <!-- Overlay de cámara -->
-      <div class="camera-overlay">📷</div>
+      <div class="camera-overlay">
+        <i class="fas fa-camera"></i>
+      </div>
     </div>
     
     <!-- Información del usuario -->
@@ -58,27 +60,27 @@
     <!-- Opciones para Proveedor -->
     <ng-container *ngIf="userRole === 'proveedor'">
       <button class="nav-btn" (click)="routePerfil()">
-        <span class="nav-icon">👤</span>
+        <i class="fas fa-user nav-icon"></i>
         <span class="nav-text">Mi Perfil</span>
       </button>
       
       <button class="nav-btn" (click)="navigateToMyServices()">
-        <span class="nav-icon">🔧</span>
+        <i class="fas fa-tools nav-icon"></i>
         <span class="nav-text">Mis Servicios</span>
       </button>
       
       <button class="nav-btn" (click)="routeRegistrarServicio()">
-        <span class="nav-icon">➕</span>
+        <i class="fas fa-plus-circle nav-icon"></i>
         <span class="nav-text">Publicar Servicio</span>
       </button>
       
       <button class="nav-btn" (click)="navigateToMyReviews()">
-        <span class="nav-icon">⭐</span>
+        <i class="fas fa-star nav-icon"></i>
         <span class="nav-text">Mis Reseñas</span>
       </button>
       
       <button class="nav-btn" (click)="navigateToSettings()">
-        <span class="nav-icon">⚙️</span>
+        <i class="fas fa-cog nav-icon"></i>
         <span class="nav-text">Configuración</span>
       </button>
     </ng-container>
@@ -86,29 +88,29 @@
     <!-- Opciones para Cliente -->
     <ng-container *ngIf="userRole === 'cliente'">
       <button class="nav-btn" (click)="routePerfil()">
-        <span class="nav-icon">👤</span>
+        <i class="fas fa-user nav-icon"></i>
         <span class="nav-text">Mi Perfil</span>
       </button>
       
       <button class="nav-btn" (click)="navigateToSavedServices()">
-        <span class="nav-icon">💾</span>
+        <i class="fas fa-bookmark nav-icon"></i>
         <span class="nav-text">Servicios Guardados</span>
       </button>
       
       <button class="nav-btn" (click)="navigateToNotifications()">
-        <span class="nav-icon">🔔</span>
+        <i class="fas fa-bell nav-icon"></i>
         <span class="nav-text">Notificaciones</span>
       </button>
       
       <button class="nav-btn" (click)="navigateToSettings()">
-        <span class="nav-icon">⚙️</span>
+        <i class="fas fa-cog nav-icon"></i>
         <span class="nav-text">Configuración</span>
       </button>
     </ng-container>
 
     <!-- Cerrar sesión (común para ambos) -->
     <button class="nav-btn logout-btn" (click)="openLogoutModal()">
-      <span class="nav-icon">🚪</span>
+      <i class="fas fa-sign-out-alt nav-icon"></i>
       <span class="nav-text">Cerrar Sesión</span>
     </button>
     
@@ -177,12 +179,12 @@
     <div *ngIf="isCliente" class="platform-container">
         <header class="platform-header">
             <div class="logo">
-                <div class="logo-icon">🔍</div>
+                <i class="fas fa-search logo-icon"></i>
                 <h1 class="logo-text">EL DATO</h1>
             </div>
         </header>
 
-        <!-- Barra de busqueda -->
+        <!-- Barra de búsqueda -->
         <section class="search-section">
             <div class="search-bar">
                 <input type="text" placeholder="¿Qué Dato necesitas hoy?" id="searchInput">
@@ -190,61 +192,163 @@
             </div>
         </section>
 
-        <section class="services-grid">
+        <!-- Vista de Categorías (cuando no hay categoría seleccionada) -->
+        <section *ngIf="!categoriaSeleccionada" class="categories-section-improved">
+            <h2 class="section-main-title">
+                <span class="title-emoji">🏘️</span>
+                Encuentra el servicio que necesitas
+            </h2>
+            
             <!-- Loading / error -->
-            <div *ngIf="categoriasLoading" class="service-card" style="opacity:.7; pointer-events:none;">
-                <div class="service-icon">⏳</div>
-                <h3 class="service-title">Cargando categorías...</h3>
-                <p class="service-description">Espera un momento</p>
+            <div *ngIf="categoriasLoading" class="loading-state">
+                <div class="loading-icon">⏳</div>
+                <p class="loading-text">Cargando categorías...</p>
             </div>
 
-            <div *ngIf="!categoriasLoading && categoriasError" class="service-card" style="border-color:#f44336;">
-                <div class="service-icon">⚠️</div>
-                <h3 class="service-title">Error</h3>
-                <p class="service-description">{{ categoriasError }}</p>
+            <div *ngIf="!categoriasLoading && categoriasError" class="error-state">
+                <div class="error-icon">⚠️</div>
+                <p class="error-text">{{ categoriasError }}</p>
             </div>
 
-            <!-- Listado dinámico -->
-            <div
-                class="service-card"
-                *ngFor="let cat of categorias"
-                (click)="seleccionarCategoria(cat)"
-                title="Ver servicios cercanos en {{cat.nombre}}">
-                <div class="service-icon">🧩</div>
-                <h3 class="service-title">{{ cat.nombre }}</h3>
-                <p class="service-description">{{ cat.descripcion || '—' }}</p>
-            </div>
-        </section>
-        
-        <section *ngIf="serviciosLoading" class="recent-searches">
-            <h3 class="recent-title">Buscando servicios cercanos...</h3>
-        </section>
-
-        <section *ngIf="!serviciosLoading && !serviciosError && serviciosDeCategoria && serviciosDeCategoria.length === 0" class="recent-searches">
-            <h3 class="recent-title">Sin resultados</h3>
-            <div class="search-item">
-                <div class="search-item-icon">😔</div>
-                <span class="search-item-text">
-                No encontramos servicios en esta categoría cerca de ti por ahora.
-                Intenta con otra categoría o vuelve a intentarlo más tarde.
-                </span>
+            <!-- Grid de Categorías Mejorado -->
+            <div class="categories-grid-improved" *ngIf="!categoriasLoading && !categoriasError">
+                <div
+                    class="category-card-improved"
+                    *ngFor="let cat of categorias; let i = index"
+                    (click)="seleccionarCategoria(cat)"
+                    [attr.data-category-index]="i">
+                    
+                    <div class="category-emoji-large">{{ getCategoryEmoji(cat.nombre) }}</div>
+                    <h3 class="category-name-large">{{ cat.nombre }}</h3>
+                    <p class="category-description-large">{{ cat.descripcion || 'Servicios disponibles en tu zona' }}</p>
+                    <div class="category-badge-improved">
+                        <span class="badge-icon">📍</span>
+                        <span class="badge-text">{{ getServiceCount(cat) }} servicios</span>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section *ngIf="!serviciosLoading && serviciosDeCategoria?.length" class="recent-searches">
-            <h3 class="recent-title">Servicios cercanos</h3>
-            <div class="search-item" *ngFor="let s of serviciosDeCategoria">
-                <div class="search-item-icon">🔎</div>
-                <span class="search-item-text">
-                {{ s.titulo }} — {{ s.categoriaNombre || ('Cat #' + s.idCategoriaServicio) }}
-                <ng-container *ngIf="s.proveedorNombre"> · por {{ s.proveedorNombre }}</ng-container>
-                <ng-container *ngIf="s.precioBase"> · $ {{ s.precioBase | number:'1.0-0' }}</ng-container>
-                </span>
+        <!-- Vista de Servicios (cuando se selecciona una categoría) -->
+        <section *ngIf="categoriaSeleccionada" class="services-view-section">
+            <div class="services-header">
+                <button class="btn-back" (click)="volverACategorias()">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">Volver</span>
+                </button>
+                <h2 class="services-view-title">
+                    <span class="title-emoji">{{ getCategoryEmoji(categoriaSeleccionada.nombre) }}</span>
+                    {{ categoriaSeleccionada.nombre }}
+                    <span class="services-count" *ngIf="!serviciosLoading && serviciosDeCategoria">
+                        ({{ serviciosDeCategoria.length }} servicios)
+                    </span>
+                </h2>
+            </div>
+
+            <!-- Loading servicios -->
+            <div *ngIf="serviciosLoading" class="loading-state">
+                <div class="loading-icon">⏳</div>
+                <p class="loading-text">Buscando servicios cercanos...</p>
+            </div>
+
+            <!-- Sin resultados -->
+            <div *ngIf="!serviciosLoading && serviciosDeCategoria?.length === 0" class="empty-services-state">
+                <div class="empty-icon">😔</div>
+                <h3 class="empty-title">No hay servicios disponibles</h3>
+                <p class="empty-text">
+                    No encontramos servicios en esta categoría cerca de ti por ahora.
+                    Intenta con otra categoría o vuelve más tarde.
+                </p>
+                <button class="btn-empty-action" (click)="volverACategorias()">
+                    Ver otras categorías
+                </button>
+            </div>
+
+            <!-- Lista de Servicios -->
+            <div class="services-list-view" *ngIf="!serviciosLoading && serviciosDeCategoria?.length">
+                <div class="service-card-large" *ngFor="let servicio of serviciosDeCategoria">
+                    <!-- Header del Servicio -->
+                    <div class="service-card-header">
+                        <div class="provider-avatar">
+                            <span class="avatar-initials">{{ getProviderInitials(servicio.proveedorNombre) }}</span>
+                        </div>
+                        <div class="provider-info">
+                            <h3 class="provider-name">{{ servicio.proveedorNombre || 'Proveedor' }}</h3>
+                            <div class="provider-rating">
+                                <span class="rating-stars">⭐</span>
+                                <span class="rating-value">5.0</span>
+                                <span class="rating-count">(0)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Foto de Portada del Servicio -->
+                    <div class="service-card-image">
+                        <img 
+                            *ngIf="servicio.urlFotoPrincipal; else placeholderImage" 
+                            [src]="servicio.urlFotoPrincipal" 
+                            [alt]="servicio.titulo" 
+                            class="service-image">
+                        <ng-template #placeholderImage>
+                            <div class="service-image-placeholder">
+                                <i class="fas fa-image placeholder-icon"></i>
+                                <p class="placeholder-text">Sin imagen</p>
+                            </div>
+                        </ng-template>
+                        <div class="image-overlay" *ngIf="servicio.urlFotoPrincipal"></div>
+                    </div>
+
+                    <!-- Título y Descripción -->
+                    <div class="service-card-body">
+                        <h4 class="service-title-large">{{ servicio.titulo }}</h4>
+                        <p class="service-description-large">{{ servicio.descripcion || 'Servicio profesional disponible en tu zona' }}</p>
+                    </div>
+
+                    <!-- Información Clave -->
+                    <div class="service-card-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📍</span>
+                            <span class="meta-text">Cerca de ti</span>
+                        </div>
+                        <div class="meta-item meta-item-highlight" *ngIf="servicio.precioBase">
+                            <span class="meta-icon">💰</span>
+                            <span class="meta-text">Desde ${{ servicio.precioBase | number:'1.0-0' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Teléfono/WhatsApp -->
+                    <div class="service-card-contact">
+                        <div class="contact-phone">
+                            <span class="phone-icon">📞</span>
+                            <span class="phone-number">+56 9 1234 5678</span>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="service-card-actions">
+                        <button class="btn-service-action btn-contact" (click)="contactarProveedor(servicio)">
+                            <span class="btn-icon">💬</span>
+                            <span class="btn-text">Contactar</span>
+                        </button>
+                        <button class="btn-service-action btn-save" (click)="guardarServicio(servicio)">
+                            <span class="btn-icon">💾</span>
+                            <span class="btn-text">Guardar</span>
+                        </button>
+                        <button class="btn-service-action btn-view" (click)="verDetalleServicioCliente(servicio)">
+                            <span class="btn-icon">👁️</span>
+                            <span class="btn-text">Ver más</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="recent-searches">
-            <h3 class="recent-title">Búsquedas Recientes</h3>
+        <!-- Búsquedas Recientes (solo cuando no hay categoría seleccionada) -->
+        <section *ngIf="!categoriaSeleccionada" class="recent-searches">
+            <h3 class="recent-title">
+                <i class="fas fa-clock recent-icon"></i>
+                Búsquedas Recientes
+            </h3>
             <div class="search-item" (click)="buscarReciente('jardineria')">
                 <div class="search-item-icon">🌱</div>
                 <span class="search-item-text">Jardinería en mi zona</span>

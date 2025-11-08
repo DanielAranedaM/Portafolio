@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 import { UsersService } from '../../core/services/users.service';
 import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
@@ -33,9 +34,13 @@ export class MenuComponent implements OnInit {
   categorias: CategoriaDTO[] = [];
   categoriasLoading = false;
   categoriasError: string | null = null;
+  categoriaSeleccionada: CategoriaDTO | null = null;
   serviciosDeCategoria: ServicioDTO[] = [];
   serviciosLoading = false;
   serviciosError: string | null = null;
+  
+  // Mapa para almacenar el conteo real de servicios por categoría
+  serviciosCountMap: Map<number, number> = new Map();
 
   userName = 'Usuario';
   userDescription: string | null = null;
@@ -145,6 +150,9 @@ export class MenuComponent implements OnInit {
       next: (cats) => {
         console.log('GET /api/Categoria ->', cats);
         this.categorias = cats ?? [];
+        
+        // Cargar el conteo real de servicios para cada categoría
+        this.loadServicesCount();
       },
       error: (err) => {
         console.error('Error cargando categorías:', err);
@@ -154,10 +162,43 @@ export class MenuComponent implements OnInit {
       this.categoriasLoading = false;
     });
   }
+  
+  private loadServicesCount(): void {
+    if (this.categorias.length === 0) return;
+    
+    // Crear un objeto con observables para cada categoría
+    const countRequests: { [key: number]: any } = {};
+    
+    this.categorias.forEach(categoria => {
+      countRequests[categoria.idCategoriaServicio] = 
+        this.servicesService.getByCategoryNearMe(categoria.idCategoriaServicio);
+    });
+    
+    // Ejecutar todas las peticiones en paralelo
+    forkJoin(countRequests).subscribe({
+      next: (results: any) => {
+        // Almacenar los conteos en el mapa
+        Object.keys(results).forEach(key => {
+          const categoryId = Number(key);
+          const servicios: ServicioDTO[] = results[categoryId];
+          this.serviciosCountMap.set(categoryId, servicios?.length || 0);
+        });
+        console.log('Conteos de servicios cargados:', this.serviciosCountMap);
+      },
+      error: (err) => {
+        console.error('Error cargando conteos de servicios:', err);
+        // En caso de error, establecer conteos en 0
+        this.categorias.forEach(cat => {
+          this.serviciosCountMap.set(cat.idCategoriaServicio, 0);
+        });
+      }
+    });
+  }
 
   seleccionarCategoria(cat: CategoriaDTO): void {
     if (!cat?.idCategoriaServicio) return;
 
+    this.categoriaSeleccionada = cat;
     this.serviciosLoading = true;
     this.serviciosError = null;
     this.serviciosDeCategoria = [];
@@ -482,6 +523,64 @@ export class MenuComponent implements OnInit {
     if (!searchInput) return;
     searchInput.value = termino;
     this.buscarServicio();
+  }
+
+  // ------------------ Métodos para Categorías y Servicios ------------------
+  getCategoryEmoji(categoryName: string): string {
+    const emojiMap: {[key: string]: string} = {
+      'Aseo y Limpieza': '🧹',
+      'Belleza y Bienestar': '💅',
+      'Clases y Tutorías': '📚',
+      'Costura y Arreglos': '🧵',
+      'Cuidados y Acompañamiento': '🤝',
+      'Eventos y Gastronomía': '🍽️',
+      'Jardinería': '🌱',
+      'Limpiezas Especiales': '✨',
+      'Mascotas': '🐕',
+      'Reparaciones': '🔧',
+      'Tecnología': '💻',
+      'Transporte': '🚗'
+    };
+    return emojiMap[categoryName] || '🔧';
+  }
+
+  getServiceCount(category: CategoriaDTO): number {
+    // Obtener el conteo real desde el mapa, o 0 si aún no se ha cargado
+    return this.serviciosCountMap.get(category.idCategoriaServicio) ?? 0;
+  }
+
+  getProviderInitials(name: string | undefined): string {
+    if (!name) return 'PR';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  volverACategorias(): void {
+    this.categoriaSeleccionada = null;
+    this.serviciosDeCategoria = [];
+    this.serviciosError = null;
+  }
+
+  contactarProveedor(servicio: ServicioDTO): void {
+    // TODO: Obtener teléfono real del proveedor desde la API
+    const phone = '+56912345678';
+    const message = encodeURIComponent(`Hola, me interesa tu servicio: ${servicio.titulo}`);
+    window.open(`https://wa.me/${phone.replace(/\s/g, '')}?text=${message}`, '_blank');
+  }
+
+  guardarServicio(servicio: ServicioDTO): void {
+    // TODO: Implementar guardado en favoritos mediante API
+    console.log('Guardando servicio:', servicio);
+    alert(`✅ Servicio "${servicio.titulo}" guardado en tus favoritos`);
+  }
+
+  verDetalleServicioCliente(servicio: ServicioDTO): void {
+    // TODO: Navegar a página de detalle del servicio
+    console.log('Ver detalle del servicio:', servicio);
+    alert(`Ver detalle completo de: ${servicio.titulo}`);
   }
 
   // ------------------ Helpers ------------------

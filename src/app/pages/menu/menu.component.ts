@@ -214,22 +214,22 @@ export class MenuComponent implements OnInit {
     this.categoriaSeleccionada = cat;
     this.serviciosLoading = true;
     this.serviciosError = null;
-    this.serviciosDeCategoria = [];
+    this.serviciosDeCategoria = []; // 👈 este es el array que tu HTML itera
 
     this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
       next: (servs) => {
-        this.results = servs ?? [];
+        this.serviciosDeCategoria = servs ?? [];
         if (Array.isArray(servs) && servs.length === 0) {
-          this.error = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
+          this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
         }
       },
       error: (err) => {
         console.error('Error obteniendo servicios por categoría:', err);
-        this.results = [];
-        this.error = err?.message || 'No se pudieron cargar los servicios.';
+        this.serviciosDeCategoria = [];
+        this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
       }
     }).add(() => {
-      this.loading = false;
+      this.serviciosLoading = false;
     });
   }
 

@@ -291,7 +291,7 @@
             </div>
 
             <!-- Sin resultados -->
-            <div *ngIf="!serviciosLoading && serviciosDeCategoria?.length === 0" class="empty-services-state">
+            <div *ngIf="!serviciosLoading && serviciosDeCategoria.length === 0" class="empty-services-state">
                 <div class="empty-icon">😔</div>
                 <h3 class="empty-title">No hay servicios disponibles</h3>
                 <p class="empty-text">
@@ -304,7 +304,7 @@
             </div>
 
             <!-- Lista de Servicios -->
-            <div class="services-list-view" *ngIf="!serviciosLoading && serviciosDeCategoria?.length">
+            <div class="services-list-view" *ngIf="!serviciosLoading && serviciosDeCategoria.length">
                 <div class="service-card-large" *ngFor="let servicio of serviciosDeCategoria">
                     <!-- Header del Servicio -->
                     <div class="service-card-header">

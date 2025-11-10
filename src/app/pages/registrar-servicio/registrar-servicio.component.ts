@@ -123,7 +123,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         this.mostrandoSugerencias = res.length > 0;
       });
   }
-
+  goBackToMenu(): void { this.router.navigate(['/menu']); }
   private precargarDesdeLocalStorage() {
     const userData = localStorage.getItem('userData');
     if (!userData) return;

@@ -66,9 +66,14 @@ export class MenuComponent implements OnInit {
   userInitials = 'US';
   currentStream: MediaStream | null = null;
 
+
+  categoriasVisibles = true; // control para mostrar/ocultar categorías
+  searchResults: ServicioDTO[] = [];
   searchLoading = false;
   searchError: string | null = null;
-  searchResults: ServicioDTO[] = [];
+  recentSearches: string[] = []; // últimas 3 búsquedas
+
+
   selectedCategoryIdForSearch: number | null = null; // si decides aplicar categoría al buscar
 
   // --- modo y estado unificado de resultados ---
@@ -80,11 +85,24 @@ export class MenuComponent implements OnInit {
 
   // --- colapsar/expandir categorías ---
   categoriasCollapsed = false;
+
   toggleCategorias(): void { this.categoriasCollapsed = !this.categoriasCollapsed; }
+  
   get categoriasArrowIcon(): string { return this.categoriasCollapsed ? '▸' : '▾'; }
 
-    ngOnInit(): void {
-    // (Opcional) Rol desde localStorage como fallback
+  toggleCategoriasVisibility(): void {
+    this.categoriasVisibles = !this.categoriasVisibles;
+
+    // Si las volvemos a mostrar, limpiamos la búsqueda
+    if (this.categoriasVisibles) {
+      this.searchResults = [];
+      this.searchError = null;
+      const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+      if (searchInput) searchInput.value = '';
+    }
+  }
+
+  ngOnInit(): void {
     const userData = localStorage.getItem('userData');
     if (userData) {
       try {
@@ -95,7 +113,10 @@ export class MenuComponent implements OnInit {
       }
     }
 
-    // Cargar datos reales del usuario
+    // 🔹 cargar historial de búsquedas guardado
+    const stored = localStorage.getItem('recentSearches');
+    this.recentSearches = stored ? JSON.parse(stored) : [];
+
     this.loadMe();
     this.loadCategorias();
   }
@@ -495,26 +516,37 @@ export class MenuComponent implements OnInit {
   buscarServicio(): void {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
     if (!searchInput) return;
-    const query = searchInput.value.trim();
-    if (!query) { alert('Por favor ingresa un término de búsqueda'); return; }
 
-    this.resultMode = 'search';
-    this.loading = true;
-    this.error = null;
-    this.results = [];
+    const query = searchInput.value.trim();
+    if (!query) {
+      alert('Por favor ingresa un término de búsqueda');
+      return;
+    }
+
+    // 🔹 ocultar categorías al buscar
+    this.categoriasVisibles = false;
+
+    this.searchLoading = true;
+    this.searchError = null;
+    this.searchResults = [];
+
+    // 🔹 guardar búsqueda reciente
+    this.addRecentSearch(query);
 
     this.servicesService.searchServices(query).subscribe({
       next: (items) => {
-        this.results = items ?? [];
-        if (this.results.length === 0) this.error = 'Sin resultados';
+        this.searchResults = items ?? [];
+        if (this.searchResults.length === 0) {
+          this.searchError = 'No se encontraron servicios que coincidan con tu búsqueda.';
+        }
       },
       error: (err) => {
         console.error('Error al buscar servicios:', err);
-        this.results = [];
-        this.error = err?.message || 'No se pudo realizar la búsqueda';
+        this.searchResults = [];
+        this.searchError = err?.message || 'Error al realizar la búsqueda.';
       }
     }).add(() => {
-      this.loading = false;
+      this.searchLoading = false;
     });
   }
 
@@ -526,6 +558,28 @@ export class MenuComponent implements OnInit {
     this.buscarServicio();
   }
 
+  private addRecentSearch(term: string): void {
+    const existingIndex = this.recentSearches.findIndex(t => t.toLowerCase() === term.toLowerCase());
+    if (existingIndex !== -1) {
+      this.recentSearches.splice(existingIndex, 1); // evita duplicados
+    }
+
+    this.recentSearches.unshift(term); // agrega al inicio
+    if (this.recentSearches.length > 3) {
+      this.recentSearches.pop(); // deja solo las últimas 3
+    }
+
+    localStorage.setItem('recentSearches', JSON.stringify(this.recentSearches));
+  }
+
+  // ------------------ NUEVO MÉTODO PARA VOLVER A MOSTRAR CATEGORÍAS ------------------
+  mostrarCategorias(): void {
+    this.categoriasVisibles = true;
+    this.searchResults = [];
+    this.searchError = null;
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    if (searchInput) searchInput.value = '';
+  }
   // ------------------ Métodos para Categorías y Servicios ------------------
   getCategoryEmoji(categoryName: string): string {
     const emojiMap: {[key: string]: string} = {

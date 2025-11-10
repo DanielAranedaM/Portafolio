@@ -359,19 +359,7 @@ export class PerfilComponent implements OnInit {
   }
 
   // Navegación / sesión
-  goBack(): void { this.router.navigate(['/']); }
-  logout(): void {
-    try {
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('userPreferences');
-      localStorage.removeItem('auth_token');
-      sessionStorage.clear();
-      this.router.navigate(['/login']);
-    } catch (e) {
-      console.error('Error al cerrar sesión:', e);
-    }
-  }
+  goBack(): void { this.router.navigate(['/menu']); }
 
   onDireccionInput(texto: string): void {
     this.direccionSeleccionada = null;
@@ -509,10 +497,6 @@ export class PerfilComponent implements OnInit {
   // Navegación
   goToRegisterService(): void {
     this.router.navigate(['/registrar-servicio']);
-  }
-
-  goToServices(): void {
-    this.router.navigate(['/home']); // O la ruta que tengas para buscar servicios
   }
 
   // Galería

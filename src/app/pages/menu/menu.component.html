@@ -377,10 +377,16 @@
                             <span class="btn-icon">👁️</span>
                             <span class="btn-text">Ver más</span>
                         </button>
+                        <!-- 🚩 Denunciar servicio -->
+                        <button class="btn-service-action btn-report" (click)="openServiceReportModal(servicio)">
+                            <span class="btn-icon">🚩</span>
+                            <span class="btn-text">Denunciar</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </section>
+
         <!-- RESULTADOS DE BÚSQUEDA (debajo de las categorías, sin ocultarlas) -->
         <section class="services-view-section" *ngIf="searchLoading || searchError || searchResults.length">
           <div class="services-header">
@@ -478,6 +484,11 @@
                 <button class="btn-service-action btn-view" (click)="verDetalleServicioCliente(servicio)">
                   <span class="btn-icon">👁️</span>
                   <span class="btn-text">Ver más</span>
+                </button>
+                <!-- 🚩 Denunciar servicio -->
+                <button class="btn-service-action btn-report" (click)="openServiceReportModal(servicio)">
+                  <span class="btn-icon">🚩</span>
+                  <span class="btn-text">Denunciar</span>
                 </button>
               </div>
             </div>
@@ -619,6 +630,57 @@
   </div>
 
 </main>
+
+<!-- MODAL: DENUNCIAR SERVICIO -->
+<div *ngIf="serviceReportModalVisible"
+     class="logout-modal-overlay"
+     (click)="closeServiceReportModal()">
+
+  <div class="logout-modal-content" (click)="$event.stopPropagation()">
+    <div class="logout-modal-header">
+      <div class="logout-modal-icon">
+        <span class="logout-icon">🚩</span>
+      </div>
+      <button class="close-logout-btn" (click)="closeServiceReportModal()">×</button>
+    </div>
+
+    <div class="logout-modal-body">
+      <h3>Denunciar servicio</h3>
+      <p *ngIf="serviceReportTarget">
+        Estás denunciando el servicio:
+        <strong>{{ serviceReportTarget.titulo }}</strong>
+      </p>
+
+      <div class="form-row">
+        <label>Motivo</label>
+        <select [(ngModel)]="serviceReportForm.motivo">
+          <option [ngValue]="''" disabled>Selecciona un motivo…</option>
+          <option>Contenido inapropiado</option>
+          <option>Información falsa</option>
+          <option>Estafa o actividad sospechosa</option>
+          <option>Spam / Publicidad</option>
+          <option>Otro</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Detalle (opcional)</label>
+        <textarea rows="3"
+                  [(ngModel)]="serviceReportForm.detalle"
+                  placeholder="Describe brevemente qué ocurrió…"></textarea>
+      </div>
+    </div>
+
+    <div class="logout-modal-footer">
+      <button class="logout-btn-cancel" (click)="closeServiceReportModal()">
+        Cancelar
+      </button>
+      <button class="logout-btn-confirm" (click)="sendServiceReport()">
+        Enviar denuncia
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL DE CONFIRMACIÓN PARA CERRAR SESIÓN -->
 <div *ngIf="logoutModalVisible" class="logout-modal-overlay" (click)="closeLogoutModal()">

@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+import { FormsModule } from '@angular/forms';
+import { DenunciasService } from '../../core/services/denuncias.service';
+import { DenunciaCreateDTO } from '../../core/models/denuncia-create.dto';
+
 import { UsersService } from '../../core/services/users.service';
 import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
 import { API_URL } from '../../core/tokens/api-url.token';
@@ -15,17 +19,20 @@ import { CalificacionesService } from '../../core/services/calificaciones.servic
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css', './proveedor-dashboard.css']
 })
+
 export class MenuComponent implements OnInit {
+
   constructor(
     private router: Router,
     private usersService: UsersService,
     private categoriasService: CategoriasService,
     private servicesService: ServicesService,
-    private califsService: CalificacionesService, 
+    private califsService: CalificacionesService,
+    private denunciasService: DenunciasService,          // 👈 NUEVO
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -85,6 +92,14 @@ export class MenuComponent implements OnInit {
 
   // --- colapsar/expandir categorías ---
   categoriasCollapsed = false;
+
+  // ===== Denuncia de servicio =====
+  serviceReportModalVisible = false;
+  serviceReportTarget: ServicioDTO | null = null;
+  serviceReportForm = {
+    motivo: '',
+    detalle: ''
+  };
 
   toggleCategorias(): void { this.categoriasCollapsed = !this.categoriasCollapsed; }
   
@@ -667,6 +682,59 @@ export class MenuComponent implements OnInit {
 
   starIcon(state: 'full'|'half'|'empty'): string {
     return state === 'full' ? '★' : state === 'half' ? '⯨' : '☆';
+  }
+
+  openServiceReportModal(servicio: ServicioDTO): void {
+    this.serviceReportTarget = servicio;
+    this.serviceReportForm = { motivo: '', detalle: '' };
+    this.serviceReportModalVisible = true;
+  }
+
+  closeServiceReportModal(): void {
+    this.serviceReportModalVisible = false;
+    this.serviceReportTarget = null;
+  }
+
+  sendServiceReport(): void {
+    if (!this.me || !this.me.idUsuario) {
+      alert('No se pudo identificar al usuario actual.');
+      return;
+    }
+
+    if (!this.serviceReportTarget) {
+      alert('No se ha seleccionado el servicio a denunciar.');
+      return;
+    }
+
+    if (!this.serviceReportForm.motivo) {
+      alert('Debes seleccionar un motivo.');
+      return;
+    }
+
+    const detalle = this.serviceReportForm.detalle?.trim();
+    const motivoFinal = detalle
+      ? `${this.serviceReportForm.motivo} - ${detalle}`
+      : this.serviceReportForm.motivo;
+
+    const dto: DenunciaCreateDTO = {
+      idUsuario: this.me.idUsuario,
+      idSolicitud: null,
+      idValorizacion: null,
+      idServicio: this.serviceReportTarget.idServicio, // 👈 ahora sí
+      motivo: motivoFinal
+    };
+
+
+    this.denunciasService.crearDenuncia(dto).subscribe({
+      next: () => {
+        alert('Tu denuncia ha sido enviada. Gracias por ayudarnos a mantener la plataforma segura.');
+        this.closeServiceReportModal();
+      },
+      error: (e) => {
+        console.error('Error enviando denuncia de servicio:', e);
+        alert(e?.error || e?.message || 'No se pudo enviar la denuncia. Intenta nuevamente.');
+      }
+    });
   }
 
 }

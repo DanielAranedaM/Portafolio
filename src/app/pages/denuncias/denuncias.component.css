@@ -1,0 +1,259 @@
+/* ===================== CONTENEDOR BASE ===================== */
+
+.denuncias-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 20px 40px;
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: 'Arial', sans-serif;
+}
+
+/* ===================== HEADER ===================== */
+
+.denuncias-header {
+  background: linear-gradient(135deg, #c62828, #8e0000);
+  border-radius: 20px;
+  padding: 26px 24px;
+  color: #fff;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(198, 40, 40, 0.35);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.denuncias-header .header-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.denuncias-header .header-subtitle {
+  opacity: .95;
+  font-size: 16px;
+}
+
+/* Botones header (reutilizamos idea de reviews) */
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-refresh {
+  background: #28a745;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(40, 167, 69, .25);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===================== CARD PRINCIPAL + TABS ===================== */
+
+.section.denuncias-card {
+  background: #fff;
+  border-radius: 15px;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+
+/* Tabs simples (mismos estilos que en reseñas) */
+.tabs-simple {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.tab-btn-simple {
+  flex: 1;
+  padding: 12px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.tab-btn-simple.active {
+  background: #ffebee;
+  border-color: #ef9a9a;
+  font-weight: 800;
+}
+
+/* ===================== LISTA DE DENUNCIAS ===================== */
+
+.list-simple {
+  display: grid;
+  gap: 10px;
+}
+
+.denuncia-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr auto;
+  gap: 12px;
+  align-items: stretch;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+/* Columnas */
+
+.denuncia-col.main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.denuncia-col.motivo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.denuncia-col.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* Badges, títulos y meta info */
+
+.denuncia-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  align-self: flex-start;
+}
+
+.denuncia-title {
+  font-weight: 800;
+  color: #003D6B;
+  font-size: 15px;
+}
+
+.denuncia-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+/* Motivo */
+
+.denuncia-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #b71c1c;
+}
+
+.denuncia-motivo {
+  background: #fff5f5;
+  border-radius: 10px;
+  padding: 8px 10px;
+  border: 1px dashed #ffcdd2;
+  font-size: 14px;
+  color: #212529;
+  line-height: 1.4;
+}
+
+/* ===================== BOTONES DE ACCIÓN ===================== */
+
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,.12);
+  white-space: nowrap;
+}
+
+.btn-detail {
+  background: #005A9C;
+  color: #fff;
+}
+
+.btn-danger {
+  background: #c62828;
+  color: #fff;
+}
+
+.btn-soft {
+  background: #e0e0e0;
+  color: #212529;
+}
+
+/* ===================== ESTADOS VACÍOS / ERROR ===================== */
+
+.empty-simple {
+  text-align: center;
+  padding: 20px 10px;
+  color: #6c757d;
+}
+
+.empty-emoji {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+/* ===================== ACCESIBILIDAD ===================== */
+
+.denuncias-container :focus {
+  outline: 3px solid #A8CD3A;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* ===================== RESPONSIVE ===================== */
+
+@media (max-width: 880px) {
+  .denuncia-row {
+    grid-template-columns: 1.8fr 1.8fr auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .denuncia-row {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .denuncia-col.actions {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .tabs-simple {
+    flex-direction: column;
+  }
+}

@@ -64,7 +64,7 @@
       
       <button class="nav-btn" (click)="navigateToSavedServices()">
         <span class="nav-icon">💾</span>
-        <span class="nav-text">Lista de solicitudes</span>
+        <span class="nav-text">Solicitudes Agendadas</span>
       </button>
 
       <button class="nav-btn" (click)="navigateToMyServices()">
@@ -99,7 +99,12 @@
         <i class="fas fa-bookmark nav-icon"></i>
         <span class="nav-text">Servicios Guardados</span>
       </button>
-      
+
+      <button class="nav-btn" (click)="navigateToSavedServices()">
+        <span class="nav-icon">💾</span>
+        <span class="nav-text">Solicitudes Agendadas</span>
+      </button>
+
       <button class="nav-btn" (click)="navigateToNotifications()">
         <i class="fas fa-bell nav-icon"></i>
         <span class="nav-text">Notificaciones</span>
@@ -195,46 +200,72 @@
         <!-- Barra de búsqueda -->
         <section class="search-section">
             <div class="search-bar">
-                <input type="text" placeholder="¿Qué Dato necesitas hoy?" id="searchInput">
+                <input
+                  type="text"
+                  placeholder="¿Qué Dato necesitas hoy?"
+                  id="searchInput"
+                  (keyup.enter)="buscarServicio()"
+                />
                 <button class="search-btn" (click)="buscarServicio()">Buscar</button>
             </div>
         </section>
 
-        <!-- Vista de Categorías (cuando no hay categoría seleccionada) -->
-        <section *ngIf="!categoriaSeleccionada" class="categories-section-improved">
+        <!-- Vista de Categorías (SIEMPRE visible el header y el botón) -->
+        <section class="categories-section-improved">
+          <div class="categories-header">
             <h2 class="section-main-title">
-                <span class="title-emoji"></span>
-                Encuentra el servicio que necesitas
+              <span class="title-emoji">🏘️</span>
+              Encuentra el servicio que necesitas
             </h2>
-            
-            <!-- Loading / error -->
-            <div *ngIf="categoriasLoading" class="loading-state">
-                <div class="loading-icon">⏳</div>
-                <p class="loading-text">Cargando categorías...</p>
-            </div>
 
-            <div *ngIf="!categoriasLoading && categoriasError" class="error-state">
-                <div class="error-icon">⚠️</div>
-                <p class="error-text">{{ categoriasError }}</p>
+            <!-- Botón único con estilo de "Ver Categorías" -->
+            <div class="search-return">
+              <button
+                class="btn-empty-action"
+                (click)="toggleCategoriasVisibility()"
+                [attr.aria-pressed]="categoriasVisibles"
+                title="{{ categoriasVisibles ? 'Ocultar Categorías' : 'Ver Categorías' }}"
+              >
+                {{ categoriasVisibles ? 'Ocultar Categorías' : 'Ver Categorías' }}
+              </button>
             </div>
+          </div>
 
-            <!-- Grid de Categorías Mejorado -->
-            <div class="categories-grid-improved" *ngIf="!categoriasLoading && !categoriasError">
-                <div
-                    class="category-card-improved"
-                    *ngFor="let cat of categorias; let i = index"
-                    (click)="seleccionarCategoria(cat)"
-                    [attr.data-category-index]="i">
-                    
-                    <div class="category-emoji-large">{{ getCategoryEmoji(cat.nombre) }}</div>
-                    <h3 class="category-name-large">{{ cat.nombre }}</h3>
-                    <p class="category-description-large">{{ cat.descripcion || 'Servicios disponibles en tu zona' }}</p>
-                    <div class="category-badge-improved">
-                        <span class="badge-icon">📍</span>
-                        <span class="badge-text">{{ getServiceCount(cat) }} servicios</span>
-                    </div>
-                </div>
+          <!-- Loading -->
+          <div *ngIf="categoriasLoading" class="loading-state">
+            <div class="loading-icon">⏳</div>
+            <p class="loading-text">Cargando categorías...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="!categoriasLoading && categoriasError" class="error-state">
+            <div class="error-icon">⚠️</div>
+            <p class="error-text">{{ categoriasError }}</p>
+          </div>
+
+          <!-- Grid de Categorías (solo se oculta/ muestra esta parte) -->
+          <div
+            class="categories-grid-improved"
+            *ngIf="!categoriasLoading && !categoriasError && categoriasVisibles"
+          >
+            <div
+              class="category-card-improved"
+              *ngFor="let cat of categorias; let i = index"
+              (click)="seleccionarCategoria(cat)"
+              [attr.data-category-index]="i"
+              title="Ver servicios cercanos en {{cat.nombre}}"
+            >
+              <div class="category-emoji-large">{{ getCategoryEmoji(cat.nombre) }}</div>
+              <h3 class="category-name-large">{{ cat.nombre }}</h3>
+              <p class="category-description-large">
+                {{ cat.descripcion || 'Servicios disponibles en tu zona' }}
+              </p>
+              <div class="category-badge-improved">
+                <span class="badge-icon">📍</span>
+                <span class="badge-text">{{ getServiceCount(cat) }} servicios</span>
+              </div>
             </div>
+          </div>
         </section>
 
         <!-- Vista de Servicios (cuando se selecciona una categoría) -->
@@ -260,7 +291,7 @@
             </div>
 
             <!-- Sin resultados -->
-            <div *ngIf="!serviciosLoading && serviciosDeCategoria?.length === 0" class="empty-services-state">
+            <div *ngIf="!serviciosLoading && serviciosDeCategoria.length === 0" class="empty-services-state">
                 <div class="empty-icon">😔</div>
                 <h3 class="empty-title">No hay servicios disponibles</h3>
                 <p class="empty-text">
@@ -273,7 +304,7 @@
             </div>
 
             <!-- Lista de Servicios -->
-            <div class="services-list-view" *ngIf="!serviciosLoading && serviciosDeCategoria?.length">
+            <div class="services-list-view" *ngIf="!serviciosLoading && serviciosDeCategoria.length">
                 <div class="service-card-large" *ngFor="let servicio of serviciosDeCategoria">
                     <!-- Header del Servicio -->
                     <div class="service-card-header">
@@ -347,39 +378,148 @@
                             <span class="btn-icon">👁️</span>
                             <span class="btn-text">Ver más</span>
                         </button>
+
+                        <!-- Modal de detalle -->
+<app-servicio-detalle-modal
+  *ngIf="showDetailModal && selectedServiceId"
+  [servicioId]="selectedServiceId"
+  (close)="closeDetailModal()"
+  (contactar)="handleContactar($event)"
+  (guardar)="handleGuardar($event)">
+</app-servicio-detalle-modal>
+                        <!-- 🚩 Denunciar servicio -->
+                        <button class="btn-service-action btn-report" (click)="openServiceReportModal(servicio)">
+                            <span class="btn-icon">🚩</span>
+                            <span class="btn-text">Denunciar</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Modal de detalle del servicio -->
-        <app-servicio-detalle-modal
-          *ngIf="showDetailModal && selectedServiceId"
-          [servicioId]="selectedServiceId"
-          (close)="closeDetailModal()"
-          (contactar)="handleContactar($event)"
-          (guardar)="handleGuardar($event)">
-        </app-servicio-detalle-modal>
+        <!-- RESULTADOS DE BÚSQUEDA (debajo de las categorías, sin ocultarlas) -->
+        <section class="services-view-section" *ngIf="searchLoading || searchError || searchResults.length">
+          <div class="services-header">
+            <h2 class="services-view-title">
+              Resultados de búsqueda
+              <span class="services-count" *ngIf="!searchLoading">
+                ({{ searchResults.length }} servicios)
+              </span>
+            </h2>
+          </div>
+
+          <!-- Loading búsqueda -->
+          <div *ngIf="searchLoading" class="loading-state">
+            <div class="loading-icon">⏳</div>
+            <p class="loading-text">Buscando servicios...</p>
+          </div>
+
+          <!-- Error / vacío -->
+          <div *ngIf="!searchLoading && searchError" class="empty-services-state">
+            <div class="empty-icon">😔</div>
+            <h3 class="empty-title">Sin resultados</h3>
+            <p class="empty-text">{{ searchError }}</p>
+          </div>
+
+          <!-- Lista de Servicios (mismo diseño de tarjetas) -->
+          <div class="services-list-view" *ngIf="!searchLoading && searchResults.length">
+            <div class="service-card-large" *ngFor="let servicio of searchResults">
+              <!-- Header del Servicio -->
+              <div class="service-card-header">
+                <div class="provider-avatar">
+                  <span class="avatar-initials">{{ getProviderInitials(servicio.proveedorNombre) }}</span>
+                </div>
+                <div class="provider-info">
+                  <h3 class="provider-name">{{ servicio.proveedorNombre || 'Proveedor' }}</h3>
+                  <div class="provider-rating">
+                    <span class="rating-stars">⭐</span>
+                    <span class="rating-value">5.0</span>
+                    <span class="rating-count">(0)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Foto -->
+              <div class="service-card-image">
+                <img 
+                  *ngIf="servicio.urlFotoPrincipal; else placeholderImageSearch" 
+                  [src]="servicio.urlFotoPrincipal" 
+                  [alt]="servicio.titulo" 
+                  class="service-image">
+                <ng-template #placeholderImageSearch>
+                  <div class="service-image-placeholder">
+                    <i class="fas fa-image placeholder-icon"></i>
+                    <p class="placeholder-text">Sin imagen</p>
+                  </div>
+                </ng-template>
+                <div class="image-overlay" *ngIf="servicio.urlFotoPrincipal"></div>
+              </div>
+
+              <!-- Título y Descripción -->
+              <div class="service-card-body">
+                <h4 class="service-title-large">{{ servicio.titulo }}</h4>
+                <p class="service-description-large">{{ servicio.descripcion || 'Servicio profesional disponible en tu zona' }}</p>
+              </div>
+
+              <!-- Meta -->
+              <div class="service-card-meta">
+                <div class="meta-item">
+                  <span class="meta-icon">📍</span>
+                  <span class="meta-text">Cerca de ti</span>
+                </div>
+                <div class="meta-item meta-item-highlight" *ngIf="servicio.precioBase">
+                  <span class="meta-icon">💰</span>
+                  <span class="meta-text">Desde ${{ servicio.precioBase | number:'1.0-0' }}</span>
+                </div>
+              </div>
+
+              <!-- Contacto -->
+              <div class="service-card-contact">
+                <div class="contact-phone">
+                  <span class="phone-icon">📞</span>
+                  <span class="phone-number">+56 9 1234 5678</span>
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div class="service-card-actions">
+                <button class="btn-service-action btn-contact" (click)="contactarProveedor(servicio)">
+                  <span class="btn-icon">💬</span>
+                  <span class="btn-text">Contactar</span>
+                </button>
+                <button class="btn-service-action btn-save" (click)="guardarServicio(servicio)">
+                  <span class="btn-icon">💾</span>
+                  <span class="btn-text">Guardar</span>
+                </button>
+                <button class="btn-service-action btn-view" (click)="verDetalleServicioCliente(servicio)">
+                  <span class="btn-icon">👁️</span>
+                  <span class="btn-text">Ver más</span>
+                </button>
+                <!-- 🚩 Denunciar servicio -->
+                <button class="btn-service-action btn-report" (click)="openServiceReportModal(servicio)">
+                  <span class="btn-icon">🚩</span>
+                  <span class="btn-text">Denunciar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <!-- Búsquedas Recientes (solo cuando no hay categoría seleccionada) -->
-        <section *ngIf="!categoriaSeleccionada" class="recent-searches">
-            <h3 class="recent-title">
-                <i class="fas fa-clock recent-icon"></i>
-                Búsquedas Recientes
-            </h3>
-            <div class="search-item" (click)="buscarReciente('jardineria')">
-                <div class="search-item-icon">🌱</div>
-                <span class="search-item-text">Jardinería en mi zona</span>
-            </div>
-            <div class="search-item" (click)="buscarReciente('limpieza')">
-                <div class="search-item-icon">🧹</div>
-                <span class="search-item-text">Limpieza semanal</span>
-            </div>
-            <div class="search-item" (click)="buscarReciente('plomeria')">
-                <div class="search-item-icon">🔧</div>
-                <span class="search-item-text">Plomero urgente</span>
-            </div>
+        <section class="recent-searches" *ngIf="recentSearches.length > 0">
+          <h3 class="recent-title">
+            <i class="fas fa-clock recent-icon"></i>
+            Búsquedas Recientes
+          </h3>
+          <div 
+            class="search-item" 
+            *ngFor="let term of recentSearches" 
+            (click)="buscarReciente(term)">
+            <div class="search-item-icon">🔍</div>
+            <span class="search-item-text">{{ term }}</span>
+          </div>
         </section>
+
     </div>
 
   <!-- ========== DASHBOARD PARA PROVEEDORES ========== -->
@@ -500,6 +640,57 @@
   </div>
 
 </main>
+
+<!-- MODAL: DENUNCIAR SERVICIO -->
+<div *ngIf="serviceReportModalVisible"
+     class="logout-modal-overlay"
+     (click)="closeServiceReportModal()">
+
+  <div class="logout-modal-content" (click)="$event.stopPropagation()">
+    <div class="logout-modal-header">
+      <div class="logout-modal-icon">
+        <span class="logout-icon">🚩</span>
+      </div>
+      <button class="close-logout-btn" (click)="closeServiceReportModal()">×</button>
+    </div>
+
+    <div class="logout-modal-body">
+      <h3>Denunciar servicio</h3>
+      <p *ngIf="serviceReportTarget">
+        Estás denunciando el servicio:
+        <strong>{{ serviceReportTarget.titulo }}</strong>
+      </p>
+
+      <div class="form-row">
+        <label>Motivo</label>
+        <select [(ngModel)]="serviceReportForm.motivo">
+          <option [ngValue]="''" disabled>Selecciona un motivo…</option>
+          <option>Contenido inapropiado</option>
+          <option>Información falsa</option>
+          <option>Estafa o actividad sospechosa</option>
+          <option>Spam / Publicidad</option>
+          <option>Otro</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Detalle (opcional)</label>
+        <textarea rows="3"
+                  [(ngModel)]="serviceReportForm.detalle"
+                  placeholder="Describe brevemente qué ocurrió…"></textarea>
+      </div>
+    </div>
+
+    <div class="logout-modal-footer">
+      <button class="logout-btn-cancel" (click)="closeServiceReportModal()">
+        Cancelar
+      </button>
+      <button class="logout-btn-confirm" (click)="sendServiceReport()">
+        Enviar denuncia
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL DE CONFIRMACIÓN PARA CERRAR SESIÓN -->
 <div *ngIf="logoutModalVisible" class="logout-modal-overlay" (click)="closeLogoutModal()">

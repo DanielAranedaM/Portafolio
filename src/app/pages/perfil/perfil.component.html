@@ -98,93 +98,6 @@
     </div>
   </div>
 
-  <!-- Mis Servicios con Pestañas -->
-  <div class="services-section-modern" *ngIf="isProveedor">
-    <div class="section-header-modern">
-      <h2 class="section-title-modern">
-        <i class="section-icon">�</i>
-        Mis Servicios
-      </h2>
-    </div>
-
-    <!-- Pestañas -->
-    <div class="tabs-modern">
-      <button 
-        class="tab-btn-modern" 
-        [class.active]="activeTab === 'servicios'"
-        (click)="setActiveTab('servicios')">
-        📋 Servicios Activos
-      </button>
-      <button 
-        class="tab-btn-modern" 
-        [class.active]="activeTab === 'recomendaciones'"
-        (click)="setActiveTab('recomendaciones')">
-        � Recomendaciones
-      </button>
-    </div>
-
-    <!-- Contenido de pestañas -->
-    <div class="tab-content-modern">
-      <!-- Servicios Activos -->
-      <div *ngIf="activeTab === 'servicios'" class="tab-panel-modern">
-        <div *ngIf="userServices.length > 0; else noServices" class="services-grid-modern">
-          <div *ngFor="let service of userServices" class="service-card-modern">
-            <div class="service-header">
-              <h4 class="service-title">{{ service.nombreServicio }}</h4>
-              <span class="service-category">{{ service.categoria }}</span>
-            </div>
-            <p class="service-description">{{ service.descripcion | slice:0:100 }}{{ service.descripcion.length > 100 ? '...' : '' }}</p>
-            <div class="service-footer">
-              <span class="service-date">Publicado: {{ service.fechaCreacion | date:'dd/MM/yyyy' }}</span>
-              <div class="service-actions">
-                <button class="service-btn edit">✏️ Editar</button>
-                <button class="service-btn view">👁️ Ver</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <ng-template #noServices>
-          <div class="empty-state-modern">
-            <i class="empty-icon">📝</i>
-            <h3>No tienes servicios publicados</h3>
-            <p>Publica tu primer servicio para que los clientes puedan encontrarte</p>
-            <button class="btn-primary-modern" (click)="goToRegisterService()">
-              ➕ Publicar Servicio
-            </button>
-          </div>
-        </ng-template>
-      </div>
-
-      <!-- Recomendaciones -->
-      <div *ngIf="activeTab === 'recomendaciones'" class="tab-panel-modern">
-        <div *ngIf="userRecommendations.length > 0; else noRecommendations" class="recommendations-list-modern">
-          <div *ngFor="let rec of userRecommendations" class="recommendation-card-modern">
-            <div class="recommendation-header">
-              <div class="client-info">
-                <span class="client-name">{{ rec.clientName }}</span>
-                <div class="recommendation-rating">
-                  <span *ngFor="let star of [1,2,3,4,5]" 
-                        [class]="rec.rating >= star ? 'star-filled' : 'star-empty'">★</span>
-                </div>
-              </div>
-              <span class="recommendation-date">{{ rec.date | date:'dd/MM/yyyy' }}</span>
-            </div>
-            <p class="recommendation-text">{{ rec.comment }}</p>
-          </div>
-        </div>
-
-        <ng-template #noRecommendations>
-          <div class="empty-state-modern">
-            <i class="empty-icon">🌟</i>
-            <h3>Aún no tienes recomendaciones</h3>
-            <p>Cuando completes servicios, los clientes podrán dejarte recomendaciones</p>
-          </div>
-        </ng-template>
-      </div>
-    </div>
-  </div>
-
   <!-- Galería de Trabajos -->
   <div class="gallery-section-modern" *ngIf="isProveedor">
     <div class="section-header-modern">
@@ -221,17 +134,11 @@
 
   <!-- Botones de Acción -->
   <div class="action-buttons-modern">
-    <button class="action-btn-modern primary" *ngIf="isCliente" (click)="goToServices()">
-      � Buscar Servicios
-    </button>
     <button class="action-btn-modern primary" *ngIf="isProveedor" (click)="goToRegisterService()">
       ➕ Publicar Servicio
     </button>
     <button class="action-btn-modern secondary" (click)="goBack()">
       ← Volver al Menú
-    </button>
-    <button class="action-btn-modern danger" (click)="logout()">
-      🚪 Cerrar Sesión
     </button>
   </div>
 </div>

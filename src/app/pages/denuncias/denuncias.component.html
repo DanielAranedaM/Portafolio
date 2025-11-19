@@ -1,0 +1,202 @@
+<div class="denuncias-container" role="region" aria-label="Gestión de denuncias">
+  <!-- ===== HEADER ===== -->
+  <header class="denuncias-header" role="banner">
+    <div class="header-main">
+      <h1 class="header-title">🚨 Denuncias</h1>
+      <p class="header-subtitle">
+        Panel de administración para revisar denuncias sobre reseñas y solicitudes.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-refresh"
+              type="button"
+              (click)="refresh()"
+              aria-label="Actualizar denuncias">
+        🔄 Actualizar
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== CARD PRINCIPAL ===== -->
+  <section class="section denuncias-card" aria-label="Panel de denuncias">
+    <!-- Tabs -->
+    <nav class="tabs-simple" role="tablist" aria-label="Tipos de denuncias">
+      <button
+        id="tab-resenas"
+        role="tab"
+        class="tab-btn-simple"
+        [class.active]="activeTab === 'resenas'"
+        [attr.aria-selected]="activeTab === 'resenas'"
+        attr.aria-controls="panel-resenas"
+        type="button"
+        (click)="setActiveTab('resenas')">
+        ⭐ Denuncias sobre reseñas
+      </button>
+
+        <button
+            id="tab-servicios"
+            role="tab"
+            class="tab-btn-simple"
+            [class.active]="activeTab === 'servicios'"
+            [attr.aria-selected]="activeTab === 'servicios'"
+            attr.aria-controls="panel-servicios"
+            type="button"
+            (click)="setActiveTab('servicios')">
+            🛠️ Denuncias sobre servicios
+        </button>
+    </nav>
+
+    <!-- =================== PANEL: DENUNCIAS DE RESEÑAS =================== -->
+    <div
+      id="panel-resenas"
+      role="tabpanel"
+      aria-labelledby="tab-resenas"
+      class="tab-panel-simple"
+      [hidden]="activeTab !== 'resenas'">
+
+      <!-- Loading / error -->
+      <div class="empty-simple" *ngIf="loadingResenas">
+        <div class="empty-emoji">⏳</div>
+        <p>Cargando denuncias sobre reseñas…</p>
+      </div>
+
+      <div class="empty-simple" *ngIf="!loadingResenas && errorResenas">
+        <div class="empty-emoji">⚠️</div>
+        <p>{{ errorResenas }}</p>
+      </div>
+
+      <!-- Lista -->
+      <div class="list-simple" *ngIf="!loadingResenas && !errorResenas">
+        <article class="denuncia-row"
+                 *ngFor="let d of denunciasResenas"
+                 aria-label="Denuncia sobre reseña">
+          <!-- Columna: info principal -->
+          <div class="denuncia-col main">
+            <div class="denuncia-badge">Reseña #{{ d.idValorizacion }}</div>
+            <div class="denuncia-title">
+              {{ d.resenaComentario || 'Sin comentario en la reseña' }}
+            </div>
+            <div class="denuncia-meta">
+              <span>⭐ {{ d.resenaCantEstrellas }} / 5</span>
+              <span>Autor reseña: {{ d.resenaAutorNombre || ('Usuario #' + d.resenaAutorId) }}</span>
+              <span>Fecha reseña: {{ d.resenaFecha | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <!-- Columna: motivo de denuncia -->
+          <div class="denuncia-col motivo">
+            <div class="denuncia-label">Motivo de denuncia</div>
+            <div class="denuncia-motivo">{{ d.motivo }}</div>
+            <div class="denuncia-meta">
+              Denunciante: {{ d.denuncianteNombre || ('Usuario #' + d.idUsuarioDenunciante) }}
+            </div>
+          </div>
+
+          <!-- Columna: acciones (funcionalidad después) -->
+          <div class="denuncia-col actions">
+            <button class="action-chip btn-detail"
+                    type="button"
+                    (click)="verDetalleResena(d)">
+              🔍 Ver detalle
+            </button>
+            <!-- Estos botones los conectaremos después -->
+            <button class="action-chip btn-danger"
+                    type="button"
+                    (click)="eliminarResena(d)"
+                    title="Eliminar reseña denunciada">
+              🗑️ Eliminar reseña
+            </button>
+            <button class="action-chip btn-soft"
+                    type="button"
+                    (click)="marcarResuelta(d)">
+              ✅ Marcar resuelta
+            </button>
+          </div>
+        </article>
+
+        <!-- Vacío -->
+        <div class="empty-simple" *ngIf="denunciasResenas.length === 0">
+          <div class="empty-emoji">✨</div>
+          <h3>No hay denuncias sobre reseñas</h3>
+          <p>Cuando los usuarios reporten reseñas, aparecerán aquí.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================== PANEL: DENUNCIAS DE SERVICIOS =================== -->
+    <div
+    id="panel-servicios"
+    role="tabpanel"
+    aria-labelledby="tab-servicios"
+    class="tab-panel-simple"
+    [hidden]="activeTab !== 'servicios'">
+
+    <!-- Loading / error -->
+    <div class="empty-simple" *ngIf="loadingServicios">
+        <div class="empty-emoji">⏳</div>
+        <p>Cargando denuncias sobre servicios…</p>
+    </div>
+
+    <div class="empty-simple" *ngIf="!loadingServicios && errorServicios">
+        <div class="empty-emoji">⚠️</div>
+        <p>{{ errorServicios }}</p>
+    </div>
+
+    <!-- Lista -->
+    <div class="list-simple" *ngIf="!loadingServicios && !errorServicios">
+        <article class="denuncia-row"
+                *ngFor="let d of denunciasServicios"
+                aria-label="Denuncia sobre servicio">
+        <!-- Columna: info principal -->
+        <div class="denuncia-col main">
+            <div class="denuncia-badge">Servicio #{{ d.idServicio }}</div>
+            <div class="denuncia-title">
+            {{ d.servicioTitulo || 'Servicio sin título' }}
+            </div>
+            <div class="denuncia-meta">
+            <span>Categoría: {{ d.servicioCategoria || 'Sin categoría' }}</span>
+            <span>Proveedor: {{ d.proveedorNombre || ('Usuario #' + d.proveedorId) }}</span>
+            </div>
+        </div>
+
+        <!-- Columna: motivo de denuncia -->
+        <div class="denuncia-col motivo">
+            <div class="denuncia-label">Motivo de denuncia</div>
+            <div class="denuncia-motivo">{{ d.motivo }}</div>
+            <div class="denuncia-meta">
+            Denunciante: {{ d.denuncianteNombre || ('Usuario #' + d.idUsuarioDenunciante) }}
+            </div>
+        </div>
+
+        <!-- Columna: acciones (a implementar después) -->
+        <div class="denuncia-col actions">
+            <button class="action-chip btn-detail"
+                    type="button"
+                    (click)="verDetalleServicio(d)">
+            🔍 Ver servicio
+            </button>
+            <button class="action-chip btn-danger"
+                    type="button"
+                    (click)="accionSobreServicio(d)">
+            ⚠️ Acción sobre servicio
+            </button>
+            <button class="action-chip btn-soft"
+                    type="button"
+                    (click)="marcarResuelta(d)">
+            ✅ Marcar resuelta
+            </button>
+        </div>
+        </article>
+
+        <!-- Vacío -->
+        <div class="empty-simple" *ngIf="denunciasServicios.length === 0">
+        <div class="empty-emoji">📭</div>
+        <h3>No hay denuncias sobre servicios</h3>
+        <p>Cuando los usuarios reporten servicios, aparecerán aquí.</p>
+        </div>
+    </div>
+    </div>
+
+  </section>
+</div>

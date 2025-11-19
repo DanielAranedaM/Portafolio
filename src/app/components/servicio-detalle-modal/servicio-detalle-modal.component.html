@@ -1,0 +1,164 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-container" (click)="onModalContentClick($event)">
+    
+    <!-- Header con botón cerrar -->
+    <div class="modal-header">
+      <h2 class="modal-title">Detalle del Servicio</h2>
+      <button type="button" class="btn-close" (click)="onClose()" aria-label="Cerrar">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="modal-body">
+      
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 text-muted">Cargando información del servicio...</p>
+      </div>
+
+      <!-- Error state -->
+      <div *ngIf="error" class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+
+      <!-- Content loaded -->
+      <div *ngIf="!isLoading && !error && detalle">
+        
+        <!-- Carrusel de imágenes -->
+        <div class="image-carousel">
+          <div class="carousel-container">
+            <img 
+              [src]="currentImage" 
+              [alt]="detalle.titulo"
+              class="carousel-image"
+              loading="lazy">
+            
+            <!-- Botones navegación -->
+            <button 
+              *ngIf="totalImages > 1"
+              type="button" 
+              class="carousel-btn carousel-btn-prev" 
+              (click)="previousImage()"
+              aria-label="Imagen anterior">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <button 
+              *ngIf="totalImages > 1"
+              type="button" 
+              class="carousel-btn carousel-btn-next" 
+              (click)="nextImage()"
+              aria-label="Siguiente imagen">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Indicadores -->
+          <div *ngIf="totalImages > 1" class="carousel-indicators">
+            <button
+              *ngFor="let foto of detalle.fotos; let i = index"
+              type="button"
+              class="indicator-dot"
+              [class.active]="i === currentImageIndex"
+              (click)="goToImage(i)"
+              [attr.aria-label]="'Ir a imagen ' + (i + 1)">
+            </button>
+            <span class="indicator-text">{{ currentImageIndex + 1 }} / {{ totalImages }}</span>
+          </div>
+        </div>
+
+        <!-- Información del servicio -->
+        <div class="service-info">
+          <div class="info-section">
+            <h3 class="section-title">
+              <i class="bi bi-tools me-2"></i>
+              {{ detalle.titulo }}
+            </h3>
+            
+            <div class="info-item">
+              <strong><i class="bi bi-tag-fill me-2"></i>Categoría:</strong>
+              <span>{{ detalle.categoria }}</span>
+            </div>
+
+            <div class="info-item" *ngIf="detalle.descripcion">
+              <strong><i class="bi bi-card-text me-2"></i>Descripción:</strong>
+              <p class="description-text">{{ detalle.descripcion }}</p>
+            </div>
+
+            <div class="info-item" *ngIf="detalle.ubicacion">
+              <strong><i class="bi bi-geo-alt-fill me-2"></i>Ubicación:</strong>
+              <span>{{ detalle.ubicacion }}</span>
+            </div>
+          </div>
+
+          <!-- Información del proveedor -->
+          <div class="provider-section">
+            <h4 class="section-subtitle">
+              <i class="bi bi-person-circle me-2"></i>
+              Proveedor
+            </h4>
+            
+            <div class="provider-card">
+              <div class="provider-avatar">
+                <img 
+                  *ngIf="detalle.proveedorFoto"
+                  [src]="detalle.proveedorFoto" 
+                  [alt]="detalle.proveedorNombre">
+                <span *ngIf="!detalle.proveedorFoto" class="avatar-initials">
+                  {{ detalle.proveedorNombre.substring(0, 2).toUpperCase() }}
+                </span>
+              </div>
+              
+              <div class="provider-info">
+                <h5 class="provider-name">{{ detalle.proveedorNombre }}</h5>
+                <div class="provider-rating">
+                  <ng-container *ngFor="let star of getStarStates(detalle.proveedorEvaluacion)">
+                    <span [class]="'star star-' + star">{{ starIcon(star) }}</span>
+                  </ng-container>
+                  <span class="rating-value">{{ detalle.proveedorEvaluacion.toFixed(1) }}</span>
+                </div>
+                <div class="provider-phone" *ngIf="detalle.proveedorTelefono">
+                  <i class="bi bi-telephone-fill me-2"></i>
+                  <a [href]="'tel:' + detalle.proveedorTelefono">{{ detalle.proveedorTelefono }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer con acciones -->
+    <div class="modal-footer" *ngIf="!isLoading && !error">
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary"
+        (click)="onClose()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Volver
+      </button>
+      
+      <button 
+        type="button" 
+        class="btn btn-outline-primary"
+        (click)="onGuardar()">
+        <i class="bi bi-bookmark me-2"></i>
+        Guardar
+      </button>
+      
+      <button 
+        type="button" 
+        class="btn btn-primary"
+        (click)="onContactar()">
+        <i class="bi bi-chat-dots me-2"></i>
+        Contactar
+      </button>
+    </div>
+
+  </div>
+</div>

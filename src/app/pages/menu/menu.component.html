@@ -203,7 +203,7 @@
         <!-- Vista de Categorías (cuando no hay categoría seleccionada) -->
         <section *ngIf="!categoriaSeleccionada" class="categories-section-improved">
             <h2 class="section-main-title">
-                <span class="title-emoji">🏘️</span>
+                <span class="title-emoji"></span>
                 Encuentra el servicio que necesitas
             </h2>
             
@@ -296,7 +296,8 @@
                             *ngIf="servicio.urlFotoPrincipal; else placeholderImage" 
                             [src]="servicio.urlFotoPrincipal" 
                             [alt]="servicio.titulo" 
-                            class="service-image">
+                            class="service-image"
+                            (error)="onImageError($event)">
                         <ng-template #placeholderImage>
                             <div class="service-image-placeholder">
                                 <i class="fas fa-image placeholder-icon"></i>
@@ -350,6 +351,15 @@
                 </div>
             </div>
         </section>
+
+        <!-- Modal de detalle del servicio -->
+        <app-servicio-detalle-modal
+          *ngIf="showDetailModal && selectedServiceId"
+          [servicioId]="selectedServiceId"
+          (close)="closeDetailModal()"
+          (contactar)="handleContactar($event)"
+          (guardar)="handleGuardar($event)">
+        </app-servicio-detalle-modal>
 
         <!-- Búsquedas Recientes (solo cuando no hay categoría seleccionada) -->
         <section *ngIf="!categoriaSeleccionada" class="recent-searches">

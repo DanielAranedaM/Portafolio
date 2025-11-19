@@ -11,11 +11,12 @@ import { CategoriaDTO } from '../../core/models/categoria.dto';
 import { ServicioDTO } from '../../core/models/servicio.dto';
 import { ServicesService } from '../../core/services/services.service';
 import { CalificacionesService } from '../../core/services/calificaciones.service';
+import { ServicioDetalleModalComponent } from '../../components/servicio-detalle-modal/servicio-detalle-modal.component';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ServicioDetalleModalComponent],
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css', './proveedor-dashboard.css']
 })
@@ -77,6 +78,10 @@ export class MenuComponent implements OnInit {
   loading = false;
   error: string | null = null;
   me: UsuarioDetalleDTO | null = null;
+
+  // Modal de detalle del servicio
+  selectedServiceId: number | null = null;
+  showDetailModal = false;
 
   // --- colapsar/expandir categorías ---
   categoriasCollapsed = false;
@@ -218,18 +223,18 @@ export class MenuComponent implements OnInit {
 
     this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
       next: (servs) => {
-        this.results = servs ?? [];
+        this.serviciosDeCategoria = servs ?? [];
         if (Array.isArray(servs) && servs.length === 0) {
-          this.error = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
+          this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
         }
       },
       error: (err) => {
         console.error('Error obteniendo servicios por categoría:', err);
-        this.results = [];
-        this.error = err?.message || 'No se pudieron cargar los servicios.';
+        this.serviciosDeCategoria = [];
+        this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
       }
     }).add(() => {
-      this.loading = false;
+      this.serviciosLoading = false;
     });
   }
 
@@ -579,9 +584,42 @@ export class MenuComponent implements OnInit {
   }
 
   verDetalleServicioCliente(servicio: ServicioDTO): void {
-    // TODO: Navegar a página de detalle del servicio
-    console.log('Ver detalle del servicio:', servicio);
-    alert(`Ver detalle completo de: ${servicio.titulo}`);
+    this.openServiceDetail(servicio.idServicio);
+  }
+
+  openServiceDetail(servicioId: number): void {
+    this.selectedServiceId = servicioId;
+    this.showDetailModal = true;
+    // Prevenir scroll del body
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeDetailModal(): void {
+    this.showDetailModal = false;
+    this.selectedServiceId = null;
+    // Restaurar scroll
+    document.body.style.overflow = 'auto';
+  }
+
+  handleContactar(servicioId: number): void {
+    console.log('Contactar servicio:', servicioId);
+    // TODO: Implementar lógica de contacto (WhatsApp, etc.)
+    this.closeDetailModal();
+  }
+
+  handleGuardar(servicioId: number): void {
+    console.log('Guardar servicio:', servicioId);
+    // TODO: Implementar lógica de guardar en favoritos
+    alert('✅ Servicio guardado en tus favoritos');
+  }
+
+  /**
+   * Maneja errores de carga de imágenes mostrando placeholder
+   */
+  onImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.style.display = 'none';
+    console.warn('Error al cargar imagen:', imgElement.src);
   }
 
   // ------------------ Helpers ------------------

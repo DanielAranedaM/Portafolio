@@ -1,10 +1,11 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { API_URL } from '../tokens/api-url.token';
-import { CreateServiceDTO } from '../models/create-Service.dto';
+import { CreateServiceDTO } from '../models/create-service.dto';
 import { ServicioDTO } from '../models/servicio.dto';
+import { ServicioDetalleDTO } from '../models/servicio-detalle.dto';
 
 @Injectable({ providedIn: 'root' })
 export class ServicesService {
@@ -18,18 +19,38 @@ export class ServicesService {
   }
 
   /**
-   * Crea un servicio. No envía IdUsuario en el body (se toma del JWT).
-   * Si precioBase viene null/undefined -> se envía 0.
+   * Crea un servicio enviando FormData (incluye archivos de imágenes)
+   * No envía IdUsuario en el body (se toma del JWT).
    */
-  createService(payload: CreateServiceDTO): Observable<ServicioDTO> {
-    const body: CreateServiceDTO = {
-      ...payload,
-      precioBase: payload.precioBase ?? 0
-    };
-
+  createService(formData: FormData): Observable<ServicioDTO> {
     return this.http
-      .post<ServicioDTO>(`${this.base}/CreateService`, body)
-      .pipe(catchError(this.handleError));
+      .post<ServicioDTO>(`${this.base}/CreateService`, formData)
+      .pipe(
+        map(servicio => this.normalizeServicio(servicio)),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Convierte URLs relativas del backend a URLs absolutas
+   * Ejemplo: /uploads/abc.jpg → https://localhost:7054/uploads/abc.jpg
+   */
+  private makeAbsoluteUrl(ruta: string | null | undefined): string | null {
+    if (!ruta) return null;
+    // Si ya es absoluta, retornarla tal cual
+    if (/^https?:\/\//i.test(ruta)) return ruta;
+    // Construir URL absoluta
+    return `${this.apiUrl}${ruta}`;
+  }
+
+  /**
+   * Normaliza un ServicioDTO convirtiendo las URLs relativas a absolutas
+   */
+  private normalizeServicio(servicio: ServicioDTO): ServicioDTO {
+    return {
+      ...servicio,
+      urlFotoPrincipal: this.makeAbsoluteUrl(servicio.urlFotoPrincipal)
+    };
   }
 
   private handleError = (err: HttpErrorResponse) => {
@@ -53,7 +74,8 @@ export class ServicesService {
           if (res && res.message) {
             throw new Error(res.message);
           }
-          return res as ServicioDTO[];
+          const servicios = res as ServicioDTO[];
+          return servicios.map(s => this.normalizeServicio(s));
         }),
         catchError(this.handleError)
       );
@@ -72,7 +94,8 @@ export class ServicesService {
       .pipe(
         map((res: any) => {
           if (res && res.message) throw new Error(res.message);
-          return res as ServicioDTO[];
+          const servicios = res as ServicioDTO[];
+          return servicios.map(s => this.normalizeServicio(s));
         }),
         catchError(this.handleError)
       );
@@ -80,5 +103,26 @@ export class ServicesService {
   
   getDashboardDataForProveedor(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/DashboardProveedor`);
+  }
+
+  /**
+   * Obtiene detalle completo del servicio incluyendo todas las fotos
+   */
+  getServiceDetailWithPhotos(id: number): Observable<ServicioDetalleDTO> {
+    return this.http
+      .get<ServicioDetalleDTO>(`${this.base}/GetServiceDetailWithPhotos/${id}`)
+      .pipe(
+        map(detalle => ({
+          ...detalle,
+          // Normalizar URLs de todas las fotos
+          fotos: detalle.fotos.map(foto => ({
+            ...foto,
+            url: this.makeAbsoluteUrl(foto.url) || ''
+          })),
+          // Normalizar foto del proveedor
+          proveedorFoto: this.makeAbsoluteUrl(detalle.proveedorFoto)
+        })),
+        catchError(this.handleError)
+      );
   }
 }

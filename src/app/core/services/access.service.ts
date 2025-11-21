@@ -28,6 +28,10 @@ export class AccessService {
     register(payload: UsuarioDTO): Observable<RegisterResponse> {
         // No enviar idUsuario ni fechaCreacion al backend en el registro
         const { idUsuario, fechaCreacion, ...body } = payload;
+        
+        // 🔍 LOG para verificar que las coordenadas llegan al servicio
+        console.log('🔵 AccessService - Body enviado al backend:', JSON.stringify(body, null, 2));
+        
         return this.http.post<RegisterResponse>(`${this.base}/Register`, body).pipe(
         catchError(this.handleError)
         );

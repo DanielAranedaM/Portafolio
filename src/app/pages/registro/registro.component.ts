@@ -192,10 +192,33 @@ export class RegistroComponent implements OnInit, OnDestroy {
       fotoPerfilUrl: null,
     } as unknown as UsuarioDTO;
 
+    // 🔍 LOG para verificar que las coordenadas están en el payload
+    console.log('📤 Payload de registro:', JSON.stringify(payload, null, 2));
+    console.log('📍 Coordenadas:', {
+      latitud: dirDto?.latitud,
+      longitud: dirDto?.longitud
+    });
+
     this.access.register(payload).subscribe({
-      next: () => this.routeLogin(),
+      next: () => {
+        alert('¡Usuario registrado exitosamente! Ahora puedes iniciar sesión.');
+        this.routeLogin();
+      },
       error: (err) => {
         console.error('Error de registro', err);
+        
+        let errorMessage = 'Error al registrar el usuario. Por favor intenta nuevamente.';
+        
+        if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.error?.errors) {
+          const validationErrors = Object.values(err.error.errors).flat();
+          errorMessage = validationErrors.join('\n');
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        alert(errorMessage);
       }
     });
   }
@@ -219,12 +242,18 @@ export class RegistroComponent implements OnInit, OnDestroy {
       (addr?.region || addr?.state) ?? null;
     const codigoPostal = addr?.postcode ?? null;
 
+    // ✅ Incluir las coordenadas seleccionadas
+    const latitud = this.latSeleccionada ? parseFloat(this.latSeleccionada) : null;
+    const longitud = this.lonSeleccionada ? parseFloat(this.lonSeleccionada) : null;
+
     return {
       idDireccion: 0,
       descripcion: desc,
       comuna,
       region,
-      codigoPostal
+      codigoPostal,
+      latitud,      // ⬅️ AGREGADO
+      longitud      // ⬅️ AGREGADO
     };
   }
 }

@@ -4,6 +4,6 @@ export interface DireccionDTO {
   comuna?: string | null;
   codigoPostal?: string | null;
   region?: string | null;
-  latitud?: number | null;
-  longitud?: number | null;
+  latitud?: string | number | null;  // Backend puede devolver string o number
+  longitud?: string | number | null; // Backend puede devolver string o number
 }

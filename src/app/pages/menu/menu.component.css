@@ -690,11 +690,12 @@ body {
     background: #96BA2F;
 }
 
-/* Contenido principal */
+/* Contenido principal - CON SCROLL HABILITADO */
 .main-content {
     margin-left: 320px;
     padding: 25px;
-    overflow-y: auto;
+    overflow-y: auto; /* ⬅️ Permite scroll vertical */
+    max-height: 100vh; /* ⬅️ Limita altura para activar scroll */
     min-height: 100vh;
     width: calc(100% - 320px);
     transition: margin-left 0.3s ease, width 0.3s ease;
@@ -703,6 +704,24 @@ body {
 .main-content.expanded {
     margin-left: 0;
     width: 100%;
+}
+
+/* Scrollbar personalizado para mejor UX */
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .platform-container {
@@ -866,12 +885,13 @@ body {
   50% { transform: translateY(-10px); }
 }
 
-/* Grid de Categorías Mejorado */
+/* Grid de Categorías Mejorado - con padding inferior para scroll cómodo */
 .categories-grid-improved {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
   margin-top: 2.5rem;
+  padding-bottom: 40px; /* ⬅️ Espacio al final para mejor scroll */
 }
 
 .category-card-improved {
@@ -1102,11 +1122,12 @@ body {
   border-radius: 20px;
 }
 
-/* Lista de Servicios con Cards Grandes */
+/* Lista de Servicios con Cards Grandes - con padding para scroll */
 .services-list-view {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+  padding-bottom: 40px; /* ⬅️ Espacio al final para scroll cómodo */
 }
 
 .service-card-large {

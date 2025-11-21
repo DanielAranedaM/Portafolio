@@ -218,7 +218,12 @@ export class MenuComponent implements OnInit {
   }
   
   private loadServicesCount(): void {
-    if (this.categorias.length === 0) return;
+    if (this.categorias.length === 0) {
+      console.log('No hay categorías para cargar conteos');
+      return;
+    }
+    
+    console.log('🔍 Iniciando carga de conteos de servicios para', this.categorias.length, 'categorías');
     
     // Crear un objeto con observables para cada categoría
     const countRequests: { [key: number]: any } = {};
@@ -231,20 +236,32 @@ export class MenuComponent implements OnInit {
     // Ejecutar todas las peticiones en paralelo
     forkJoin(countRequests).subscribe({
       next: (results: any) => {
+        console.log('✅ Resultados de conteos de servicios:', results);
+        
         // Almacenar los conteos en el mapa
         Object.keys(results).forEach(key => {
           const categoryId = Number(key);
           const servicios: ServicioDTO[] = results[categoryId];
-          this.serviciosCountMap.set(categoryId, servicios?.length || 0);
+          const count = servicios?.length || 0;
+          this.serviciosCountMap.set(categoryId, count);
+          console.log(`   📊 Categoría ${categoryId}: ${count} servicios`);
         });
-        console.log('Conteos de servicios cargados:', this.serviciosCountMap);
+        
+        console.log('✅ Mapa de conteos final:', this.serviciosCountMap);
       },
       error: (err) => {
-        console.error('Error cargando conteos de servicios:', err);
+        console.error('❌ Error cargando conteos de servicios:', err);
+        console.error('   Detalle del error:', err.message || err);
+        
         // En caso de error, establecer conteos en 0
         this.categorias.forEach(cat => {
           this.serviciosCountMap.set(cat.idCategoriaServicio, 0);
         });
+        
+        console.warn('⚠️ Conteos establecidos en 0 por error. Verifica:');
+        console.warn('   1. Que el usuario tenga Latitud/Longitud en su dirección');
+        console.warn('   2. Que el backend esté corriendo correctamente');
+        console.warn('   3. Que el endpoint /api/Services/GetByCategory/{id} esté funcionando');
       }
     });
   }
@@ -252,20 +269,29 @@ export class MenuComponent implements OnInit {
   seleccionarCategoria(cat: CategoriaDTO): void {
     if (!cat?.idCategoriaServicio) return;
 
+    console.log('🎯 Categoría seleccionada:', cat.nombre, '(ID:', cat.idCategoriaServicio + ')');
+    
     this.categoriaSeleccionada = cat;
     this.serviciosLoading = true;
     this.serviciosError = null;
     this.serviciosDeCategoria = []; // 👈 este es el array que tu HTML itera
 
+    console.log('🔄 Cargando servicios de categoría', cat.idCategoriaServicio, '...');
+    
     this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
       next: (servs) => {
+        console.log('✅ Servicios recibidos:', servs);
+        console.log('   📊 Cantidad:', servs?.length || 0);
+        
         this.serviciosDeCategoria = servs ?? [];
         if (Array.isArray(servs) && servs.length === 0) {
+          console.warn('⚠️ No se encontraron servicios en esta categoría');
           this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
         }
       },
       error: (err) => {
-        console.error('Error obteniendo servicios por categoría:', err);
+        console.error('❌ Error obteniendo servicios por categoría:', err);
+        console.error('   Mensaje:', err?.message);
         this.serviciosDeCategoria = [];
         this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
       }
@@ -277,6 +303,14 @@ export class MenuComponent implements OnInit {
   private loadMe(): void {
     this.usersService.getMe().subscribe({
       next: (me: UsuarioDetalleDTO) => {
+        console.log('✅ Usuario cargado:', me);
+        if (me.direccion) {
+          console.log('   📍 Dirección:', me.direccion);
+          console.log('   📍 Latitud:', me.direccion.latitud, 'Longitud:', me.direccion.longitud);
+        } else {
+          console.warn('   ⚠️ Usuario SIN dirección registrada');
+        }
+        
         this.me = me; // 👈 guarda el usuario aquí
         this.profileImageUrl = me.fotoPerfilUrl ? this.makeAbsoluteUrl(me.fotoPerfilUrl) : null;
         this.userName = me.nombre || 'Usuario';

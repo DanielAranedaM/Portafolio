@@ -21,8 +21,7 @@ import { ServicioDetalleModalComponent } from '../../components/servicio-detalle
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [CommonModule, ChatbotInteligenteComponent],
-  imports: [CommonModule, FormsModule, ServicioDetalleModalComponent],
+  imports: [CommonModule, FormsModule, ServicioDetalleModalComponent, ChatbotInteligenteComponent],
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css', './proveedor-dashboard.css']
 })

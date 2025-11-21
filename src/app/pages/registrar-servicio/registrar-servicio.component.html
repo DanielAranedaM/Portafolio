@@ -3,6 +3,9 @@
     
     <!-- Header principal prominente -->
     <div class="rs-header">
+      <button class="rs-back-btn" (click)="goBackToMenu()" title="Volver al menú principal">
+        ⬅️ Volver al Menú
+      </button>
       <span class="rs-icon">🛠️</span>
       <h1>Registrar Servicio</h1>
       <p class="rs-subtitle">Publica tu servicio en 3 pasos simples y claros</p>
@@ -244,11 +247,21 @@
         <button 
           type="submit" 
           class="btn btn-success btn-xl" 
-          [disabled]="!form.valid" 
+          [disabled]="!form.valid || isSubmitting" 
           *ngIf="currentStep === totalSteps"
         >
-          <i class="bi bi-check-circle"></i> Publicar Servicio
+          <span *ngIf="!isSubmitting">
+            <i class="bi bi-check-circle"></i> Publicar Servicio
+          </span>
+          <span *ngIf="isSubmitting">
+            <i class="bi bi-hourglass-split"></i> Publicando... {{ uploadProgress }}%
+          </span>
         </button>
+
+        <!-- Indicador de progreso -->
+        <div *ngIf="isSubmitting" class="upload-progress-container">
+          <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
+        </div>
       </div>
       
     </form>

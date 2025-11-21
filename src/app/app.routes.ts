@@ -8,6 +8,7 @@ import { PerfilComponent } from './pages/perfil/perfil.component';
 import { RegistrarServicioComponent } from './pages/registrar-servicio/registrar-servicio.component';
 import { HistorialSolicitudComponent } from './pages/historial-solicitud/historial-solicitud/historial-solicitud.component';
 import { CalificacionesComponent } from './pages/Calificaciones/calificaciones/calificaciones.component';
+import { DenunciasComponent } from './pages/denuncias/denuncias.component';
 
 export const routes: Routes = [
     {
@@ -50,6 +51,10 @@ export const routes: Routes = [
     {
         path: 'calificaciones',
         component: CalificacionesComponent
+    },
+    {
+        path: 'denuncias',
+        component: DenunciasComponent
     },
     {
         path: '**',

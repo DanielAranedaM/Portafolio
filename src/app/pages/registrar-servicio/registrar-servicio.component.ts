@@ -11,13 +11,14 @@ import {
   distinctUntilChanged,
   filter,
   switchMap,
+  firstValueFrom,
 } from 'rxjs';
 
 import { ServicesService } from '../../core/services/services.service';
 import { UsersService } from '../../core/services/users.service';
 import { CategoriasService } from '../../core/services/categorias.service';
 
-import { CreateServiceDTO } from '../../core/models/create-Service.dto';
+import { CreateServiceDTO } from '../../core/models/create-service.dto';
 import { DireccionDTO } from '../../core/models/direccion.dto';
 import { CategoriaDTO } from '../../core/models/categoria.dto';
 
@@ -52,6 +53,8 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
 
   form!: FormGroup;
   selectedFiles: File[] = [];
+  isSubmitting = false;
+  uploadProgress = 0;
 
   // categorías
   categorias: CategoriaDTO[] = [];
@@ -123,7 +126,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         this.mostrandoSugerencias = res.length > 0;
       });
   }
-
+  goBackToMenu(): void { this.router.navigate(['/menu']); }
   private precargarDesdeLocalStorage() {
     const userData = localStorage.getItem('userData');
     if (!userData) return;
@@ -237,37 +240,76 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
   }
 
   // === SUBMIT ===
-  submit() {
+  async submit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      alert('Por favor completa todos los campos requeridos');
       return;
     }
 
-    // Ahora el select tiene IDs reales -> Number directo
+    // Validar categoría
     const idCategoriaServicio = Number(this.form.value.categoria) || 0;
     if (idCategoriaServicio <= 0) {
       alert('Selecciona una categoría válida.');
       return;
     }
 
-    const direccion: DireccionDTO | null = this.toDireccionDTO();
+    this.isSubmitting = true;
+    this.uploadProgress = 0;
 
-    const payload: CreateServiceDTO = {
-      titulo: (this.form.value.nombreServicio ?? '').trim(),
-      descripcion: (this.form.value.descripcion ?? '').trim(),
-      precioBase: Number(this.form.value.precio) ?? 0,
-      idCategoriaServicio,
-      direccion,
-      fotos: null
-    };
-
-    this.servicesService.createService(payload).subscribe({
-      next: () => this.router.navigate(['/menu']),
-      error: (err) => {
-        console.error('Error al crear servicio:', err);
-        alert(err?.message || 'Error al crear el servicio');
+    try {
+      // Crear FormData con todos los datos
+      const formData = new FormData();
+      
+      // Agregar campos del formulario
+      formData.append('Titulo', (this.form.value.nombreServicio ?? '').trim());
+      formData.append('Descripcion', (this.form.value.descripcion ?? '').trim());
+      formData.append('IdCategoriaServicio', idCategoriaServicio.toString());
+      
+      if (this.form.value.precio) {
+        formData.append('PrecioBase', this.form.value.precio.toString());
       }
-    });
+
+      // Agregar TODAS las imágenes con el mismo nombre 'imagenes'
+      // El backend las recibe como List<IFormFile>
+      this.selectedFiles.forEach((file) => {
+        formData.append('imagenes', file, file.name);
+      });
+
+      console.log('📤 Enviando servicio con', this.selectedFiles.length, 'imagen(es)...');
+      this.uploadProgress = 50;
+
+      // Enviar todo en una sola petición
+      const servicioCreado = await firstValueFrom(
+        this.servicesService.createService(formData)
+      );
+
+      this.uploadProgress = 100;
+      console.log('✅ Servicio creado exitosamente:', servicioCreado);
+
+      alert('¡Servicio publicado exitosamente!');
+      this.router.navigate(['/menu']);
+
+    } catch (error: any) {
+      console.error('❌ Error al crear servicio:', error);
+      
+      let errorMessage = 'Error al publicar el servicio. Por favor intenta nuevamente.';
+      
+      if (error.error?.message) {
+        errorMessage = error.error.message;
+      } else if (error.error?.errors) {
+        // Errores de validación de ASP.NET
+        const validationErrors = Object.values(error.error.errors).flat();
+        errorMessage = validationErrors.join('\n');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
+    } finally {
+      this.isSubmitting = false;
+      this.uploadProgress = 0;
+    }
   }
 
   private toDireccionDTO(): DireccionDTO | null {

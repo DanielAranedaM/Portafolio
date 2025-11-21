@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { DenunciasService } from '../../../core/services/denuncias.service';
+import { DenunciaCreateDTO } from '../../../core/models/denuncia-create.dto';
 
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { UsersService } from '../../../core/services/users.service'; 
@@ -28,6 +30,7 @@ export class CalificacionesComponent implements OnInit {
   private readonly usersService = inject(UsersService);
   private readonly califsService = inject(CalificacionesService);
   private readonly solicitudesService = inject(SolicitudesService);
+  private readonly denunciasService = inject(DenunciasService);
 
   // ===== estado básico
   activeTab: TabKey = 'recibidas';
@@ -61,7 +64,8 @@ export class CalificacionesComponent implements OnInit {
     motivo: '',
     detalle: ''
   };
-  
+  private reportTarget: CalificacionDTO | null = null;
+
   // ===== modal selección cliente/proveedor =====
   selectModalOpen = false;
   clientesOProveedores: { id: number; nombre: string }[] = [];
@@ -265,20 +269,58 @@ export class CalificacionesComponent implements OnInit {
   }
 
   // ===== modal reportar (placeholder) =====
-  openReportModal(): void {
+  openReportModal(r: CalificacionDTO): void {
+    this.reportTarget = r;
     this.reportForm = { motivo: '', detalle: '' };
     this.reportModalOpen = true;
   }
 
   closeReportModal(): void {
     this.reportModalOpen = false;
+    this.reportTarget = null;
   }
 
   sendReport(): void {
-    // TODO: conectar cuando tengas endpoint para denuncias
-    alert('Reporte enviado (demo).');
-    this.closeReportModal();
+    if (!this.myUserId) {
+      alert('No se ha identificado el usuario actual.');
+      return;
+    }
+
+    if (!this.reportTarget) {
+      alert('No se ha seleccionado la reseña a reportar.');
+      return;
+    }
+
+    if (!this.reportForm.motivo) {
+      alert('Debes seleccionar un motivo.');
+      return;
+    }
+
+    const detalle = this.reportForm.detalle?.trim();
+    const motivoFinal = detalle
+      ? `${this.reportForm.motivo} - ${detalle}`
+      : this.reportForm.motivo;
+
+    const dto: DenunciaCreateDTO = {
+      idUsuario: this.myUserId,                      // quien reporta
+      idSolicitud: null,                            // aquí es denuncia de reseña, no de solicitud
+      idServicio: null,
+      idValorizacion: this.reportTarget.idValorizacion,
+      motivo: motivoFinal
+    };
+
+    this.denunciasService.crearDenuncia(dto).subscribe({
+      next: () => {
+        alert('Tu reporte ha sido enviado. Gracias por ayudarnos a mantener la comunidad segura.');
+        this.closeReportModal();
+      },
+      error: (e) => {
+        console.error('Error enviando denuncia:', e);
+        alert(e?.error || e?.message || 'No se pudo enviar el reporte. Intenta nuevamente.');
+      }
+    });
   }
+
 
   // ===== helpers =====
   renderStars(n: number): string {

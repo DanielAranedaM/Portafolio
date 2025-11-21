@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+import { FormsModule } from '@angular/forms';
+import { DenunciasService } from '../../core/services/denuncias.service';
+import { DenunciaCreateDTO } from '../../core/models/denuncia-create.dto';
+
 import { UsersService } from '../../core/services/users.service';
 import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
 import { API_URL } from '../../core/tokens/api-url.token';
@@ -12,22 +16,27 @@ import { ServicioDTO } from '../../core/models/servicio.dto';
 import { ServicesService } from '../../core/services/services.service';
 import { CalificacionesService } from '../../core/services/calificaciones.service';
 import { ChatbotInteligenteComponent } from "../../chatbot-inteligente/chatbot-inteligente.component";
+import { ServicioDetalleModalComponent } from '../../components/servicio-detalle-modal/servicio-detalle-modal.component';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
   imports: [CommonModule, ChatbotInteligenteComponent],
+  imports: [CommonModule, FormsModule, ServicioDetalleModalComponent],
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css', './proveedor-dashboard.css']
 })
+
 export class MenuComponent implements OnInit {
 chatbotVisible: boolean = false;
+
   constructor(
     private router: Router,
     private usersService: UsersService,
     private categoriasService: CategoriasService,
     private servicesService: ServicesService,
-    private califsService: CalificacionesService, 
+    private califsService: CalificacionesService,
+    private denunciasService: DenunciasService,          // 👈 NUEVO
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -68,9 +77,14 @@ chatbotVisible: boolean = false;
   userInitials = 'US';
   currentStream: MediaStream | null = null;
 
+
+  categoriasVisibles = true; // control para mostrar/ocultar categorías
+  searchResults: ServicioDTO[] = [];
   searchLoading = false;
   searchError: string | null = null;
-  searchResults: ServicioDTO[] = [];
+  recentSearches: string[] = []; // últimas 3 búsquedas
+
+
   selectedCategoryIdForSearch: number | null = null; // si decides aplicar categoría al buscar
 
   // --- modo y estado unificado de resultados ---
@@ -80,13 +94,38 @@ chatbotVisible: boolean = false;
   error: string | null = null;
   me: UsuarioDetalleDTO | null = null;
 
+  // Modal de detalle del servicio
+  selectedServiceId: number | null = null;
+  showDetailModal = false;
+
   // --- colapsar/expandir categorías ---
   categoriasCollapsed = false;
+
+  // ===== Denuncia de servicio =====
+  serviceReportModalVisible = false;
+  serviceReportTarget: ServicioDTO | null = null;
+  serviceReportForm = {
+    motivo: '',
+    detalle: ''
+  };
+
   toggleCategorias(): void { this.categoriasCollapsed = !this.categoriasCollapsed; }
+  
   get categoriasArrowIcon(): string { return this.categoriasCollapsed ? '▸' : '▾'; }
 
-    ngOnInit(): void {
-    // (Opcional) Rol desde localStorage como fallback
+  toggleCategoriasVisibility(): void {
+    this.categoriasVisibles = !this.categoriasVisibles;
+
+    // Si las volvemos a mostrar, limpiamos la búsqueda
+    if (this.categoriasVisibles) {
+      this.searchResults = [];
+      this.searchError = null;
+      const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+      if (searchInput) searchInput.value = '';
+    }
+  }
+
+  ngOnInit(): void {
     const userData = localStorage.getItem('userData');
     if (userData) {
       try {
@@ -97,7 +136,10 @@ chatbotVisible: boolean = false;
       }
     }
 
-    // Cargar datos reales del usuario
+    // 🔹 cargar historial de búsquedas guardado
+    const stored = localStorage.getItem('recentSearches');
+    this.recentSearches = stored ? JSON.parse(stored) : [];
+
     this.loadMe();
     this.loadCategorias();
   }
@@ -216,22 +258,22 @@ chatbotVisible: boolean = false;
     this.categoriaSeleccionada = cat;
     this.serviciosLoading = true;
     this.serviciosError = null;
-    this.serviciosDeCategoria = [];
+    this.serviciosDeCategoria = []; // 👈 este es el array que tu HTML itera
 
     this.servicesService.getByCategoryNearMe(cat.idCategoriaServicio).subscribe({
       next: (servs) => {
-        this.results = servs ?? [];
+        this.serviciosDeCategoria = servs ?? [];
         if (Array.isArray(servs) && servs.length === 0) {
-          this.error = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
+          this.serviciosError = 'No encontramos servicios en esta categoría cerca de ti por ahora.';
         }
       },
       error: (err) => {
         console.error('Error obteniendo servicios por categoría:', err);
-        this.results = [];
-        this.error = err?.message || 'No se pudieron cargar los servicios.';
+        this.serviciosDeCategoria = [];
+        this.serviciosError = err?.message || 'No se pudieron cargar los servicios.';
       }
     }).add(() => {
-      this.loading = false;
+      this.serviciosLoading = false;
     });
   }
 
@@ -497,26 +539,37 @@ chatbotVisible: boolean = false;
   buscarServicio(): void {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
     if (!searchInput) return;
-    const query = searchInput.value.trim();
-    if (!query) { alert('Por favor ingresa un término de búsqueda'); return; }
 
-    this.resultMode = 'search';
-    this.loading = true;
-    this.error = null;
-    this.results = [];
+    const query = searchInput.value.trim();
+    if (!query) {
+      alert('Por favor ingresa un término de búsqueda');
+      return;
+    }
+
+    // 🔹 ocultar categorías al buscar
+    this.categoriasVisibles = false;
+
+    this.searchLoading = true;
+    this.searchError = null;
+    this.searchResults = [];
+
+    // 🔹 guardar búsqueda reciente
+    this.addRecentSearch(query);
 
     this.servicesService.searchServices(query).subscribe({
       next: (items) => {
-        this.results = items ?? [];
-        if (this.results.length === 0) this.error = 'Sin resultados';
+        this.searchResults = items ?? [];
+        if (this.searchResults.length === 0) {
+          this.searchError = 'No se encontraron servicios que coincidan con tu búsqueda.';
+        }
       },
       error: (err) => {
         console.error('Error al buscar servicios:', err);
-        this.results = [];
-        this.error = err?.message || 'No se pudo realizar la búsqueda';
+        this.searchResults = [];
+        this.searchError = err?.message || 'Error al realizar la búsqueda.';
       }
     }).add(() => {
-      this.loading = false;
+      this.searchLoading = false;
     });
   }
 
@@ -528,6 +581,28 @@ chatbotVisible: boolean = false;
     this.buscarServicio();
   }
 
+  private addRecentSearch(term: string): void {
+    const existingIndex = this.recentSearches.findIndex(t => t.toLowerCase() === term.toLowerCase());
+    if (existingIndex !== -1) {
+      this.recentSearches.splice(existingIndex, 1); // evita duplicados
+    }
+
+    this.recentSearches.unshift(term); // agrega al inicio
+    if (this.recentSearches.length > 3) {
+      this.recentSearches.pop(); // deja solo las últimas 3
+    }
+
+    localStorage.setItem('recentSearches', JSON.stringify(this.recentSearches));
+  }
+
+  // ------------------ NUEVO MÉTODO PARA VOLVER A MOSTRAR CATEGORÍAS ------------------
+  mostrarCategorias(): void {
+    this.categoriasVisibles = true;
+    this.searchResults = [];
+    this.searchError = null;
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    if (searchInput) searchInput.value = '';
+  }
   // ------------------ Métodos para Categorías y Servicios ------------------
   getCategoryEmoji(categoryName: string): string {
     const emojiMap: {[key: string]: string} = {
@@ -581,9 +656,42 @@ chatbotVisible: boolean = false;
   }
 
   verDetalleServicioCliente(servicio: ServicioDTO): void {
-    // TODO: Navegar a página de detalle del servicio
-    console.log('Ver detalle del servicio:', servicio);
-    alert(`Ver detalle completo de: ${servicio.titulo}`);
+    this.openServiceDetail(servicio.idServicio);
+  }
+
+  openServiceDetail(servicioId: number): void {
+    this.selectedServiceId = servicioId;
+    this.showDetailModal = true;
+    // Prevenir scroll del body
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeDetailModal(): void {
+    this.showDetailModal = false;
+    this.selectedServiceId = null;
+    // Restaurar scroll
+    document.body.style.overflow = 'auto';
+  }
+
+  handleContactar(servicioId: number): void {
+    console.log('Contactar servicio:', servicioId);
+    // TODO: Implementar lógica de contacto (WhatsApp, etc.)
+    this.closeDetailModal();
+  }
+
+  handleGuardar(servicioId: number): void {
+    console.log('Guardar servicio:', servicioId);
+    // TODO: Implementar lógica de guardar en favoritos
+    alert('✅ Servicio guardado en tus favoritos');
+  }
+
+  /**
+   * Maneja errores de carga de imágenes mostrando placeholder
+   */
+  onImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.style.display = 'none';
+    console.warn('Error al cargar imagen:', imgElement.src);
   }
 
   // ------------------ Helpers ------------------
@@ -615,6 +723,59 @@ chatbotVisible: boolean = false;
 
   starIcon(state: 'full'|'half'|'empty'): string {
     return state === 'full' ? '★' : state === 'half' ? '⯨' : '☆';
+  }
+
+  openServiceReportModal(servicio: ServicioDTO): void {
+    this.serviceReportTarget = servicio;
+    this.serviceReportForm = { motivo: '', detalle: '' };
+    this.serviceReportModalVisible = true;
+  }
+
+  closeServiceReportModal(): void {
+    this.serviceReportModalVisible = false;
+    this.serviceReportTarget = null;
+  }
+
+  sendServiceReport(): void {
+    if (!this.me || !this.me.idUsuario) {
+      alert('No se pudo identificar al usuario actual.');
+      return;
+    }
+
+    if (!this.serviceReportTarget) {
+      alert('No se ha seleccionado el servicio a denunciar.');
+      return;
+    }
+
+    if (!this.serviceReportForm.motivo) {
+      alert('Debes seleccionar un motivo.');
+      return;
+    }
+
+    const detalle = this.serviceReportForm.detalle?.trim();
+    const motivoFinal = detalle
+      ? `${this.serviceReportForm.motivo} - ${detalle}`
+      : this.serviceReportForm.motivo;
+
+    const dto: DenunciaCreateDTO = {
+      idUsuario: this.me.idUsuario,
+      idSolicitud: null,
+      idValorizacion: null,
+      idServicio: this.serviceReportTarget.idServicio, // 👈 ahora sí
+      motivo: motivoFinal
+    };
+
+
+    this.denunciasService.crearDenuncia(dto).subscribe({
+      next: () => {
+        alert('Tu denuncia ha sido enviada. Gracias por ayudarnos a mantener la plataforma segura.');
+        this.closeServiceReportModal();
+      },
+      error: (e) => {
+        console.error('Error enviando denuncia de servicio:', e);
+        alert(e?.error || e?.message || 'No se pudo enviar la denuncia. Intenta nuevamente.');
+      }
+    });
   }
 
 }

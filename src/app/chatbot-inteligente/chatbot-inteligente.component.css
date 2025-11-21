@@ -1,0 +1,139 @@
+/* Contenedor flotante en esquina inferior derecha */
+.chatbot-fab-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;     
+  z-index: 9999;
+}
+
+/* Botón flotante (más pequeño) */
+.chatbot-fab {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;          /* antes 60px */
+  height: 48px;         /* antes 60px */
+  font-size: 22px;      /* antes 28px */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Ventana del chat (más pequeña) */
+.chatbot-ventana {
+  width: 260px;         /* antes 320px */
+  height: 360px;        /* antes 430px */
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+/* Header (compacto) */
+.chatbot-header {
+  background: #007bff;
+  color: white;
+  padding: 8px;         /* antes 12px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.cerrar {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;      /* antes 18px */
+  cursor: pointer;
+}
+
+/* Mensajes */
+.chatbot-mensajes {
+  flex: 1;
+  padding: 8px;         /* antes 10px */
+  overflow-y: auto;
+}
+
+.mensaje {
+  margin-bottom: 6px;   /* antes 10px */
+  display: flex;
+}
+
+.mensaje.usuario {
+  justify-content: flex-end;
+}
+
+.mensaje.bot {
+  justify-content: flex-start;
+}
+
+.burbuja {
+  max-width: 70%;       /* antes 75% */
+  padding: 6px 10px;    /* antes 8px 12px */
+  border-radius: 10px;
+  font-size: 13px;      /* más pequeño */
+}
+
+.usuario .burbuja {
+  background: #007bff;
+  color: white;
+}
+
+.bot .burbuja {
+  background: #e5e5e5;
+  color: #333;
+}
+
+/* Input */
+.chatbot-input {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+
+.chatbot-input input {
+  flex: 1;
+  padding: 6px;         /* antes 10px */
+  border: none;
+  outline: none;
+  font-size: 13px;
+}
+
+.chatbot-input button {
+  background: #007bff;
+  border: none;
+  color: white;
+  padding: 0 10px;      /* antes 0 15px */
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* === Botón flotante de login Puter (compacto) === */
+
+.login-msg {
+  position: fixed;      
+  right: 20px;          
+  bottom: 80px;         /* un poco encima del FAB y del chat */
+  z-index: 10000;       
+}
+
+.btn-login-puter {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;     /* antes 10px 16px */
+  border-radius: 999px;  
+  cursor: pointer;
+  font-size: 12px;       /* antes 14px */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  white-space: nowrap;   
+}

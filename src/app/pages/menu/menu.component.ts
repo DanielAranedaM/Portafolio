@@ -15,17 +15,19 @@ import { CategoriaDTO } from '../../core/models/categoria.dto';
 import { ServicioDTO } from '../../core/models/servicio.dto';
 import { ServicesService } from '../../core/services/services.service';
 import { CalificacionesService } from '../../core/services/calificaciones.service';
+import { ChatbotInteligenteComponent } from "../../chatbot-inteligente/chatbot-inteligente.component";
 import { ServicioDetalleModalComponent } from '../../components/servicio-detalle-modal/servicio-detalle-modal.component';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [CommonModule, FormsModule, ServicioDetalleModalComponent],
+  imports: [CommonModule, FormsModule, ServicioDetalleModalComponent, ChatbotInteligenteComponent],
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css', './proveedor-dashboard.css']
 })
 
 export class MenuComponent implements OnInit {
+chatbotVisible: boolean = false;
 
   constructor(
     private router: Router,

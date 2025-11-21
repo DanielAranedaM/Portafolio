@@ -1,7 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { FormsModule } from '@angular/forms';
 import { DenunciasService } from '../../core/services/denuncias.service';
@@ -232,7 +233,9 @@ chatbotVisible: boolean = false;
     
     this.categorias.forEach(categoria => {
       countRequests[categoria.idCategoriaServicio] = 
-        this.servicesService.getByCategoryNearMe(categoria.idCategoriaServicio);
+        this.servicesService.getByCategoryNearMe(categoria.idCategoriaServicio).pipe(
+          catchError(() => of([]))
+        );
     });
     
     // Ejecutar todas las peticiones en paralelo

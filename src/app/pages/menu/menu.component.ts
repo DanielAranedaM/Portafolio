@@ -666,11 +666,17 @@ chatbotVisible: boolean = false;
     this.categoriaSeleccionada = null;
     this.serviciosDeCategoria = [];
     this.serviciosError = null;
+    this.categoriasVisibles = true;
   }
 
   contactarProveedor(servicio: ServicioDTO): void {
-    // TODO: Obtener teléfono real del proveedor desde la API
-    const phone = '+56912345678';
+    // Intentar usar el teléfono del proveedor si viene en el DTO, sino usar uno por defecto o mostrar alerta
+    const phone = servicio.telefonoProveedor || '+56912345678'; 
+    
+    if (!servicio.telefonoProveedor) {
+      console.warn('El servicio no tiene teléfono de proveedor asociado en el DTO. Usando número de prueba.');
+    }
+
     const message = encodeURIComponent(`Hola, me interesa tu servicio: ${servicio.titulo}`);
     window.open(`https://wa.me/${phone.replace(/\s/g, '')}?text=${message}`, '_blank');
   }

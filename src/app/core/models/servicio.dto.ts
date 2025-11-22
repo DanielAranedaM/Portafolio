@@ -11,4 +11,6 @@ export interface ServicioDTO {
   urlFotoPrincipal?: string | null;
   categoriaNombre: string;
   proveedorNombre: string;
+  ubicacion?: string; // Agregado para mostrar comuna/ciudad
+  telefonoProveedor?: string; // Agregado para contacto
 }

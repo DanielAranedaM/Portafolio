@@ -35,6 +35,8 @@ export interface DenunciaServicioAdminDTO {
   proveedorNombre?: string | null;
 
   motivo: string;
+
+  fotoServicioUrl?: string | null;
 }
 
 export interface DenunciaSolicitudAdminDTO {
@@ -84,4 +86,18 @@ export class DenunciasService {
     return this.http.get<DenunciaServicioAdminDTO[]>(`${this.apiUrl}/api/denuncia/servicios`);
   }
 
+// 1. Eliminar la denuncia solamente (Marcar como resuelta/ignorar)
+  deleteDenuncia(idDenuncia: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/denuncia/${idDenuncia}`);
+  }
+
+  // 2. Eliminar la reseña reportada (Acción punitiva)
+  deleteResena(idValorizacion: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/denuncia/resena/${idValorizacion}`);
+  }
+
+  // 3. Eliminar el servicio reportado (Acción punitiva)
+  deleteServicio(idServicio: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/denuncia/servicio/${idServicio}`);
+  }
 }

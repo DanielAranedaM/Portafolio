@@ -11,7 +11,15 @@ import { ServicesService } from '../../core/services/services.service';
   styleUrl: './servicio-detalle-modal.component.css'
 })
 export class ServicioDetalleModalComponent implements OnInit {
-  @Input() servicioId!: number;
+  
+  // OPCIÓN A: Datos directos (Lo que usa Denuncias)
+  // Al agregar esto, el error "Can't bind to servicio" desaparecerá
+  @Input() servicio: ServicioDetalleDTO | null = null; 
+
+  // OPCIÓN B: ID (Lo que usa el Menú/Otros)
+  // Lo mantenemos para NO romper el código antiguo
+  @Input() servicioId: number | null = null;
+
   @Output() close = new EventEmitter<void>();
   @Output() contactar = new EventEmitter<number>();
   @Output() guardar = new EventEmitter<number>();
@@ -24,10 +32,28 @@ export class ServicioDetalleModalComponent implements OnInit {
   constructor(private servicesService: ServicesService) {}
 
   ngOnInit(): void {
-    this.loadServiceDetail();
+    // LÓGICA INTELIGENTE:
+    
+    // CASO 1: Denuncias (Ya tenemos los datos, no llamamos a la API)
+    if (this.servicio) {
+      this.detalle = this.servicio;
+      this.isLoading = false;
+    } 
+    // CASO 2: Menú (Solo tenemos ID, llamamos a la API como siempre)
+    else if (this.servicioId) {
+      this.loadServiceDetail();
+    }
+    // CASO 3: Error
+    else {
+      this.error = "No se proporcionó información del servicio.";
+      this.isLoading = false;
+    }
   }
 
+  // Esta función se usa solo cuando viene del Menú
   loadServiceDetail(): void {
+    if (!this.servicioId) return;
+
     this.isLoading = true;
     this.error = null;
 
@@ -37,26 +63,29 @@ export class ServicioDetalleModalComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar el detalle del servicio';
+        console.error('Error cargando servicio', err);
+        this.error = 'No se pudo cargar la información del servicio.';
         this.isLoading = false;
-        console.error('Error loading service detail:', err);
       }
     });
   }
 
-  // Carrusel de imágenes
-  get currentImage(): string {
-    if (!this.detalle || this.detalle.fotos.length === 0) {
-      return 'assets/placeholder-service.png';
+  // --- Getters y Helpers Visuales ---
+
+  get currentImageUrl(): string {
+    if (!this.detalle || !this.detalle.fotos || this.detalle.fotos.length === 0) {
+      // Retorna una imagen por defecto o vacía si no hay fotos
+      return 'assets/images/no-image.png'; 
     }
     return this.detalle.fotos[this.currentImageIndex].url;
   }
 
   get totalImages(): number {
-    return this.detalle?.fotos.length || 0;
+    return this.detalle?.fotos?.length || 0;
   }
 
   previousImage(): void {
+    if (this.totalImages === 0) return;
     if (this.currentImageIndex > 0) {
       this.currentImageIndex--;
     } else {
@@ -65,6 +94,7 @@ export class ServicioDetalleModalComponent implements OnInit {
   }
 
   nextImage(): void {
+    if (this.totalImages === 0) return;
     if (this.currentImageIndex < this.totalImages - 1) {
       this.currentImageIndex++;
     } else {
@@ -76,43 +106,44 @@ export class ServicioDetalleModalComponent implements OnInit {
     this.currentImageIndex = index;
   }
 
+  // --- Acciones ---
+
   onClose(): void {
     this.close.emit();
   }
 
   onContactar(): void {
     if (this.detalle) {
-      this.contactar.emit(this.servicioId);
+      // Usamos el ID del detalle cargado (funciona para ambos casos)
+      this.contactar.emit(this.detalle.idServicio);
     }
   }
 
   onGuardar(): void {
     if (this.detalle) {
-      this.guardar.emit(this.servicioId);
+      this.guardar.emit(this.detalle.idServicio);
     }
   }
 
-  // Prevenir cierre al hacer clic dentro del modal
   onModalContentClick(event: Event): void {
     event.stopPropagation();
   }
 
-  // Generar estrellas para rating
   getStarStates(rating: number): ('full' | 'half' | 'empty')[] {
     const stars: ('full' | 'half' | 'empty')[] = [];
     for (let i = 1; i <= 5; i++) {
-      if (rating >= i) {
-        stars.push('full');
-      } else if (rating >= i - 0.5) {
-        stars.push('half');
-      } else {
-        stars.push('empty');
-      }
+      if (rating >= i) stars.push('full');
+      else if (rating >= i - 0.5) stars.push('half');
+      else stars.push('empty');
     }
     return stars;
   }
 
   starIcon(state: 'full' | 'half' | 'empty'): string {
-    return state === 'full' ? '★' : state === 'half' ? '⯨' : '☆';
+    switch (state) {
+      case 'full': return '★';
+      case 'half': return '✫';
+      case 'empty': return '☆';
+    }
   }
 }

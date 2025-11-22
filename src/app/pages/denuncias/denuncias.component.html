@@ -1,5 +1,4 @@
 <div class="denuncias-container" role="region" aria-label="Gestión de denuncias">
-  <!-- ===== HEADER ===== -->
   <header class="denuncias-header" role="banner">
     <div class="header-main">
       <h1 class="header-title">🚨 Denuncias</h1>
@@ -18,9 +17,7 @@
     </div>
   </header>
 
-  <!-- ===== CARD PRINCIPAL ===== -->
   <section class="section denuncias-card" aria-label="Panel de denuncias">
-    <!-- Tabs -->
     <nav class="tabs-simple" role="tablist" aria-label="Tipos de denuncias">
       <button
         id="tab-resenas"
@@ -34,20 +31,19 @@
         ⭐ Denuncias sobre reseñas
       </button>
 
-        <button
-            id="tab-servicios"
-            role="tab"
-            class="tab-btn-simple"
-            [class.active]="activeTab === 'servicios'"
-            [attr.aria-selected]="activeTab === 'servicios'"
-            attr.aria-controls="panel-servicios"
-            type="button"
-            (click)="setActiveTab('servicios')">
-            🛠️ Denuncias sobre servicios
-        </button>
+      <button
+        id="tab-servicios"
+        role="tab"
+        class="tab-btn-simple"
+        [class.active]="activeTab === 'servicios'"
+        [attr.aria-selected]="activeTab === 'servicios'"
+        attr.aria-controls="panel-servicios"
+        type="button"
+        (click)="setActiveTab('servicios')">
+        🛠️ Denuncias sobre servicios
+      </button>
     </nav>
 
-    <!-- =================== PANEL: DENUNCIAS DE RESEÑAS =================== -->
     <div
       id="panel-resenas"
       role="tabpanel"
@@ -55,7 +51,6 @@
       class="tab-panel-simple"
       [hidden]="activeTab !== 'resenas'">
 
-      <!-- Loading / error -->
       <div class="empty-simple" *ngIf="loadingResenas">
         <div class="empty-emoji">⏳</div>
         <p>Cargando denuncias sobre reseñas…</p>
@@ -66,12 +61,10 @@
         <p>{{ errorResenas }}</p>
       </div>
 
-      <!-- Lista -->
       <div class="list-simple" *ngIf="!loadingResenas && !errorResenas">
         <article class="denuncia-row"
                  *ngFor="let d of denunciasResenas"
                  aria-label="Denuncia sobre reseña">
-          <!-- Columna: info principal -->
           <div class="denuncia-col main">
             <div class="denuncia-badge">Reseña #{{ d.idValorizacion }}</div>
             <div class="denuncia-title">
@@ -84,7 +77,6 @@
             </div>
           </div>
 
-          <!-- Columna: motivo de denuncia -->
           <div class="denuncia-col motivo">
             <div class="denuncia-label">Motivo de denuncia</div>
             <div class="denuncia-motivo">{{ d.motivo }}</div>
@@ -93,14 +85,7 @@
             </div>
           </div>
 
-          <!-- Columna: acciones (funcionalidad después) -->
           <div class="denuncia-col actions">
-            <button class="action-chip btn-detail"
-                    type="button"
-                    (click)="verDetalleResena(d)">
-              🔍 Ver detalle
-            </button>
-            <!-- Estos botones los conectaremos después -->
             <button class="action-chip btn-danger"
                     type="button"
                     (click)="eliminarResena(d)"
@@ -115,7 +100,6 @@
           </div>
         </article>
 
-        <!-- Vacío -->
         <div class="empty-simple" *ngIf="denunciasResenas.length === 0">
           <div class="empty-emoji">✨</div>
           <h3>No hay denuncias sobre reseñas</h3>
@@ -124,79 +108,95 @@
       </div>
     </div>
 
-    <!-- =================== PANEL: DENUNCIAS DE SERVICIOS =================== -->
     <div
-    id="panel-servicios"
-    role="tabpanel"
-    aria-labelledby="tab-servicios"
-    class="tab-panel-simple"
-    [hidden]="activeTab !== 'servicios'">
+      id="panel-servicios"
+      role="tabpanel"
+      aria-labelledby="tab-servicios"
+      class="tab-panel-simple"
+      [hidden]="activeTab !== 'servicios'">
 
-    <!-- Loading / error -->
-    <div class="empty-simple" *ngIf="loadingServicios">
+      <div class="empty-simple" *ngIf="loadingServicios">
         <div class="empty-emoji">⏳</div>
         <p>Cargando denuncias sobre servicios…</p>
-    </div>
+      </div>
 
-    <div class="empty-simple" *ngIf="!loadingServicios && errorServicios">
+      <div class="empty-simple" *ngIf="!loadingServicios && errorServicios">
         <div class="empty-emoji">⚠️</div>
         <p>{{ errorServicios }}</p>
-    </div>
+      </div>
 
-    <!-- Lista -->
-    <div class="list-simple" *ngIf="!loadingServicios && !errorServicios">
+      <div class="list-simple" *ngIf="!loadingServicios && !errorServicios">
         <article class="denuncia-row"
-                *ngFor="let d of denunciasServicios"
-                aria-label="Denuncia sobre servicio">
-        <!-- Columna: info principal -->
-        <div class="denuncia-col main">
+                 *ngFor="let d of denunciasServicios"
+                 aria-label="Denuncia sobre servicio">
+          <div class="denuncia-col main">
             <div class="denuncia-badge">Servicio #{{ d.idServicio }}</div>
-            <div class="denuncia-title">
-            {{ d.servicioTitulo || 'Servicio sin título' }}
-            </div>
-            <div class="denuncia-meta">
-            <span>Categoría: {{ d.servicioCategoria || 'Sin categoría' }}</span>
-            <span>Proveedor: {{ d.proveedorNombre || ('Usuario #' + d.proveedorId) }}</span>
-            </div>
-        </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 8px; align-items: flex-start;">
+              
+              <img *ngIf="d.fotoServicioUrl" 
+                   [src]="d.fotoServicioUrl" 
+                   alt="Foto servicio" 
+                   style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; flex-shrink: 0;">
+              
+              <div *ngIf="!d.fotoServicioUrl" 
+                   style="width: 60px; height: 60px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #999; flex-shrink: 0;">
+                🛠️
+              </div>
 
-        <!-- Columna: motivo de denuncia -->
-        <div class="denuncia-col motivo">
+              <div>
+                <div class="denuncia-title">
+                  {{ d.servicioTitulo || 'Servicio sin título' }}
+                </div>
+                <div class="denuncia-meta" style="display: flex; flex-direction: column; gap: 2px;">
+                  <span>Categoría: {{ d.servicioCategoria || 'Sin categoría' }}</span>
+                  <span>Proveedor: {{ d.proveedorNombre || ('Usuario #' + d.proveedorId) }}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="denuncia-col motivo">
             <div class="denuncia-label">Motivo de denuncia</div>
             <div class="denuncia-motivo">{{ d.motivo }}</div>
             <div class="denuncia-meta">
-            Denunciante: {{ d.denuncianteNombre || ('Usuario #' + d.idUsuarioDenunciante) }}
+              Denunciante: {{ d.denuncianteNombre || ('Usuario #' + d.idUsuarioDenunciante) }}
             </div>
-        </div>
+          </div>
 
-        <!-- Columna: acciones (a implementar después) -->
-        <div class="denuncia-col actions">
+          <div class="denuncia-col actions">
             <button class="action-chip btn-detail"
                     type="button"
                     (click)="verDetalleServicio(d)">
-            🔍 Ver servicio
+              🔍 Ver servicio
             </button>
             <button class="action-chip btn-danger"
                     type="button"
                     (click)="accionSobreServicio(d)">
-            ⚠️ Acción sobre servicio
+              ⚠️ Acción sobre servicio
             </button>
             <button class="action-chip btn-soft"
                     type="button"
                     (click)="marcarResuelta(d)">
-            ✅ Marcar resuelta
+              ✅ Marcar resuelta
             </button>
-        </div>
+          </div>
         </article>
 
-        <!-- Vacío -->
         <div class="empty-simple" *ngIf="denunciasServicios.length === 0">
-        <div class="empty-emoji">📭</div>
-        <h3>No hay denuncias sobre servicios</h3>
-        <p>Cuando los usuarios reporten servicios, aparecerán aquí.</p>
+          <div class="empty-emoji">📭</div>
+          <h3>No hay denuncias sobre servicios</h3>
+          <p>Cuando los usuarios reporten servicios, aparecerán aquí.</p>
         </div>
-    </div>
+      </div>
     </div>
 
   </section>
 </div>
+
+<app-servicio-detalle-modal
+  *ngIf="selectedService"
+  [servicio]="selectedService"
+  (close)="closeServiceModal()">
+</app-servicio-detalle-modal>

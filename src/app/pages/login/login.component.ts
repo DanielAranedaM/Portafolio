@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AccessService } from '../../core/services/access.service';
+import { UsersService } from '../../core/services/users.service';
+import { AuthService } from '../../core/services/auth.service';
 import { LoginDTO } from '../../core/models/login.dto';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -20,30 +22,26 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private accessService: AccessService
+    private accessService: AccessService,
+    private usersService: UsersService,
+    private authService: AuthService
   ) {}
 
-  //-----------------------------------Navegación--------------------------------------------
-  //Navegar a Registro
+  // --- FUNCIONES DE NAVEGACIÓN Y UI (Las que faltaban) ---
+
   routeRegistro() {
     this.router.navigate(['/registro']);
   }
 
-  //Navegar a Menu (solo si hay datos de usuario)
-  routeMenu() {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      this.router.navigate(['/menu']);
-    } else {
-      alert('Por favor regístrate primero');
-      this.router.navigate(['/registro']);
-    }
-  }
-
-  //Navegar a Recuperar pass
   routeRecuperarPass() {
     this.router.navigate(['/recuperar-pass']);
   }
+
+  togglePassword(input: HTMLInputElement) {
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  // --- LÓGICA DE LOGIN ---
 
   login() {
     this.mensajeError = '';
@@ -56,22 +54,46 @@ export class LoginComponent {
 
     this.accessService.login(payload).subscribe({
       next: res => {
-        this.loading = false;
         if (res.isSuccess && res.token) {
+          // 1. Guardar token
           localStorage.setItem('auth_token', res.token);
-          this.router.navigate(['/menu']); // redirige
+          
+          // 2. Verificar rol
+          this.verificarRolYRedirigir();
         } else {
+          this.loading = false;
           this.mensajeError = 'Credenciales inválidas.';
         }
       },
-      error: () => {
+      error: err => {
+        console.error(err);
         this.loading = false;
-        this.mensajeError = 'Error de servidor o validación.';
+        this.mensajeError = 'Ocurrió un error al conectar con el servidor.';
       }
     });
   }
-  
-  togglePassword(input: HTMLInputElement) {
-    input.type = input.type === 'password' ? 'text' : 'password';
+
+  private verificarRolYRedirigir() {
+    this.usersService.getMe().subscribe({
+      next: (usuario) => {
+        this.loading = false;
+        
+        const esCliente = usuario.esCliente || false;
+        const esProveedor = usuario.esProveedor || false;
+        const esAdmin = !esCliente && !esProveedor;
+
+        if (esAdmin) {
+          this.router.navigate(['/denuncias']);
+        } else {
+          this.router.navigate(['/menu']);
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Error obteniendo perfil', err);
+        this.authService.logout();
+        this.mensajeError = 'Error al cargar perfil de usuario.';
+      }
+    });
   }
 }

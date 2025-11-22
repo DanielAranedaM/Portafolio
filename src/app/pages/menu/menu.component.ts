@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
@@ -18,6 +18,7 @@ import { ServicesService } from '../../core/services/services.service';
 import { CalificacionesService } from '../../core/services/calificaciones.service';
 import { ChatbotInteligenteComponent } from "../../chatbot-inteligente/chatbot-inteligente.component";
 import { ServicioDetalleModalComponent } from '../../components/servicio-detalle-modal/servicio-detalle-modal.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-menu',
@@ -29,6 +30,7 @@ import { ServicioDetalleModalComponent } from '../../components/servicio-detalle
 
 export class MenuComponent implements OnInit {
 chatbotVisible: boolean = false;
+  private readonly authService = inject(AuthService);
 
   constructor(
     private router: Router,
@@ -555,20 +557,8 @@ chatbotVisible: boolean = false;
   openLogoutModal(): void { this.logoutModalVisible = true; }
   closeLogoutModal(): void { this.logoutModalVisible = false; }
   confirmLogout(): void {
-    try {
-      this.clearSessionData();
-      this.closeLogoutModal();
-      this.router.navigate(['/login']).catch(err => console.error('Error al navegar:', err));
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  }
-  private clearSessionData(): void {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userPreferences');
-    localStorage.removeItem('auth_token');
-    sessionStorage.clear();
+    this.closeLogoutModal();
+    this.authService.logout(); // <--- Reutilizas la lógica
   }
 
   // ------------------ Búsquedas ------------------

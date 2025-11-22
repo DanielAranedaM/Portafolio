@@ -9,6 +9,8 @@ import { RegistrarServicioComponent } from './pages/registrar-servicio/registrar
 import { HistorialSolicitudComponent } from './pages/historial-solicitud/historial-solicitud/historial-solicitud.component';
 import { CalificacionesComponent } from './pages/Calificaciones/calificaciones/calificaciones.component';
 import { DenunciasComponent } from './pages/denuncias/denuncias.component';
+import { adminGuard } from './core/guards/admin.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
     {
@@ -32,29 +34,35 @@ export const routes: Routes = [
         path: 'recuperar-pass',
         component: RecuperarPassComponent
     },
-    {
-        path: 'menu',
-        component: MenuComponent
+    { 
+        path: 'menu', 
+        component: MenuComponent,
+        canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
     },
     {
         path: 'perfil',
-        component: PerfilComponent
+        component: PerfilComponent,
+        canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
     },
     {
         path: 'registrar-servicio',
-        component: RegistrarServicioComponent
+        component: RegistrarServicioComponent,
+        canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
     },
     {
         path: 'historial-solicitud',
-        component: HistorialSolicitudComponent
+        component: HistorialSolicitudComponent,
+        canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
     },
     {
         path: 'calificaciones',
-        component: CalificacionesComponent
+        component: CalificacionesComponent,
+        canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
     },
     {
         path: 'denuncias',
-        component: DenunciasComponent
+        component: DenunciasComponent,
+        canActivate: [adminGuard] // <--- AQUÍ SE APLICA LA SEGURIDAD
     },
     {
         path: '**',

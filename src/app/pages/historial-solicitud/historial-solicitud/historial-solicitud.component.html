@@ -1,5 +1,3 @@
-
-
 <div class="requests-container" role="region" aria-label="Solicitudes agendadas">
   <!-- Header -->
   <header class="requests-header" role="banner">
@@ -90,84 +88,73 @@
                 }">{{ s.estado }}</span>
               </td>
               <td class="col-actions" data-label="Acciones" *ngIf="mostrarColumnaAcciones">
+                <!-- CLIENTE: Completar -->
                 <button *ngIf="isCliente && s.estado === 'Agendado'" 
                         class="action-chip btn-complete" 
-                        (click)="completar(s)">✓ Completar</button>
+                        (click)="onClickCompletar(s)">
+                  ✓ Completar
+                </button>
 
+                <!-- PROVEEDOR: Finalizar -->
                 <button *ngIf="isProveedor && s.estado === 'Completado'" 
                         class="action-chip btn-finish" 
-                        (click)="abrirModalFinalizar(s)">✔ Finalizar</button>
+                        (click)="onClickFinalizar(s)">
+                  ✔ Finalizar
+                </button>
 
+                <!-- PROVEEDOR: Ver detalle -->
                 <button *ngIf="isProveedor && s.estado === 'Finalizado'" 
                         class="action-chip btn-detail" 
-                        (click)="abrirModalDetalle(s)">👁️ Ver detalle</button>
+                        (click)="abrirModalDetalle(s)">
+                  👁️ Ver detalle
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Tarjetas móviles -->
-      <div class="cards-mobile">
-        <!-- Agendado -->
-        <article class="req-card">
+      <!-- Tarjetas móviles (misma lógica que la tabla) -->
+      <div class="cards-mobile" *ngIf="dataLoaded">
+        <article class="req-card" *ngFor="let s of solicitudes">
           <header class="req-card-header">
-            <span class="req-number">N° 000145</span>
-            <span class="badge badge-agendado">Agendado</span>
+            <span class="req-number">N° {{ s.idSolicitud }}</span>
+            <span class="badge" [ngClass]="{
+              'badge-agendado': s.estado === 'Agendado',
+              'badge-completado': s.estado === 'Completado',
+              'badge-finalizado': s.estado === 'Finalizado'
+            }">{{ s.estado }}</span>
           </header>
           <dl class="req-data">
-            <div><dt>Cliente</dt><dd>María González</dd></div>
-            <div><dt>Proveedor</dt><dd>Juan Pérez</dd></div>
-            <div><dt>Agendado</dt><dd>12/10/2025 10:30</dd></div>
-            <div><dt>Precio</dt><dd>$ 35.000</dd></div>
-            <div><dt>Completado cliente</dt><dd>—</dd></div>
-            <div><dt>Finalizado</dt><dd>—</dd></div>
-            <div class="req-notas"><dt>Notas</dt><dd>Instalación de lámparas en comedor y pasillo.</dd></div>
+            <div><dt>Cliente</dt><dd>{{ s.clienteNombre }}</dd></div>
+            <div><dt>Proveedor</dt><dd>{{ s.proveedorNombre }}</dd></div>
+            <div><dt>Agendado</dt><dd>{{ formatoFecha(s.fechaAgendamiento) }}</dd></div>
+            <div><dt>Precio</dt><dd>{{ formatoPrecio(s.precioAcordado) }}</dd></div>
+            <div><dt>Completado cliente</dt><dd>{{ formatoFecha(s.fechaCreacion) || '—' }}</dd></div>
+            <div><dt>Finalizado</dt><dd>{{ formatoFecha(s.fechaRealizacion) || '—' }}</dd></div>
+            <div class="req-notas"><dt>Notas</dt><dd>{{ s.notas || '—' }}</dd></div>
           </dl>
           <footer class="req-actions">
-            <button class="action-chip btn-complete">✓ Completar</button>
-            <button class="action-chip btn-finish">✔ Finalizar</button>
-          </footer>
-        </article>
+            <!-- CLIENTE: Completar -->
+            <button *ngIf="isCliente && s.estado === 'Agendado'"
+                    class="action-chip btn-complete"
+                    (click)="onClickCompletar(s)">
+              ✓ Completar
+            </button>
 
-        <!-- Completado -->
-        <article class="req-card">
-          <header class="req-card-header">
-            <span class="req-number">N° 000150</span>
-            <span class="badge badge-completado">Completado</span>
-          </header>
-          <dl class="req-data">
-            <div><dt>Cliente</dt><dd>Ana Rojas</dd></div>
-            <div><dt>Proveedor</dt><dd>ElectricPro Ltda.</dd></div>
-            <div><dt>Agendado</dt><dd>14/10/2025 09:00</dd></div>
-            <div><dt>Precio</dt><dd>$ 40.000</dd></div>
-            <div><dt>Completado cliente</dt><dd>14/10/2025 18:00</dd></div>
-            <div><dt>Finalizado</dt><dd>—</dd></div>
-            <div class="req-notas"><dt>Notas</dt><dd>Revisión de enchufes y cambio de térmico.</dd></div>
-          </dl>
-          <footer class="req-actions">
-            <button class="action-chip btn-complete" disabled>✓ Completar</button>
-            <button class="action-chip btn-finish">✔ Finalizar</button>
-          </footer>
-        </article>
+            <!-- PROVEEDOR: Finalizar -->
+            <button *ngIf="isProveedor && s.estado === 'Completado'"
+                    class="action-chip btn-finish"
+                    (click)="onClickFinalizar(s)">
+              ✔ Finalizar
+            </button>
 
-        <!-- Finalizado -->
-        <article class="req-card">
-          <header class="req-card-header">
-            <span class="req-number">N° 000146</span>
-            <span class="badge badge-finalizado">Finalizado</span>
-          </header>
-          <dl class="req-data">
-            <div><dt>Cliente</dt><dd>Carlos Medina</dd></div>
-            <div><dt>Proveedor</dt><dd>ServiPlom SPA</dd></div>
-            <div><dt>Agendado</dt><dd>09/10/2025 15:00</dd></div>
-            <div><dt>Precio</dt><dd>$ 48.000</dd></div>
-            <div><dt>Completado cliente</dt><dd>10/10/2025 18:20</dd></div>
-            <div><dt>Finalizado</dt><dd>11/10/2025 09:05</dd></div>
-            <div class="req-notas"><dt>Notas</dt><dd>Cambio de flexibles y revisión de fuga bajo lavamanos.</dd></div>
-          </dl>
-          <footer class="req-actions">
-            <button class="action-chip btn-detail">👁️ Ver detalle</button>
+            <!-- PROVEEDOR: Ver detalle -->
+            <button *ngIf="isProveedor && s.estado === 'Finalizado'"
+                    class="action-chip btn-detail"
+                    (click)="abrirModalDetalle(s)">
+              👁️ Ver detalle
+            </button>
           </footer>
         </article>
       </div>
@@ -175,9 +162,44 @@
   </section>
 </div>
 
+<!-- =================== MODAL: EVALUAR SERVICIO =================== -->
+<div class="modal-backdrop" 
+     [class.is-open]="modalEvaluacionAbierto"
+     [attr.aria-hidden]="!modalEvaluacionAbierto">
+  <div class="modal-card modal-card-evaluacion" 
+       role="dialog" 
+       aria-modal="true"
+       aria-labelledby="titulo-evaluacion">
+    
+    <div class="modal-header modal-header--center">
+      <h3 id="titulo-evaluacion">¿Desea evaluar el servicio?</h3>
+    </div>
+
+    <div class="modal-body modal-body--center">
+      <p class="eval-text">
+        Su opinión nos ayuda a mejorar.  
+        ¿Quiere evaluar ahora o prefiere hacerlo más tarde?
+      </p>
+    </div>
+
+    <div class="modal-footer modal-footer--stacked">
+      <button class="eval-btn eval-btn-primary"
+              (click)="irAEvaluacion()">
+        ✅ Ir a evaluar ahora
+      </button>
+
+      <button class="eval-btn eval-btn-secondary"
+              (click)="posponerEvaluacion()">
+        ⏱️ Más tarde
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- =================== MODAL: FINALIZAR SERVICIO (formulario) =================== -->
-<!-- Para abrir este modal agrega la clase 'is-open' en el div.modal-backdrop -->
-<div class="modal-backdrop" [class.is-open]="modalAbierto" aria-hidden="!modalAbierto">
+<div class="modal-backdrop" 
+     [class.is-open]="modalAbierto" 
+     [attr.aria-hidden]="!modalAbierto">
   <div class="modal-card" role="dialog">
     <div class="modal-header">
       <h3>✔ Finalizar servicio</h3>
@@ -213,8 +235,9 @@
 </div>
 
 <!-- =================== MODAL: VER DETALLE (solo lectura) =================== -->
-<!-- Para abrir este modal agrega la clase 'is-open' en el div.modal-backdrop -->
-<div class="modal-backdrop" [class.is-open]="modalDetalleAbierto">
+<div class="modal-backdrop" 
+     [class.is-open]="modalDetalleAbierto"
+     [attr.aria-hidden]="!modalDetalleAbierto">
   <div class="modal-card">
     <div class="modal-header">
       <h3>👁️ Detalle de finalización</h3>
@@ -237,4 +260,3 @@
     </div>
   </div>
 </div>
-

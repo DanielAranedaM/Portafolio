@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SolicitudesService } from '../../../core/services/solicitudes.service'; 
+import { SolicitudesService } from '../../../core/services/solicitudes.service';
 import { UsersService } from '../../../core/services/users.service';
 import { FormsModule } from '@angular/forms';
 import { SolicitudListadoDTO } from '../../../core/models/solicitud-listado.dto';
@@ -39,6 +39,12 @@ export class HistorialSolicitudComponent implements OnInit {
   modalDetalleAbierto = false;
   detalleSeleccionado: SolicitudListadoDTO | null = null;
 
+  // Modal "¿Desea evaluar el servicio?"
+  modalEvaluacionAbierto = false;
+  solicitudEnEvaluacion: SolicitudListadoDTO | null = null;
+  // 'completar' -> cliente; 'finalizar' -> proveedor
+  tipoAccionEvaluacion: 'completar' | 'finalizar' | null = null;
+
   // Refrescar vista
   isRefreshing = false;
   lastUpdated: Date | null = null;
@@ -52,7 +58,8 @@ export class HistorialSolicitudComponent implements OnInit {
   ngOnInit(): void {
     this.cargarUsuarioYDatos();
   }
-  //Navegar a inicio
+
+  // Navegar a inicio
   routeMenu() {
     this.router.navigate(['/menu']);
   }
@@ -78,15 +85,12 @@ export class HistorialSolicitudComponent implements OnInit {
       next: (data) => {
         this.solicitudes = data.sort((a, b) => b.idSolicitud - a.idSolicitud);
 
-        // acciones visibles (si ya lo tienes)
         this.mostrarColumnaAcciones = this.solicitudes.some(s =>
           (this.isCliente && s.estado === 'Agendado') ||
           (this.isProveedor && (s.estado === 'Completado' || s.estado === 'Finalizado'))
         );
 
-        // 👇 recálculo del resumen
         this.recomputeSummary();
-
         this.dataLoaded = true;
       },
       error: (err) => {
@@ -100,20 +104,23 @@ export class HistorialSolicitudComponent implements OnInit {
   }
 
   refresh(): void {
-    // fuerza recarga desde el servidor
     this.cargarSolicitudes();
   }
-  // === Acciones ===
 
-  completar(s: SolicitudListadoDTO): void {
-    if (!confirm(`¿Confirmas que el servicio N°${s.idSolicitud} fue completado?`)) return;
-    this.solicitudesService.marcarCompletada(s.idSolicitud).subscribe({
-      next: () => {
-        alert('Solicitud marcada como completada.');
-        this.cargarSolicitudes();
-      },
-      error: (err) => console.error('Error completando solicitud:', err)
-    });
+  // ====== FLUJO CLIENTE (Completar) ======
+
+  // Clic en "Completar" (cliente): primero preguntar si quiere evaluar
+  onClickCompletar(s: SolicitudListadoDTO): void {
+    this.solicitudEnEvaluacion = s;
+    this.tipoAccionEvaluacion = 'completar';
+    this.modalEvaluacionAbierto = true;
+  }
+
+  // ====== FLUJO PROVEEDOR (Finalizar) ======
+
+  // Clic en "Finalizar" (proveedor): primero finalizar servicio
+  onClickFinalizar(s: SolicitudListadoDTO): void {
+    this.abrirModalFinalizar(s);  // solo abrir modal verde
   }
 
   abrirModalFinalizar(s: SolicitudListadoDTO): void {
@@ -137,6 +144,9 @@ export class HistorialSolicitudComponent implements OnInit {
       return;
     }
 
+    // guardamos una copia para usarla después de cerrar el modal
+    const solicitudFinalizada = this.solicitudSeleccionada;
+
     const dto: SolicitudFinalizarDTO = {
       precioAcordado: this.precioCobrado,
       medioDePago: this.medioPago,
@@ -148,8 +158,74 @@ export class HistorialSolicitudComponent implements OnInit {
         alert('Solicitud finalizada correctamente.');
         this.cerrarModalFinalizar();
         this.cargarSolicitudes();
+
+        // AHORA, recién finalizado, mostramos el modal de "¿Desea evaluar?"
+        if (solicitudFinalizada) {
+          this.solicitudEnEvaluacion = solicitudFinalizada;
+          this.tipoAccionEvaluacion = 'finalizar';
+          this.modalEvaluacionAbierto = true;
+        }
       },
       error: (err) => console.error('Error al finalizar:', err)
+    });
+  }
+
+  // ====== MODAL "¿Desea evaluar el servicio?" ======
+
+  // Botón "Ir a evaluar ahora"
+  irAEvaluacion(): void {
+    if (!this.solicitudEnEvaluacion) return;
+
+    // Si es cliente, aún falta marcar como completado
+    if (this.tipoAccionEvaluacion === 'completar') {
+      this.completar(this.solicitudEnEvaluacion, true); // sin confirm()
+    }
+    // Si es proveedor, ya está finalizado aquí; no hacemos nada más
+
+    this.modalEvaluacionAbierto = false;
+    this.limpiarEvaluacion();
+
+    // Llevar a la página de calificaciones (ajusta la ruta a la tuya)
+    this.router.navigate(['/calificaciones']);
+  }
+
+  // Botón "Más tarde"
+  posponerEvaluacion(): void {
+    if (this.solicitudEnEvaluacion && this.tipoAccionEvaluacion === 'completar') {
+      // Cliente: marcar completado sin confirm()
+      this.completar(this.solicitudEnEvaluacion, true);
+    }
+    // Proveedor: ya finalizó en guardarFinalizacion, no hacemos nada más
+
+    this.modalEvaluacionAbierto = false;
+    this.limpiarEvaluacion();
+  }
+
+  private limpiarEvaluacion(): void {
+    this.solicitudEnEvaluacion = null;
+    this.tipoAccionEvaluacion = null;
+  }
+
+  // ====== Acciones base ======
+
+  /**
+   * Completar solicitud.
+   * @param s solicitud
+   * @param saltarConfirmacion si es true NO muestra window.confirm
+   */
+  completar(s: SolicitudListadoDTO, saltarConfirmacion: boolean = false): void {
+    if (!saltarConfirmacion) {
+      if (!confirm(`¿Confirmas que el servicio N°${s.idSolicitud} fue completado?`)) {
+        return;
+      }
+    }
+
+    this.solicitudesService.marcarCompletada(s.idSolicitud).subscribe({
+      next: () => {
+        alert('Solicitud marcada como completada.');
+        this.cargarSolicitudes();
+      },
+      error: (err) => console.error('Error completando solicitud:', err)
     });
   }
 
@@ -163,7 +239,7 @@ export class HistorialSolicitudComponent implements OnInit {
     this.detalleSeleccionado = null;
   }
 
-  // === Helpers ===
+  // ====== Helpers ======
 
   formatoFecha(f: string | null): string {
     if (!f) return '—';
@@ -178,10 +254,9 @@ export class HistorialSolicitudComponent implements OnInit {
   private recomputeSummary(): void {
     const arr = this.solicitudes || [];
 
-    this.summary.total        = arr.length;
-    this.summary.agendados    = arr.filter(s => s.estado === 'Agendado').length;
-    this.summary.completados  = arr.filter(s => s.estado === 'Completado').length;
-    this.summary.finalizados  = arr.filter(s => s.estado === 'Finalizado').length;
+    this.summary.total       = arr.length;
+    this.summary.agendados   = arr.filter(s => s.estado === 'Agendado').length;
+    this.summary.completados = arr.filter(s => s.estado === 'Completado').length;
+    this.summary.finalizados = arr.filter(s => s.estado === 'Finalizado').length;
   }
-
 }

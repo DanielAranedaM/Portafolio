@@ -23,6 +23,7 @@ export class ServicioDetalleModalComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
   @Output() contactar = new EventEmitter<number>();
   @Output() guardar = new EventEmitter<number>();
+  @Output() solicitar = new EventEmitter<ServicioDetalleDTO>();
 
   detalle: ServicioDetalleDTO | null = null;
   currentImageIndex = 0;
@@ -122,6 +123,46 @@ export class ServicioDetalleModalComponent implements OnInit {
   onGuardar(): void {
     if (this.detalle) {
       this.guardar.emit(this.detalle.idServicio);
+    }
+  }
+
+  onSolicitar(): void {
+    if (this.detalle) {
+      this.solicitar.emit(this.detalle);
+    }
+  }
+
+  onWhatsApp(): void {
+    if (this.detalle) {
+      let phone = this.detalle.proveedorTelefono;
+
+      // Si no hay teléfono, usar uno de respaldo o mostrar error
+      if (!phone) {
+        console.warn('El proveedor no tiene teléfono registrado. Usando número de prueba.');
+        phone = '+56912345678';
+      }
+
+      // Limpieza del número para la API de WhatsApp
+      // 1. Eliminar caracteres no numéricos excepto el +
+      let cleanPhone = phone.replace(/[^0-9+]/g, '');
+
+      // 2. Si no tiene código de país (no empieza con +), asumir Chile (56) si parece un número local
+      if (!cleanPhone.startsWith('+')) {
+        // Si tiene 9 dígitos (ej: 912345678), agregar 56
+        if (cleanPhone.length === 9) {
+          cleanPhone = '56' + cleanPhone;
+        }
+      }
+
+      // 3. Eliminar el + final para la URL (wa.me prefiere números puros)
+      cleanPhone = cleanPhone.replace('+', '');
+
+      console.log('Redirigiendo a WhatsApp:', cleanPhone);
+
+      const message = encodeURIComponent(`Hola, me interesa tu servicio: ${this.detalle.titulo}`);
+      const url = `https://wa.me/${cleanPhone}?text=${message}`;
+      
+      window.open(url, '_blank');
     }
   }
 

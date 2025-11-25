@@ -1,0 +1,136 @@
+
+<div class="container">
+  <header class="header">
+    <button class="btn-back" (click)="volverAlMenu()">
+      <span class="back-icon">←</span> Volver al Menú
+    </button>
+    <h1>Servicios Guardados</h1>
+  </header>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-icon">⏳</div>
+    <p>Cargando tus servicios guardados...</p>
+  </div>
+
+  <div *ngIf="!loading && error" class="error-state">
+    <p>{{ error }}</p>
+    <button (click)="loadServiciosGuardados()">Reintentar</button>
+  </div>
+
+  <div *ngIf="!loading && !error && servicios.length === 0" class="empty-state">
+    <div class="empty-icon">🔖</div>
+    <h3>No tienes servicios guardados</h3>
+    <p>Guarda los servicios que te interesen para verlos aquí.</p>
+    <button class="btn-explore" (click)="volverAlMenu()">Explorar Servicios</button>
+  </div>
+
+  <div class="services-grid" *ngIf="!loading && servicios.length > 0">
+    <div class="service-card" *ngFor="let servicio of servicios">
+      <!-- Foto con Badge y Acción Rápida -->
+      <div class="service-card-image">
+        <div class="category-badge">{{ servicio.categoriaNombre || 'Servicio' }}</div>
+        <button class="btn-heart-remove" (click)="quitarServicio(servicio)" title="Quitar de guardados">
+          <i class="fas fa-heart"></i>
+        </button>
+        
+        <img 
+          *ngIf="servicio.urlFotoPrincipal; else placeholderImage" 
+          [src]="servicio.urlFotoPrincipal" 
+          [alt]="servicio.titulo" 
+          class="service-image"
+          (error)="onImageError($event)">
+        <ng-template #placeholderImage>
+          <div class="service-image-placeholder">
+            <i class="fas fa-image placeholder-icon"></i>
+            <p class="placeholder-text">Sin imagen</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="service-card-body">
+        <h4 class="service-title">{{ servicio.titulo }}</h4>
+        
+        <!-- Info Proveedor -->
+        <div class="provider-row">
+          <div class="provider-avatar-small">
+            {{ getProviderInitials(servicio.proveedorNombre) }}
+          </div>
+          <span class="provider-name-small">{{ servicio.proveedorNombre || 'Proveedor' }}</span>
+          <div class="provider-rating-small">
+            <span class="star">⭐</span> 4.8
+          </div>
+        </div>
+
+        <p class="service-description">{{ servicio.descripcion || 'Sin descripción' }}</p>
+      </div>
+
+      <!-- Meta -->
+      <div class="service-card-meta">
+        <div class="meta-item">
+          <span class="meta-icon">📍</span>
+          <span class="meta-text">{{ servicio.ubicacion || 'Santiago, RM' }}</span>
+        </div>
+        <div class="meta-item meta-item-highlight" *ngIf="servicio.precioBase">
+          <span class="meta-icon">💰</span>
+          <span class="meta-text">Desde ${{ servicio.precioBase | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="service-card-actions">
+        <button class="btn-action btn-whatsapp" (click)="contactarProveedor(servicio)" title="Contactar por WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </button>
+        <button class="btn-action btn-view" (click)="verDetalle(servicio)" title="Ver detalles">
+          <i class="fas fa-eye"></i> Ver más
+        </button>
+        <button class="btn-action btn-remove" (click)="quitarServicio(servicio)" title="Quitar de guardados">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de detalle -->
+<app-servicio-detalle-modal
+  *ngIf="showDetailModal && selectedServiceId"
+  [servicioId]="selectedServiceId"
+  (close)="closeDetailModal()"
+  (contactar)="handleContactar($event)"
+  (guardar)="handleGuardar($event)"
+  (solicitar)="handleSolicitar($event)">
+</app-servicio-detalle-modal>
+
+<!-- Modal de Confirmación -->
+<div class="custom-modal-overlay" *ngIf="confirmModalOpen">
+  <div class="custom-modal-content">
+    <span class="modal-icon-large">⚠️</span>
+    <h3 class="modal-title">¿Estás seguro?</h3>
+    <p class="modal-message">
+      Vas a quitar <strong>"{{ serviceToRemove?.titulo }}"</strong> de tus servicios guardados.
+    </p>
+    <div class="modal-actions">
+      <button class="btn-modal btn-modal-cancel" (click)="closeConfirmModal()">Cancelar</button>
+      <button class="btn-modal btn-modal-confirm" (click)="confirmRemove()">Quitar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Notificación (Éxito/Error) -->
+<div class="custom-modal-overlay" *ngIf="notificationModalOpen">
+  <div class="custom-modal-content">
+    <span class="modal-icon-large" *ngIf="notificationType === 'success'">✅</span>
+    <span class="modal-icon-large" *ngIf="notificationType === 'error'">❌</span>
+    
+    <h3 class="modal-title" *ngIf="notificationType === 'success'">¡Listo!</h3>
+    <h3 class="modal-title" *ngIf="notificationType === 'error'">Ups...</h3>
+    
+    <p class="modal-message">{{ notificationMessage }}</p>
+    
+    <div class="modal-actions">
+      <button class="btn-modal btn-modal-ok" (click)="closeNotification()">Aceptar</button>
+    </div>
+  </div>
+</div>

@@ -125,4 +125,38 @@ export class ServicesService {
         catchError(this.handleError)
       );
   }
+
+  /**
+   * Guarda un servicio en favoritos
+   */
+  guardarServicio(idServicio: number): Observable<any> {
+    return this.http.post(`${this.base}/Guardar/${idServicio}`, {});
+  }
+
+  /**
+   * Quita un servicio de favoritos
+   */
+  quitarServicioGuardado(idServicio: number): Observable<any> {
+    return this.http.delete(`${this.base}/Guardar/${idServicio}`);
+  }
+
+  /**
+   * Obtiene los servicios guardados por el usuario actual
+   */
+  getServiciosGuardados(): Observable<ServicioDTO[]> {
+    return this.http
+      .get<ServicioDTO[] | { message: string }>(`${this.base}/Guardados`)
+      .pipe(
+        map((res: any) => {
+          // Si el backend devuelve { message: "No tiene servicios guardados." }
+          if (res && res.message) {
+            return [];
+          }
+          // Si devuelve array
+          const servicios = res as ServicioDTO[];
+          return servicios.map(s => this.normalizeServicio(s));
+        }),
+        catchError(this.handleError)
+      );
+  }
 }

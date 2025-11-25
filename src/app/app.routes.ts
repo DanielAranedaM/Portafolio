@@ -9,6 +9,7 @@ import { RegistrarServicioComponent } from './pages/registrar-servicio/registrar
 import { HistorialSolicitudComponent } from './pages/historial-solicitud/historial-solicitud/historial-solicitud.component';
 import { CalificacionesComponent } from './pages/Calificaciones/calificaciones/calificaciones.component';
 import { DenunciasComponent } from './pages/denuncias/denuncias.component';
+import { ServiciosGuardadosComponent } from './pages/servicios-guardados/servicios-guardados.component';
 import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -58,6 +59,11 @@ export const routes: Routes = [
         path: 'calificaciones',
         component: CalificacionesComponent,
         canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
+    },
+    {
+        path: 'servicios-guardados',
+        component: ServiciosGuardadosComponent,
+        canActivate: [authGuard]
     },
     {
         path: 'denuncias',

@@ -18,6 +18,9 @@ import { ServicesService } from '../../core/services/services.service';
 import { CalificacionesService } from '../../core/services/calificaciones.service';
 import { ChatbotInteligenteComponent } from "../../chatbot-inteligente/chatbot-inteligente.component";
 import { ServicioDetalleModalComponent } from '../../components/servicio-detalle-modal/servicio-detalle-modal.component';
+import { SolicitudesService } from '../../core/services/solicitudes.service';
+import { SolicitudCreateDTO } from '../../core/models/solicitud-create.dto';
+import { ServicioDetalleDTO } from '../../core/models/servicio-detalle.dto';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -38,7 +41,8 @@ chatbotVisible: boolean = false;
     private categoriasService: CategoriasService,
     private servicesService: ServicesService,
     private califsService: CalificacionesService,
-    private denunciasService: DenunciasService,          // 👈 NUEVO
+    private denunciasService: DenunciasService,
+    private solicitudesService: SolicitudesService, // 👈 NUEVO
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -110,6 +114,23 @@ chatbotVisible: boolean = false;
     motivo: '',
     detalle: ''
   };
+
+  // ===== Modal de Notificación Personalizado =====
+  notificationModalOpen = false;
+  notificationMessage = '';
+  notificationType: 'success' | 'error' = 'success';
+
+  showNotification(message: string, type: 'success' | 'error'): void {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.notificationModalOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeNotification(): void {
+    this.notificationModalOpen = false;
+    document.body.style.overflow = 'auto';
+  }
 
   toggleCategorias(): void { this.categoriasCollapsed = !this.categoriasCollapsed; }
   
@@ -392,7 +413,7 @@ chatbotVisible: boolean = false;
   }
 
   navigateToSavedServices(): void {
-    this.router.navigate(['/historial-solicitud'])
+    this.router.navigate(['/servicios-guardados']);
   }
 
   navigateToNotifications(): void {
@@ -405,6 +426,10 @@ chatbotVisible: boolean = false;
     // TODO: Implementar navegación a "Configuración"
     console.log('Navegando a Configuración...');
     alert('Funcionalidad "Configuración" próximamente disponible');
+  }
+
+    navigateToHistorialSolicitudes(): void {
+    this.router.navigate(['/historial-solicitud']);
   }
 
   // ------------------ Sidebar ------------------
@@ -682,9 +707,22 @@ chatbotVisible: boolean = false;
   }
 
   guardarServicio(servicio: ServicioDTO): void {
-    // TODO: Implementar guardado en favoritos mediante API
-    console.log('Guardando servicio:', servicio);
-    alert(`✅ Servicio "${servicio.titulo}" guardado en tus favoritos`);
+    if (!this.me) {
+      this.showNotification('Debes iniciar sesión para guardar servicios.', 'error');
+      return;
+    }
+
+    this.servicesService.guardarServicio(servicio.idServicio).subscribe({
+      next: (res: any) => {
+        // El backend devuelve { message: "Servicio guardado" } o { message: "Ya estaba guardado" }
+        const msg = res?.message || 'Servicio guardado';
+        this.showNotification(`${msg}: "${servicio.titulo}"`, 'success');
+      },
+      error: (err) => {
+        console.error('Error al guardar servicio:', err);
+        this.showNotification('Hubo un error al guardar el servicio.', 'error');
+      }
+    });
   }
 
   verDetalleServicioCliente(servicio: ServicioDTO): void {
@@ -712,9 +750,52 @@ chatbotVisible: boolean = false;
   }
 
   handleGuardar(servicioId: number): void {
-    console.log('Guardar servicio:', servicioId);
-    // TODO: Implementar lógica de guardar en favoritos
-    alert('✅ Servicio guardado en tus favoritos');
+    if (!this.me) {
+      this.showNotification('Debes iniciar sesión para guardar servicios.', 'error');
+      return;
+    }
+
+    this.servicesService.guardarServicio(servicioId).subscribe({
+      next: (res: any) => {
+        const msg = res?.message || 'Servicio guardado';
+        this.showNotification(msg, 'success');
+        this.closeDetailModal();
+      },
+      error: (err) => {
+        console.error('Error al guardar servicio:', err);
+        this.showNotification('Hubo un error al guardar el servicio.', 'error');
+      }
+    });
+  }
+
+  handleSolicitar(detalle: ServicioDetalleDTO): void {
+    if (!this.me) {
+      this.showNotification('Debes iniciar sesión para solicitar servicios.', 'error');
+      return;
+    }
+
+    // Crear DTO de solicitud
+    const dto: SolicitudCreateDTO = {
+      idUsuario: this.me.idUsuario,
+      idProveedor: detalle.proveedorId,
+      idServicio: detalle.idServicio,
+      fechaAgendamiento: new Date().toISOString() // Por defecto "ahora", o podrías abrir un modal de fecha
+    };
+
+    this.solicitudesService.crear(dto).subscribe({
+      next: () => {
+        this.showNotification('Solicitud creada exitosamente.', 'success');
+        this.closeDetailModal();
+        // Redirigir a historial
+        setTimeout(() => {
+          this.router.navigate(['/historial-solicitud']);
+        }, 1500);
+      },
+      error: (err) => {
+        console.error('Error creando solicitud:', err);
+        this.showNotification('No se pudo crear la solicitud.', 'error');
+      }
+    });
   }
 
   /**

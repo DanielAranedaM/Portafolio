@@ -62,7 +62,7 @@
         <span class="nav-text">Mi Perfil</span>
       </button>
       
-      <button class="nav-btn" (click)="navigateToSavedServices()">
+      <button class="nav-btn" (click)="navigateToHistorialSolicitudes()">
         <i class="fas fa-calendar-check nav-icon"></i>
         <span class="nav-text">Solicitudes Agendadas</span>
       </button>
@@ -100,7 +100,7 @@
         <span class="nav-text">Servicios Guardados</span>
       </button>
 
-      <button class="nav-btn" (click)="navigateToSavedServices()">
+      <button class="nav-btn" (click)="navigateToHistorialSolicitudes()">
         <i class="fas fa-calendar-check nav-icon"></i>
         <span class="nav-text">Solicitudes Agendadas</span>
       </button>
@@ -377,7 +377,8 @@
   [servicioId]="selectedServiceId"
   (close)="closeDetailModal()"
   (contactar)="handleContactar($event)"
-  (guardar)="handleGuardar($event)">
+  (guardar)="handleGuardar($event)"
+  (solicitar)="handleSolicitar($event)">
 </app-servicio-detalle-modal>
                         <!-- 🚩 Denunciar servicio -->
                         <button class="btn-service-action btn-report" (click)="openServiceReportModal(servicio)">
@@ -698,6 +699,30 @@
       </button>
       <button class="logout-btn-confirm" (click)="confirmLogout()">
         Sí, Cerrar Sesión
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE NOTIFICACIÓN (Éxito/Error) -->
+<div *ngIf="notificationModalOpen" class="custom-modal-overlay" (click)="closeNotification()">
+  <div class="custom-modal-content notification-modal" (click)="$event.stopPropagation()">
+    <div class="custom-modal-header">
+      <div class="custom-modal-icon" [ngClass]="notificationType">
+        <span *ngIf="notificationType === 'success'">✅</span>
+        <span *ngIf="notificationType === 'error'">⚠️</span>
+      </div>
+      <button class="close-custom-btn" (click)="closeNotification()">×</button>
+    </div>
+    
+    <div class="custom-modal-body">
+      <h3>{{ notificationType === 'success' ? '¡Éxito!' : 'Atención' }}</h3>
+      <p>{{ notificationMessage }}</p>
+    </div>
+    
+    <div class="custom-modal-footer">
+      <button class="custom-btn-primary" (click)="closeNotification()">
+        Entendido
       </button>
     </div>
   </div>

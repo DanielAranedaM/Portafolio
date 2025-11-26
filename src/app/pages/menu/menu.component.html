@@ -386,7 +386,10 @@
         </section>
 
         <!-- RESULTADOS DE BÚSQUEDA (debajo de las categorías, sin ocultarlas) -->
-        <section class="services-view-section" *ngIf="searchLoading || searchError || searchResults.length">
+        <section 
+          class="services-view-section" 
+          *ngIf="!categoriaSeleccionada && (searchLoading || searchError || searchResults.length)"
+        >
           <div class="services-header">
             <h2 class="services-view-title">
               Resultados de búsqueda

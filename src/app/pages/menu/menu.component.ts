@@ -297,6 +297,11 @@ chatbotVisible: boolean = false;
   seleccionarCategoria(cat: CategoriaDTO): void {
     if (!cat?.idCategoriaServicio) return;
 
+    // 👇 Al seleccionar categoría, limpiamos todo lo relacionado a búsqueda
+    this.searchResults = [];
+    this.searchError = null;
+    this.searchLoading = false;
+
     console.log('🎯 Categoría seleccionada:', cat.nombre, '(ID:', cat.idCategoriaServicio + ')');
     
     this.categoriaSeleccionada = cat;
@@ -596,6 +601,12 @@ chatbotVisible: boolean = false;
       alert('Por favor ingresa un término de búsqueda');
       return;
     }
+
+    // 👇 Al buscar, deseleccionamos categoría y limpiamos sus servicios
+    this.categoriaSeleccionada = null;
+    this.serviciosDeCategoria = [];
+    this.serviciosError = null;
+    this.serviciosLoading = false;
 
     // 🔹 ocultar categorías al buscar
     this.categoriasVisibles = false;

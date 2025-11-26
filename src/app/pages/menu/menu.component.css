@@ -2023,3 +2023,18 @@ body {
     background: #004a80;
 }
 
+/* Card especial para servicios de personas mayores (sin texto) */
+.senior-service-card {
+  background: #fff7e0;              /* fondo suave amarillito */
+  border: 1px solid #f6b73c;        /* borde acorde al fondo */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+/* Si ya tienes un :hover para .service-card-large, puedes opcionalmente
+   añadir un toque extra cuando sea senior */
+.senior-service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}

@@ -305,7 +305,11 @@
 
             <!-- Lista de Servicios -->
             <div class="services-list-view" *ngIf="!serviciosLoading && serviciosDeCategoria.length">
-                <div class="service-card-large" *ngFor="let servicio of serviciosDeCategoria">
+              <div 
+                class="service-card-large" 
+                *ngFor="let servicio of serviciosDeCategoria"
+                [ngClass]="{ 'senior-service-card': servicio.esMayorDeEdad }"
+              >
                     <!-- Header del Servicio -->
                     <div class="service-card-header">
                         <div class="provider-avatar">
@@ -407,7 +411,11 @@
 
           <!-- Lista de Servicios (mismo diseño de tarjetas) -->
           <div class="services-list-view" *ngIf="!searchLoading && searchResults.length">
-            <div class="service-card-large" *ngFor="let servicio of searchResults">
+            <div 
+              class="service-card-large" 
+              *ngFor="let servicio of searchResults"
+              [ngClass]="{ 'senior-service-card': servicio.esMayorDeEdad }"
+            >
               <!-- Header del Servicio -->
               <div class="service-card-header">
                 <div class="provider-avatar">

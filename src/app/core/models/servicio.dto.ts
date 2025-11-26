@@ -13,4 +13,5 @@ export interface ServicioDTO {
   proveedorNombre: string;
   ubicacion?: string; // Agregado para mostrar comuna/ciudad
   telefonoProveedor?: string; // Agregado para contacto
+  esMayorDeEdad?: boolean;
 }

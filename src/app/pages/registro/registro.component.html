@@ -19,11 +19,18 @@
       <div class="input-container">
         <span class="input-icon">🎂</span>
         <input type="date" class="form-input" placeholder="AAAA-MM-DD"
-               formControlName="fechaNacimiento" [attr.max]="today"
+               formControlName="fechaNacimiento" 
+               [attr.max]="maxDateAllowed"
                [class.invalid]="invalid('fechaNacimiento')" required>
       </div>
+      
       <div class="error-text" *ngIf="invalid('fechaNacimiento')">
-        La fecha de nacimiento es obligatoria y no puede ser futura.
+        <span *ngIf="form.get('fechaNacimiento')?.errors?.['required']">
+          La fecha de nacimiento es obligatoria.
+        </span>
+        <span *ngIf="form.get('fechaNacimiento')?.errors?.['underAge']">
+          Debes ser mayor de 18 años para registrarte.
+        </span>
       </div>
     </div>
 

@@ -50,7 +50,11 @@ export class RegistroComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private access: AccessService
-  ) {}
+  ) {
+    const today = new Date();
+    today.setFullYear(today.getFullYear() - 18);
+    this.maxDateAllowed = this.toYMD(today);
+  }
 
   routeLogin() {
     this.router.navigate(['/login']);
@@ -72,6 +76,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
   latSeleccionada: string | null = null;
   lonSeleccionada: string | null = null;
   today = this.toYMD(new Date());
+  maxDateAllowed: string = '';
 
   get passwordsMatch(): boolean {
     const g = this.form.get('passwordGroup');
@@ -81,7 +86,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(200)]],
-      fechaNacimiento: ['', [Validators.required]],
+      fechaNacimiento: ['', [Validators.required, this.minimumAgeValidator(18)]],
       direccionDescripcion: ['', [Validators.required]],
       correo: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
       telefono: [''], // opcional
@@ -254,6 +259,25 @@ export class RegistroComponent implements OnInit, OnDestroy {
       codigoPostal,
       latitud,      // ⬅️ AGREGADO
       longitud      // ⬅️ AGREGADO
+    };
+  }
+
+  minimumAgeValidator(minAge: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null; // Si está vacío, el Validators.required se encarga
+      
+      const birthDate = new Date(control.value);
+      const today = new Date();
+      
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      // Ajuste si aún no ha cumplido años en el mes/día actual
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      return age >= minAge ? null : { underAge: { requiredAge: minAge, actualAge: age } };
     };
   }
 }

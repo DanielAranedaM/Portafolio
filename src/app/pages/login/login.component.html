@@ -1,59 +1,98 @@
-<div class="login-centered-bg">
-  <div class="login-container">
-
-  <div class="logo-login">
-    <img class="logo-login-img" src="../../../assets/imagen/logo.png" alt="">
+<div class="login-layout">
+  
+  <!-- Lado Izquierdo: Imagen/Branding -->
+  <div class="branding-side">
+    <div class="branding-overlay"></div>
+    <div class="branding-content">
+      <h1>Bienvenido a El Dato</h1>
+      <p>La plataforma donde encuentras los servicios que necesitas, o haces crecer tu negocio.</p>
+    </div>
   </div>
 
-  <!--Titulo-->
-  <h1 class="welcome-title">INICIAR SESIÓN</h1>
-
-  <!-- Formulario Ingreso Login -->
-  <form class="login-form" (ngSubmit)="login()">
-    <div class="form-group">
-      <div class="input-container">
-        <span class="input-icon">📧</span>
-        <input type="email"
-               class="form-input"
-               placeholder="Email"
-               required
-               [(ngModel)]="correo"
-               name="correo">
+  <!-- Lado Derecho: Formulario -->
+  <div class="form-side">
+    <div class="form-container">
+      
+      <div class="logo-section">
+        <img src="assets/imagen/logo.png" alt="El Dato Logo" class="logo-img">
       </div>
-    </div>
 
-    <div class="form-group">
-      <div class="input-container">
-        <span class="input-icon">🔒</span>
-        <input 
-            #pwd 
-            type="password"
-            class="form-input"
-            placeholder="Contraseña"
-            id="passwordInput"
-            required
-            [(ngModel)]="contrasena"
-            name="contrasena">
-        <button type="button" class="password-toggle" (click)="togglePassword(pwd)">👁</button>
+      <div class="header-section">
+        <h2>Iniciar Sesión</h2>
+        <p class="subtitle">Ingresa a tu cuenta para continuar</p>
       </div>
+
+      <form class="login-form" (ngSubmit)="login()">
+        
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Correo Electrónico</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope input-icon"></i>
+            <input 
+              type="email" 
+              id="email"
+              class="form-input" 
+              placeholder="ejemplo@correo.com"
+              required
+              [(ngModel)]="correo"
+              name="correo">
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock input-icon"></i>
+            <input 
+              #pwd
+              type="password" 
+              id="password"
+              class="form-input" 
+              placeholder="••••••••"
+              required
+              [(ngModel)]="contrasena"
+              name="contrasena">
+            <button type="button" class="toggle-password" (click)="togglePassword(pwd)" tabindex="-1">
+              <i class="fas" [ngClass]="pwd.type === 'password' ? 'fa-eye' : 'fa-eye-slash'"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Opciones (Recordar / Olvidé contraseña) -->
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox">
+            <span>Recordarme</span>
+          </label>
+          <a routerLink="/recuperar-pass" class="forgot-link">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <!-- Botón Login -->
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">Ingresar</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+
+        <!-- Separador -->
+        <div class="divider">
+          <span>o</span>
+        </div>
+
+        <!-- Botón Registro -->
+        <button type="button" class="btn-secondary" (click)="routeRegistro()">
+          Crear una cuenta nueva
+        </button>
+
+      </form>
+
+      <!-- Mensaje de Error -->
+      <div *ngIf="mensajeError" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ mensajeError }}</span>
+      </div>
+
     </div>
-
-    <div class="form-options">
-      <label class="remember-me">
-        <input type="checkbox">
-        Recordarme
-      </label>
-      <a routerLink="/recuperar-pass" class="forgot-password">Has Olvidado tu contraseña?</a>
-    </div>
-
-    <!-- Boton Ingresar -->
-    <button type="submit" class="login-button" [disabled]="loading">Ingresar</button>
-    <br><br>
-
-    <!-- Boton Registrar -->
-    <button type="button" class="register-button" (click)="routeRegistro()">Registrarse</button>
-  </form>
-
-  <p *ngIf="mensajeError" class="error">{{ mensajeError }}</p>
-</div>
+  </div>
 </div>

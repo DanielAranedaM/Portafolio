@@ -371,15 +371,6 @@
                             <span class="btn-text">Ver más</span>
                         </button>
 
-                        <!-- Modal de detalle -->
-<app-servicio-detalle-modal
-  *ngIf="showDetailModal && selectedServiceId"
-  [servicioId]="selectedServiceId"
-  (close)="closeDetailModal()"
-  (contactar)="handleContactar($event)"
-  (guardar)="handleGuardar($event)"
-  (solicitar)="handleSolicitar($event)">
-</app-servicio-detalle-modal>
                         <!-- 🚩 Denunciar servicio -->
                         <button class="btn-service-action btn-report" (click)="openServiceReportModal(servicio)">
                             <span class="btn-icon">🚩</span>
@@ -625,6 +616,16 @@
   </div>
 
 </main>
+
+<!-- Modal de detalle del servicio (GLOBAL) -->
+<app-servicio-detalle-modal
+  *ngIf="showDetailModal && selectedServiceId"
+  [servicioId]="selectedServiceId"
+  (close)="closeDetailModal()"
+  (contactar)="handleContactar($event)"
+  (guardar)="handleGuardar($event)"
+  (solicitar)="handleSolicitar($event)">
+</app-servicio-detalle-modal>
 
 <!-- MODAL: DENUNCIAR SERVICIO -->
 <div *ngIf="serviceReportModalVisible"

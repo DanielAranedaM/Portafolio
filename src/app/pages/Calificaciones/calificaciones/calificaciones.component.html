@@ -37,7 +37,7 @@
             class="tab-btn-simple"
             [class.active]="activeTab === 'recibidas'"
             [attr.aria-selected]="activeTab === 'recibidas'"
-            attr.aria-controls="panel-recibidas"
+            aria-controls="panel-recibidas"
             (click)="setActiveTab('recibidas')">
             📥 Lo que me reseñaron
         </button>
@@ -48,7 +48,7 @@
             class="tab-btn-simple"
             [class.active]="activeTab === 'enviadas'"
             [attr.aria-selected]="activeTab === 'enviadas'"
-            attr.aria-controls="panel-enviadas"
+            aria-controls="panel-enviadas"
             (click)="setActiveTab('enviadas')">
             📤 Lo que yo reseñé
         </button>

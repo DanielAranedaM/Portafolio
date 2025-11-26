@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ServicioDetalleDTO } from '../../core/models/servicio-detalle.dto';
 import { ServicesService } from '../../core/services/services.service';
 
@@ -30,7 +31,10 @@ export class ServicioDetalleModalComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
-  constructor(private servicesService: ServicesService) {}
+  constructor(
+    private servicesService: ServicesService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     // LÓGICA INTELIGENTE:
@@ -185,6 +189,13 @@ export class ServicioDetalleModalComponent implements OnInit {
       case 'full': return '★';
       case 'half': return '✫';
       case 'empty': return '☆';
+    }
+  }
+
+  goToProviderProfile(): void {
+    if (this.detalle && this.detalle.proveedorId) {
+      this.router.navigate(['/perfil', this.detalle.proveedorId]);
+      this.onClose();
     }
   }
 }

@@ -17,6 +17,10 @@ export class UsersService {
     return this.http.get<UsuarioDetalleDTO>(`${this.apiUrl}/api/Usuario/Me`);
   }
 
+  getById(id: number): Observable<UsuarioDetalleDTO> {
+    return this.http.get<UsuarioDetalleDTO>(`${this.apiUrl}/api/Usuario/${id}`);
+  }
+
   subirMiFoto(archivo: Blob, fileName = 'foto.jpg'): Observable<FotoUsuarioDTO> {
     const form = new FormData();
     form.append('archivo', archivo, fileName);

@@ -103,7 +103,7 @@
               Proveedor
             </h4>
             
-            <div class="provider-card">
+            <div class="provider-card" (click)="goToProviderProfile()" style="cursor: pointer;" title="Ver perfil del proveedor">
               <div class="provider-avatar">
                 <img 
                   *ngIf="detalle.proveedorFoto"
@@ -115,14 +115,17 @@
               </div>
               
               <div class="provider-info">
-                <h5 class="provider-name">{{ detalle.proveedorNombre }}</h5>
+                <h5 class="provider-name">
+                  {{ detalle.proveedorNombre }}
+                  <i class="bi bi-box-arrow-up-right ms-2" style="font-size: 0.8em; color: #666;"></i>
+                </h5>
                 <div class="provider-rating">
                   <ng-container *ngFor="let star of getStarStates(detalle.proveedorEvaluacion)">
                     <span [class]="'star star-' + star">{{ starIcon(star) }}</span>
                   </ng-container>
                   <span class="rating-value">{{ detalle.proveedorEvaluacion.toFixed(1) }}</span>
                 </div>
-                <div class="provider-phone" *ngIf="detalle.proveedorTelefono">
+                <div class="provider-phone" *ngIf="detalle.proveedorTelefono" (click)="$event.stopPropagation()">
                   <i class="bi bi-telephone-fill me-2"></i>
                   <a [href]="'tel:' + detalle.proveedorTelefono">{{ detalle.proveedorTelefono }}</a>
                 </div>

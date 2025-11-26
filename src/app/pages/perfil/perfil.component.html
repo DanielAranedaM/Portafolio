@@ -34,6 +34,7 @@
 
     <!-- Botón de configuración más claro -->
     <button 
+      *ngIf="!isPublicProfile"
       class="config-btn-clear-modern" 
       (click)="toggleEdit()"
       [disabled]="!dataLoaded || saving"
@@ -52,11 +53,11 @@
       </h2>
     </div>
     
-    <div *ngIf="!editingDescription" class="description-display-separate" (click)="startEditDescription()">
+    <div *ngIf="!editingDescription" class="description-display-separate" (click)="!isPublicProfile && startEditDescription()">
       <p class="description-text-separate">
         {{ userDescription || 'Cuéntanos sobre tu experiencia, especialidades y lo que te hace único...' }}
       </p>
-      <div class="edit-hint-modern">
+      <div class="edit-hint-modern" *ngIf="!isPublicProfile">
         <i class="edit-icon-modern">✏️</i>
         <span>Haz clic para editar</span>
       </div>
@@ -105,7 +106,7 @@
         <i class="section-icon">🖼️</i>
         Galería de Trabajos
       </h2>
-      <button class="add-photo-btn-modern" (click)="addPhoto()">
+      <button class="add-photo-btn-modern" (click)="addPhoto()" *ngIf="!isPublicProfile">
         📷 Agregar Foto
       </button>
     </div>
@@ -114,7 +115,7 @@
       <div *ngFor="let photo of galleryPhotos; let i = index" class="gallery-item-modern">
         <img [src]="photo.url" [alt]="photo.description" class="gallery-image">
         <div class="gallery-overlay">
-          <button class="gallery-action delete" (click)="removePhoto(i)">🗑️</button>
+          <button class="gallery-action delete" (click)="removePhoto(i)" *ngIf="!isPublicProfile">🗑️</button>
           <button class="gallery-action view" (click)="viewPhoto(photo)">🔍</button>
         </div>
       </div>
@@ -123,9 +124,9 @@
     <ng-template #noPhotos>
       <div class="empty-state-modern gallery-empty">
         <i class="empty-icon">📸</i>
-        <h3>No tienes fotos de trabajos</h3>
-        <p>Agrega fotos de tus trabajos para que los clientes vean la calidad de tu trabajo</p>
-        <button class="btn-primary-modern" (click)="addPhoto()">
+        <h3>No hay fotos de trabajos</h3>
+        <p *ngIf="!isPublicProfile">Agrega fotos de tus trabajos para que los clientes vean la calidad de tu trabajo</p>
+        <button class="btn-primary-modern" (click)="addPhoto()" *ngIf="!isPublicProfile">
           📷 Subir Primera Foto
         </button>
       </div>
@@ -134,7 +135,7 @@
 
   <!-- Botones de Acción -->
   <div class="action-buttons-modern">
-    <button class="action-btn-modern primary" *ngIf="isProveedor" (click)="goToRegisterService()">
+    <button class="action-btn-modern primary" *ngIf="isProveedor && !isPublicProfile" (click)="goToRegisterService()">
       ➕ Publicar Servicio
     </button>
     <button class="action-btn-modern secondary" (click)="goBack()">

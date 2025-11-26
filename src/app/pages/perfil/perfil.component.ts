@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 import { UsersService } from '../../core/services/users.service';
@@ -43,9 +43,12 @@ export class PerfilComponent implements OnInit {
   
   // Subject manual evitando RxJS extra (mantener simple):
   direccionTimer: any = null;
+  
+  isPublicProfile = false; // Flag para perfil público
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private usersService: UsersService,
     private fb: FormBuilder,
     @Inject(API_URL) private apiUrl: string
@@ -124,7 +127,29 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit(): void {
     this.buildForm();
-    this.loadMe();
+    
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.isPublicProfile = true;
+      this.loadUserById(+idParam);
+    } else {
+      this.loadMe();
+    }
+  }
+
+  private loadUserById(id: number): void {
+    this.usersService.getById(id).subscribe({
+      next: (user) => {
+        this.populateUserData(user);
+        this.form.disable(); // Deshabilitar formulario en modo lectura
+        this.dataLoaded = true;
+        this.initializeExampleData();
+      },
+      error: (err) => {
+        console.error('Error cargando perfil de usuario:', err);
+        this.router.navigate(['/menu']);
+      }
+    });
   }
 
   private buildForm(): void {
@@ -145,39 +170,44 @@ export class PerfilComponent implements OnInit {
   private loadMe(): void {
     this.usersService.getMe().subscribe({
       next: (me: UsuarioDetalleDTO) => {
-        this.profileImageUrl = me.fotoPerfilUrl ? this.makeAbsoluteUrl(me.fotoPerfilUrl) : null;
-        this.userName = me.nombre || 'Usuario';
-        this.userInitials = this.computeInitials(this.userName);
-        this.userDescription = me.descripcion ?? null;
-        this.userRating = typeof me.evaluacion === 'number' ? me.evaluacion : null;
-        this.userPhone = me.telefono ?? null;
-        this.isProveedor = !!me.esProveedor;
-        this.isCliente   = !!me.esCliente && !this.isProveedor; 
-        this.direccionId = me.direccion?.idDireccion ?? 0;
-
-        this.form.patchValue({
-          nombre: me.nombre || '',
-          descripcion: me.descripcion || '',
-          telefono: (me.telefono || '').replace(/\D/g, '').replace(/^56/, ''),
-          correo: me.correo || '',
-          idDireccion: this.direccionId,
-          direccionDescripcion: me.direccion?.descripcion || '',
-          codigoPostal: me.direccion?.codigoPostal || ''
-        });
+        this.populateUserData(me);
+        
+        // Snapshots para edición (solo en mi perfil)
         this.initialDireccionDescripcion = this.form.value.direccionDescripcion || '';
         this.initialCodigoPostal = this.form.value.codigoPostal || '';
 
         this.form.markAsPristine();
         this.form.markAsUntouched();
-        this.dataLoaded = true; // <<<<<< habilita botones
+        this.dataLoaded = true; 
         
-        // Inicializar datos de ejemplo para la nueva interfaz
         this.initializeExampleData();
       },
       error: (err) => {
         console.error('Error cargando perfil:', err);
-        this.dataLoaded = true; // evita que quede bloqueado si falla
+        this.dataLoaded = true; 
       }
+    });
+  }
+
+  private populateUserData(user: UsuarioDetalleDTO): void {
+    this.profileImageUrl = user.fotoPerfilUrl ? this.makeAbsoluteUrl(user.fotoPerfilUrl) : null;
+    this.userName = user.nombre || 'Usuario';
+    this.userInitials = this.computeInitials(this.userName);
+    this.userDescription = user.descripcion ?? null;
+    this.userRating = typeof user.evaluacion === 'number' ? user.evaluacion : null;
+    this.userPhone = user.telefono ?? null;
+    this.isProveedor = !!user.esProveedor;
+    this.isCliente   = !!user.esCliente && !this.isProveedor; 
+    this.direccionId = user.direccion?.idDireccion ?? 0;
+
+    this.form.patchValue({
+      nombre: user.nombre || '',
+      descripcion: user.descripcion || '',
+      telefono: (user.telefono || '').replace(/\D/g, '').replace(/^56/, ''),
+      correo: user.correo || '',
+      idDireccion: this.direccionId,
+      direccionDescripcion: user.direccion?.descripcion || '',
+      codigoPostal: user.direccion?.codigoPostal || ''
     });
   }
 

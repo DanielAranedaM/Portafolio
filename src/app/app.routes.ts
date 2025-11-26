@@ -46,6 +46,11 @@ export const routes: Routes = [
         canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login
     },
     {
+        path: 'perfil/:id',
+        component: PerfilComponent,
+        canActivate: [authGuard]
+    },
+    {
         path: 'registrar-servicio',
         component: RegistrarServicioComponent,
         canActivate: [authGuard] // 🔒 Si no hay token, lo patea al login

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import {
   Subject,
@@ -21,6 +21,9 @@ import { CategoriasService } from '../../core/services/categorias.service';
 import { CreateServiceDTO } from '../../core/models/create-service.dto';
 import { DireccionDTO } from '../../core/models/direccion.dto';
 import { CategoriaDTO } from '../../core/models/categoria.dto';
+import { ToastService } from '../../core/services/toast.service';
+
+import { ServicioDTO } from '../../core/models/servicio.dto';
 
 type NominatimResult = {
   place_id: number;
@@ -50,6 +53,9 @@ type NominatimResult = {
 export class RegistrarServicioComponent implements OnInit, OnDestroy {
   currentStep = 1;
   totalSteps = 3;
+  editMode = false;
+  serviceId: number | null = null;
+  servicioOriginal: ServicioDTO | null = null;
 
   form!: FormGroup;
   selectedFiles: File[] = [];
@@ -72,15 +78,16 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private servicesService: ServicesService,
     private usersService: UsersService,
-    private categoriasService: CategoriasService
+    private categoriasService: CategoriasService,
+    private toastService: ToastService
   ) {
     this.form = this.fb.group({
       nombreServicio: ['', [Validators.required, Validators.minLength(3)]],
       categoria: ['', Validators.required], // value será un ID numérico
       descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      precio: [''], // Campo opcional - podrá ser agregado más tarde
       direccionDescripcion: ['']
     });
   }
@@ -92,6 +99,15 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       next: (cats) => {
         this.categorias = cats ?? [];
         this.cargandoCategorias = false;
+
+        // Check for edit mode
+        this.route.queryParams.subscribe(params => {
+          if (params['id']) {
+            this.editMode = true;
+            this.serviceId = +params['id'];
+            this.loadServiceData(this.serviceId);
+          }
+        });
       },
       error: (err) => {
         console.error('Error al cargar categorías', err);
@@ -100,18 +116,20 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
     });
 
     // Precargar dirección REAL desde la API (SQL)
-    this.usersService.getMe().subscribe({
-      next: (user) => {
-        const desc = (user?.direccion?.descripcion ?? '').toString().trim();
-        if (desc) {
-          this.form.patchValue({ direccionDescripcion: desc });
+    if (!this.editMode) {
+      this.usersService.getMe().subscribe({
+        next: (user) => {
+          const desc = (user?.direccion?.descripcion ?? '').toString().trim();
+          if (desc) {
+            this.form.patchValue({ direccionDescripcion: desc });
+          }
+        },
+        error: (err) => {
+          console.warn('No se pudo precargar dirección desde API:', err);
+          this.precargarDesdeLocalStorage();
         }
-      },
-      error: (err) => {
-        console.warn('No se pudo precargar dirección desde API:', err);
-        this.precargarDesdeLocalStorage();
-      }
-    });
+      });
+    }
 
     // Suscripción a Nominatim
     this.sub = this.direccionInput$
@@ -126,6 +144,25 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         this.mostrandoSugerencias = res.length > 0;
       });
   }
+  loadServiceData(id: number) {
+    this.servicesService.getServiceById(id).subscribe({
+      next: (dto) => {
+        this.servicioOriginal = dto;
+        this.form.patchValue({
+          nombreServicio: dto.titulo,
+          categoria: dto.idCategoriaServicio,
+          descripcion: dto.descripcion,
+          direccionDescripcion: dto.ubicacion 
+        });
+      },
+      error: (err) => {
+        console.error('Error loading service', err);
+        this.toastService.show('Error al cargar los datos del servicio.', 'error');
+        this.router.navigate(['/menu']);
+      }
+    });
+  }
+
   goBackToMenu(): void { this.router.navigate(['/menu']); }
   private precargarDesdeLocalStorage() {
     const userData = localStorage.getItem('userData');
@@ -276,24 +313,60 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         formData.append('imagenes', file, file.name);
       });
 
-      console.log('📤 Enviando servicio con', this.selectedFiles.length, 'imagen(es)...');
+      console.log('📤 Enviando servicio...');
       this.uploadProgress = 50;
 
-      // Enviar todo en una sola petición
-      const servicioCreado = await firstValueFrom(
-        this.servicesService.createService(formData)
-      );
+      if (this.editMode && this.serviceId && this.servicioOriginal) {
+        if (this.selectedFiles.length > 0) {
+          alert('Nota: La actualización de imágenes no está soportada en la edición. Se actualizarán solo los datos de texto.');
+        }
+
+        // Construir objeto JSON para update
+        // Mezclamos el original con los cambios del form
+        const updatePayload: ServicioDTO = {
+          ...this.servicioOriginal,
+          titulo: (this.form.value.nombreServicio ?? '').trim(),
+          descripcion: (this.form.value.descripcion ?? '').trim(),
+          idCategoriaServicio: idCategoriaServicio,
+          precioBase: 0, // El precio se especifica en la descripción
+          ubicacion: (this.form.value.direccionDescripcion ?? '').trim()
+          // Mantenemos idUsuario, fechaPublicacion, etc. del original
+        };
+
+         await firstValueFrom(
+          this.servicesService.updateService(this.serviceId, updatePayload)
+        );
+        alert('¡Servicio actualizado exitosamente!');
+      } else {
+        // MODO CREACIÓN (FormData)
+        const formData = new FormData();
+        
+        // Agregar campos del formulario
+        formData.append('Titulo', (this.form.value.nombreServicio ?? '').trim());
+        formData.append('Descripcion', (this.form.value.descripcion ?? '').trim());
+        formData.append('IdCategoriaServicio', idCategoriaServicio.toString());
+        
+        // PrecioBase no se envía ya que se especifica en la descripción
+
+        // Agregar TODAS las imágenes
+        this.selectedFiles.forEach((file) => {
+          formData.append('imagenes', file, file.name);
+        });
+
+        // Enviar todo en una sola petición
+        await firstValueFrom(
+          this.servicesService.createService(formData)
+        );
+        alert('¡Servicio publicado exitosamente!');
+      }
 
       this.uploadProgress = 100;
-      console.log('✅ Servicio creado exitosamente:', servicioCreado);
-
-      alert('¡Servicio publicado exitosamente!');
       this.router.navigate(['/menu']);
 
     } catch (error: any) {
-      console.error('❌ Error al crear servicio:', error);
+      console.error('❌ Error al guardar servicio:', error);
       
-      let errorMessage = 'Error al publicar el servicio. Por favor intenta nuevamente.';
+      let errorMessage = 'Error al guardar el servicio. Por favor intenta nuevamente.';
       
       if (error.error?.message) {
         errorMessage = error.error.message;

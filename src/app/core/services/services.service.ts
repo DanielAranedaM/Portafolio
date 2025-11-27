@@ -101,6 +101,39 @@ export class ServicesService {
       );
   }
   
+  /**
+   * Obtiene un servicio por su ID
+   */
+  getServiceById(id: number): Observable<ServicioDTO> {
+    return this.http
+      .get<ServicioDTO>(`${this.base}/GetServiceById/${id}`)
+      .pipe(
+        map(servicio => this.normalizeServicio(servicio)),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Actualiza un servicio existente enviando JSON
+   */
+  updateService(id: number, serviceData: any): Observable<ServicioDTO> {
+    return this.http
+      .put<ServicioDTO>(`${this.base}/UpdateService/${id}`, serviceData)
+      .pipe(
+        map(servicio => this.normalizeServicio(servicio)),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Elimina un servicio por su ID
+   */
+  deleteService(id: number): Observable<any> {
+    return this.http
+      .delete(`${this.base}/DeleteServices/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
   getDashboardDataForProveedor(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/DashboardProveedor`);
   }

@@ -22,6 +22,7 @@ import { SolicitudesService } from '../../core/services/solicitudes.service';
 import { SolicitudCreateDTO } from '../../core/models/solicitud-create.dto';
 import { ServicioDetalleDTO } from '../../core/models/servicio-detalle.dto';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-menu',
@@ -43,6 +44,7 @@ chatbotVisible: boolean = false;
     private califsService: CalificacionesService,
     private denunciasService: DenunciasService,
     private solicitudesService: SolicitudesService, // 👈 NUEVO
+    private toastService: ToastService,
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -386,14 +388,27 @@ chatbotVisible: boolean = false;
   // Métodos para acciones del dashboard de proveedor
   verDetalleServicio(servicio: any): void {
     console.log('Ver detalle de servicio:', servicio);
-    alert(`Ver detalles de: ${servicio.titulo}`);
+    this.toastService.show(`Ver detalles de: ${servicio.titulo}`, 'info');
     // TODO: Navegar a página de detalle del servicio
   }
 
   editarServicio(servicio: any): void {
-    console.log('Editar servicio:', servicio);
-    alert(`Editar: ${servicio.titulo}`);
-    // TODO: Navegar a página de edición del servicio
+    this.router.navigate(['/registrar-servicio'], { queryParams: { id: servicio.id } });
+  }
+
+  deleteService(servicio: any): void {
+    if (confirm(`¿Estás seguro de que deseas eliminar el servicio "${servicio.titulo}"?`)) {
+      this.servicesService.deleteService(servicio.id).subscribe({
+        next: () => {
+          this.toastService.show('El servicio ha sido eliminado exitosamente.', 'success');
+          this.loadProveedorData();
+        },
+        error: (err) => {
+          console.error('Error al eliminar servicio', err);
+          this.toastService.show('Error al eliminar el servicio: ' + (err.message || 'Error desconocido'), 'error');
+        }
+      });
+    }
   }
 
   verTodasResenas(): void {

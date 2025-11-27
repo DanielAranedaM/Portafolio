@@ -147,6 +147,7 @@
       </button>
       
       <button 
+        *ngIf="!isReadOnly"
         type="button" 
         class="btn btn-outline-primary"
         (click)="onGuardar()">
@@ -155,6 +156,7 @@
       </button>
       
       <button 
+        *ngIf="!isReadOnly"
         type="button" 
         class="btn btn-whatsapp"
         (click)="onWhatsApp()">
@@ -163,6 +165,7 @@
       </button>
 
       <button 
+        *ngIf="!isReadOnly"
         type="button" 
         class="btn btn-success"
         (click)="onSolicitar()">

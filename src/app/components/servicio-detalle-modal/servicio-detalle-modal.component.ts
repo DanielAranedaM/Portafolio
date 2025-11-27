@@ -25,6 +25,7 @@ export class ServicioDetalleModalComponent implements OnInit {
   @Output() contactar = new EventEmitter<number>();
   @Output() guardar = new EventEmitter<number>();
   @Output() solicitar = new EventEmitter<ServicioDetalleDTO>();
+  @Input() isReadOnly: boolean = false;
 
   detalle: ServicioDetalleDTO | null = null;
   currentImageIndex = 0;

@@ -198,5 +198,6 @@
 <app-servicio-detalle-modal
   *ngIf="selectedService"
   [servicio]="selectedService"
+  [isReadOnly]="true" 
   (close)="closeServiceModal()">
 </app-servicio-detalle-modal>

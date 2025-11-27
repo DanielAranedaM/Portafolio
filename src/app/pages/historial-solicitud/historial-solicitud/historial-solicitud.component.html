@@ -1,5 +1,4 @@
 <div class="requests-container" role="region" aria-label="Solicitudes agendadas">
-  <!-- Header -->
   <header class="requests-header" role="banner">
     <div class="header-main">
       <button class="btn-back-icon" aria-label="Volver" (click)="routeMenu()">
@@ -18,7 +17,6 @@
     </div>
   </header>
 
-  <!-- Resumen Compacto -->
   <section class="stats-row">
     <div class="stat-item">
       <span class="stat-value">{{ summary.total }}</span>
@@ -41,7 +39,6 @@
     </div>
   </section>
 
-  <!-- Filtros -->
   <nav class="filters-nav">
     <button class="filter-chip" [class.active]="filtroEstado === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
     <button class="filter-chip" [class.active]="filtroEstado === 'Agendado'" (click)="setFiltro('Agendado')">Agendados</button>
@@ -49,7 +46,6 @@
     <button class="filter-chip" [class.active]="filtroEstado === 'Finalizado'" (click)="setFiltro('Finalizado')">Finalizados</button>
   </nav>
 
-  <!-- Lista de Tarjetas -->
   <section class="cards-grid" *ngIf="dataLoaded">
     
     <div class="empty-state" *ngIf="solicitudesFiltradas.length === 0">
@@ -59,17 +55,16 @@
     </div>
 
     <article class="request-card" *ngFor="let s of solicitudesFiltradas">
-      <!-- Header Tarjeta -->
       <div class="card-header">
         <div class="card-id">#{{ s.idSolicitud }}</div>
         <span class="status-badge" [ngClass]="{
           'status-agendado': s.estado === 'Agendado',
           'status-completado': s.estado === 'Completado',
-          'status-finalizado': s.estado === 'Finalizado'
+          'status-finalizado': s.estado === 'Finalizado',
+          'status-cancelado': s.estado === 'Cancelado'
         }">{{ s.estado }}</span>
       </div>
 
-      <!-- Cuerpo Tarjeta -->
       <div class="card-body">
         <div class="info-row">
           <div class="info-col">
@@ -94,48 +89,59 @@
           </div>
         </div>
 
-        <!-- Timeline Visual -->
         <div class="timeline-mini">
-          <div class="step step-done"></div> <!-- Creado -->
-          <div class="line" [class.line-done]="s.estado !== 'Agendado'"></div>
-          <div class="step" [class.step-done]="s.estado !== 'Agendado'"></div> <!-- Completado -->
+          <div class="step step-done"></div> 
+          
+          <div class="line" [class.line-done]="s.estado !== 'Agendado' && s.estado !== 'Cancelado'"></div>
+          
+          <div class="step" [class.step-done]="s.estado !== 'Agendado' && s.estado !== 'Cancelado'"></div> 
+          
           <div class="line" [class.line-done]="s.estado === 'Finalizado'"></div>
-          <div class="step" [class.step-done]="s.estado === 'Finalizado'"></div> <!-- Finalizado -->
+          
+          <div class="step" [class.step-done]="s.estado === 'Finalizado'"></div> 
         </div>
+        
         <div class="timeline-labels">
           <span>Inicio</span>
           <span>Completado</span>
           <span>Fin</span>
         </div>
 
-        <!-- Fechas secundarias -->
         <div class="dates-secondary" *ngIf="s.estado !== 'Agendado'">
-          <div *ngIf="s.fechaCreacion && s.estado !== 'Agendado'">
+          <div *ngIf="s.estado === 'Completado' || s.estado === 'Finalizado'">
             <i class="bi bi-check-circle"></i> Completado: {{ formatoFecha(s.fechaCreacion) }}
           </div>
           <div *ngIf="s.fechaRealizacion">
             <i class="bi bi-check-all"></i> Finalizado: {{ formatoFecha(s.fechaRealizacion) }}
           </div>
+           <div *ngIf="s.estado === 'Cancelado'" style="color: #dc3545;">
+            <i class="bi bi-x-circle"></i> Servicio Cancelado
+          </div>
         </div>
       </div>
 
-      <!-- Footer Acciones -->
       <div class="card-footer" *ngIf="mostrarColumnaAcciones">
-        <!-- CLIENTE: Completar -->
+        
+        <button 
+          class="btn-action btn-cancel" 
+          *ngIf="s.estado !== 'Completado' && s.estado !== 'Finalizado' && s.estado !== 'Cancelado'"
+          (click)="abrirModalCancelar(s)" 
+          title="Cancelar servicio">
+          ✖ Cancelar
+        </button>
+
         <button *ngIf="isCliente && s.estado === 'Agendado'" 
                 class="btn-action btn-complete" 
                 (click)="onClickCompletar(s)">
           <i class="bi bi-check-lg"></i> Marcar Completado
         </button>
 
-        <!-- PROVEEDOR: Finalizar -->
         <button *ngIf="isProveedor && s.estado === 'Completado'" 
                 class="btn-action btn-finish" 
                 (click)="onClickFinalizar(s)">
           <i class="bi bi-check2-all"></i> Finalizar Servicio
         </button>
 
-        <!-- PROVEEDOR: Ver detalle -->
         <button *ngIf="isProveedor && s.estado === 'Finalizado'" 
                 class="btn-action btn-detail" 
                 (click)="abrirModalDetalle(s)">
@@ -143,46 +149,35 @@
         </button>
       </div>
     </article>
+    
   </section>
+  
 </div>
 
-<!-- =================== MODALES (Mismos que antes, solo estilos si es necesario) =================== -->
-
-<!-- MODAL: EVALUAR SERVICIO -->
 <div class="modal-backdrop" 
      [class.is-open]="modalEvaluacionAbierto"
      [attr.aria-hidden]="!modalEvaluacionAbierto">
-  <div class="modal-card modal-card-evaluacion" 
-       role="dialog" 
-       aria-modal="true"
-       aria-labelledby="titulo-evaluacion">
-    
+  <div class="modal-card modal-card-evaluacion" role="dialog">
     <div class="modal-header modal-header--center">
       <h3 id="titulo-evaluacion">¿Desea evaluar el servicio?</h3>
     </div>
-
     <div class="modal-body modal-body--center">
       <p class="eval-text">
         Su opinión nos ayuda a mejorar.  
         ¿Quiere evaluar ahora o prefiere hacerlo más tarde?
       </p>
     </div>
-
     <div class="modal-footer modal-footer--stacked">
-      <button class="eval-btn eval-btn-primary"
-              (click)="irAEvaluacion()">
+      <button class="eval-btn eval-btn-primary" (click)="irAEvaluacion()">
         ✅ Ir a evaluar ahora
       </button>
-
-      <button class="eval-btn eval-btn-secondary"
-              (click)="posponerEvaluacion()">
+      <button class="eval-btn eval-btn-secondary" (click)="posponerEvaluacion()">
         ⏱️ Más tarde
       </button>
     </div>
   </div>
 </div>
 
-<!-- =================== MODAL: FINALIZAR SERVICIO (formulario) =================== -->
 <div class="modal-backdrop" 
      [class.is-open]="modalAbierto" 
      [attr.aria-hidden]="!modalAbierto">
@@ -220,7 +215,6 @@
   </div>
 </div>
 
-<!-- =================== MODAL: VER DETALLE (solo lectura) =================== -->
 <div class="modal-backdrop" 
      [class.is-open]="modalDetalleAbierto"
      [attr.aria-hidden]="!modalDetalleAbierto">
@@ -243,6 +237,39 @@
     </div>
     <div class="modal-footer">
       <button class="action-chip btn-cancel" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" 
+     [class.is-open]="modalCancelarAbierto"
+     [attr.aria-hidden]="!modalCancelarAbierto">
+  
+  <div class="modal-card modal-danger"> <div class="modal-header">
+      <h3>⚠️ Cancelar Solicitud</h3>
+      <button class="modal-close" (click)="cerrarModalCancelar()">✖</button>
+    </div>
+
+    <div class="modal-body" *ngIf="solicitudACancelar">
+      <p>
+        Estás a punto de cancelar la solicitud 
+        <strong>#{{ solicitudACancelar.idSolicitud }}</strong> con 
+        <strong>{{ isProveedor ? solicitudACancelar.clienteNombre : solicitudACancelar.proveedorNombre }}</strong>.
+      </p>
+      <p class="warning-text">
+        Esta acción es irreversible y el servicio quedará anulado.
+      </p>
+
+      <div *ngIf="mensajeErrorCancelar" class="error-banner">
+        {{ mensajeErrorCancelar }}
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalCancelar()">Volver</button>
+      <button class="btn-danger-action" (click)="confirmarCancelacion()">
+        Sí, Cancelar Servicio
+      </button>
     </div>
   </div>
 </div>

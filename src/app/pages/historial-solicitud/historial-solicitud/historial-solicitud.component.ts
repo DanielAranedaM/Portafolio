@@ -52,6 +52,11 @@ export class HistorialSolicitudComponent implements OnInit {
   // Filtros
   filtroEstado: string = 'Todos';
 
+  // VARIABLES PARA EL MODAL DE CANCELACIÓN
+  modalCancelarAbierto = false;
+  solicitudACancelar: SolicitudListadoDTO | null = null;
+  mensajeErrorCancelar: string = '';
+
   constructor(
     private router: Router,
     private solicitudesService: SolicitudesService,
@@ -67,6 +72,37 @@ export class HistorialSolicitudComponent implements OnInit {
     this.router.navigate(['/menu']);
   }
 
+  abrirModalCancelar(s: SolicitudListadoDTO): void {
+      this.solicitudACancelar = s;
+      this.mensajeErrorCancelar = ''; // Limpiar errores previos
+      this.modalCancelarAbierto = true;
+  }
+
+  cerrarModalCancelar(): void {
+    this.modalCancelarAbierto = false;
+    this.solicitudACancelar = null;
+  }
+
+  confirmarCancelacion(): void {
+    if (!this.solicitudACancelar) return;
+
+    const id = this.solicitudACancelar.idSolicitud;
+
+    this.solicitudesService.cancelarSolicitud(id).subscribe({
+      next: () => {
+        // Éxito: Cerramos modal y recargamos lista
+        this.cerrarModalCancelar();
+        this.cargarSolicitudes(); 
+        // Opcional: Podrías usar un 'Toast' o snackbar aquí si quieres feedback visual sutil
+      },
+      error: (err) => {
+        console.error('Error al cancelar:', err);
+        // En lugar de alert, mostramos el error en el modal
+        this.mensajeErrorCancelar = 'No se pudo cancelar. Verifica que no esté finalizada o intenta nuevamente.';
+      }
+    });
+  }
+  
   private cargarUsuarioYDatos(): void {
     this.usersService.getMe().subscribe({
       next: me => {
@@ -272,5 +308,24 @@ export class HistorialSolicitudComponent implements OnInit {
     this.summary.agendados   = arr.filter(s => s.estado === 'Agendado').length;
     this.summary.completados = arr.filter(s => s.estado === 'Completado').length;
     this.summary.finalizados = arr.filter(s => s.estado === 'Finalizado').length;
+  }
+
+  cancelar(s: SolicitudListadoDTO): void {
+    // 1. Confirmación de seguridad
+    if (!confirm(`¿Estás seguro de que deseas cancelar la solicitud N°${s.idSolicitud}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    // 2. Llamada al servicio
+    this.solicitudesService.cancelarSolicitud(s.idSolicitud).subscribe({
+      next: () => {
+        alert('La solicitud ha sido cancelada exitosamente.');
+        this.cargarSolicitudes(); // Recargamos la lista para ver el cambio de estado
+      },
+      error: (err) => {
+        console.error('Error al cancelar:', err);
+        alert('No se pudo cancelar la solicitud. Verifica que no esté ya finalizada.');
+      }
+    });
   }
 }

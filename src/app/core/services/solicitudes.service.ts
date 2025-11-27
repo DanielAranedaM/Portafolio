@@ -36,4 +36,8 @@ export class SolicitudesService {
   finalizar(id: number, dto: SolicitudFinalizarDTO): Observable<any> {
     return this.http.put(`${this.apiUrl}/api/Solicitud/${id}/finalizar`, dto);
   }
+
+  cancelarSolicitud(idSolicitud: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/Solicitud/${idSolicitud}/cancelar`, {});
+  }
 }

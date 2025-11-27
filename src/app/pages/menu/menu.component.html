@@ -81,11 +81,7 @@
         <i class="fas fa-star nav-icon"></i>
         <span class="nav-text">Mis Reseñas</span>
       </button>
-      
-      <button class="nav-btn" (click)="navigateToSettings()">
-        <i class="fas fa-cog nav-icon"></i>
-        <span class="nav-text">Configuración</span>
-      </button>
+    
     </ng-container>
 
     <!-- Opciones para Cliente -->
@@ -105,27 +101,19 @@
         <span class="nav-text">Solicitudes Agendadas</span>
       </button>
 
-      <button class="nav-btn" (click)="navigateToNotifications()">
-        <i class="fas fa-bell nav-icon"></i>
-        <span class="nav-text">Notificaciones</span>
-      </button>
             
       <button class="nav-btn" (click)="navigateToMyReviews()">
         <span class="nav-icon">⭐</span>
         <span class="nav-text">Mis Reseñas</span>
       </button>
 
-      <button class="nav-btn" (click)="navigateToSettings()">
-        <i class="fas fa-cog nav-icon"></i>
-        <span class="nav-text">Configuración</span>
-      </button>
-    </ng-container>
-
     <!-- Cerrar sesión (común para ambos) -->
     <button class="nav-btn logout-btn" (click)="openLogoutModal()">
       <i class="fas fa-sign-out-alt nav-icon"></i>
       <span class="nav-text">Cerrar Sesión</span>
     </button>
+  </ng-container>
+    
     
   </nav>
   

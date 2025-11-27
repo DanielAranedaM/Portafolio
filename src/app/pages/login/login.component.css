@@ -100,7 +100,8 @@
 
 /* --- Lado Derecho: Formulario --- */
 .form-side {
-    flex: 0 0 500px; /* Ancho fijo para el formulario */
+    flex: 0 0 45%; /* Más ancho para mejor visibilidad */
+    min-width: 550px; /* Asegurar un ancho mínimo cómodo */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -112,48 +113,49 @@
 
 .form-container {
     width: 100%;
-    max-width: 380px;
+    max-width: 500px; /* Más ancho para elementos más grandes */
 }
 
 /* Logo y Header */
 .logo-section {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .logo-img {
-    height: 60px;
+    height: 90px; /* Logo más grande */
     width: auto;
 }
 
 .header-section {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 50px;
 }
 
 .header-section h2 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 10px;
-    font-weight: 700;
+    font-size: 2.8rem; /* Título mucho más grande y claro */
+    color: #222; /* Negro suave para alto contraste */
+    margin-bottom: 15px;
+    font-weight: 800;
 }
 
 .subtitle {
-    color: #666;
-    font-size: 1rem;
+    color: #444;
+    font-size: 1.3rem; /* Subtítulo más legible */
+    line-height: 1.5;
 }
 
 /* Formulario */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 35px; /* Más espacio entre campos */
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
-    color: #444;
-    font-weight: 500;
-    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: #333;
+    font-weight: 700; /* Negrita para mejor legibilidad */
+    font-size: 1.2rem; /* Etiquetas más grandes */
 }
 
 .input-wrapper {
@@ -164,29 +166,29 @@
 
 .input-icon {
     position: absolute;
-    left: 16px;
-    color: #999;
-    font-size: 1.1rem;
+    left: 20px;
+    color: #555; /* Iconos más oscuros para contraste */
+    font-size: 1.5rem; /* Icono más grande */
     pointer-events: none;
     transition: color 0.3s;
 }
 
 .form-input {
     width: 100%;
-    padding: 14px 16px 14px 48px; /* Espacio para el icono */
-    border: 2px solid #e1e1e1;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 20px 20px 20px 65px; /* Inputs más altos y espaciosos */
+    border: 2px solid #ccc; /* Borde más visible por defecto */
+    border-radius: 16px;
+    font-size: 1.3rem; /* Texto ingresado más grande */
     transition: all 0.3s ease;
-    background-color: #fafafa;
-    color: #333;
+    background-color: #f8f9fa;
+    color: #000; /* Negro puro */
 }
 
 .form-input:focus {
-    border-color: #005c00; /* Verde corporativo */
+    border-color: #005c00;
     background-color: #fff;
     outline: none;
-    box-shadow: 0 0 0 4px rgba(0, 92, 0, 0.1);
+    box-shadow: 0 0 0 4px rgba(0, 92, 0, 0.15);
 }
 
 .form-input:focus + .input-icon,
@@ -196,18 +198,20 @@
 
 .toggle-password {
     position: absolute;
-    right: 16px;
+    right: 20px;
     background: none;
     border: none;
-    color: #999;
+    color: #555;
     cursor: pointer;
-    padding: 0;
-    font-size: 1.1rem;
+    padding: 10px; /* Área de click más grande */
+    font-size: 1.5rem;
     transition: color 0.3s;
 }
 
 .toggle-password:hover {
-    color: #333;
+    color: #000;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 50%;
 }
 
 /* Opciones */
@@ -215,51 +219,55 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    font-size: 0.9rem;
+    margin-bottom: 45px;
+    font-size: 1.1rem; /* Texto de opciones más grande */
 }
 
 .remember-me {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     cursor: pointer;
-    color: #666;
+    color: #333;
     user-select: none;
+    font-weight: 500;
 }
 
 .remember-me input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 24px; /* Checkbox más grande */
+    height: 24px;
     accent-color: #005c00;
     cursor: pointer;
 }
 
 .forgot-link {
     color: #005c00;
-    text-decoration: none;
-    font-weight: 600;
+    text-decoration: underline; /* Subrayado para claridad */
+    font-weight: 700;
     transition: color 0.2s;
+    padding: 5px; /* Área de click un poco mayor */
 }
 
 .forgot-link:hover {
     color: #003d00;
-    text-decoration: underline;
+    background-color: rgba(0, 92, 0, 0.05);
+    border-radius: 4px;
 }
 
 /* Botones */
 .btn-primary {
     width: 100%;
-    padding: 16px;
+    padding: 22px; /* Botón muy alto y fácil de tocar */
     background-color: #005c00;
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
+    border-radius: 16px;
+    font-size: 1.4rem; /* Texto grande */
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 92, 0, 0.2);
+    margin-bottom: 10px;
 }
 
 .btn-primary:hover {
@@ -302,21 +310,21 @@
 
 .btn-secondary {
     width: 100%;
-    padding: 14px;
+    padding: 20px; /* Botón más alto */
     background-color: transparent;
-    color: #555;
-    border: 2px solid #e1e1e1;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
+    color: #333; /* Mayor contraste */
+    border: 3px solid #ddd; /* Borde más grueso y visible */
+    border-radius: 16px;
+    font-size: 1.2rem; /* Texto más grande */
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
-    border-color: #333;
-    color: #333;
-    background-color: #f9f9f9;
+    border-color: #005c00;
+    color: #005c00;
+    background-color: #f0fdf0;
 }
 
 /* Mensaje de Error */

@@ -38,6 +38,13 @@ const passwordsMatchValidator: ValidatorFn = (group: AbstractControl): Validatio
   return p && r && p === r ? null : { passwordsMismatch: true };
 };
 
+const fullNameValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const value = (control.value || '').trim();
+  // Verifica si hay al menos un espacio entre caracteres (ej: "Juan Perez")
+  const hasSpace = value.indexOf(' ') > 0;
+  return hasSpace ? null : { incompleteName: true };
+};
+
 @Component({
   selector: 'app-registro',
   standalone: true,
@@ -85,7 +92,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.form = this.fb.group({
-      nombre: ['', [Validators.required, Validators.maxLength(200)]],
+      nombre: ['', [Validators.required, Validators.maxLength(200), fullNameValidator]],
       fechaNacimiento: ['', [Validators.required, this.minimumAgeValidator(18)]],
       direccionDescripcion: ['', [Validators.required]],
       correo: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],

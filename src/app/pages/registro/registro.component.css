@@ -1,245 +1,434 @@
-.registro-container {
-  background: rgb(249, 247, 247);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 40px;
-  width: 470px;
-  min-height: 250px;
-  min-width: 26rem;
-  margin: 15dvh auto auto auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.logo-login {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.logo-login-img {
-  max-width: 120px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-.welcome-title {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 600;
-  color: royalblue;
-  margin-bottom: 30px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 15px;
-  color: #2196f3;
-  z-index: 2;
-  font-size: 16px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 15px 45px;
-  border: 2px solid #f0f0f0;
-  border-radius: 12px;
-  font-size: 16px;
-  background: #fafafa;
-  transition: all 0.3s ease;
-  outline: none;
-}
-
-.form-input:focus {
-  border-color: #2196f3;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.form-input::placeholder {
-  color: #999;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 15px;
-  background: none;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  font-size: 16px;
-  z-index: 2;
-}
-
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  font-size: 14px;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-}
-
-.remember-me input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #2196f3;
-}
-
-.forgot-password {
-  color: #2196f3;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.forgot-password:hover {
-  text-decoration: underline;
-}
-
-.login-button {
-  width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
-}
-
-.login-button:active {
-  transform: translateY(0);
-}
-
-.cancel-button {
-  width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, red 0%, red 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancel-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
-}
-
-.cancel-button:active {
-  transform: translateY(0);
-}
-
-.tipo-usuario-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.tipo-usuario-container label:first-child {
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-.form-check {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* --- Autocompletado Dirección --- */
-.sugerencias {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-  max-height: 260px;
-  overflow: auto;
-  z-index: 20;
-}
-
-.sugerencia-item {
-  padding: 10px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #374151; /* gris oscuro */
-}
-
-.form-input.invalid {
-  border-color: #ef4444; /* rojo */
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.error-text {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #dc2626; /* rojo */
-}
-
-.sugerencia-item:last-child {
-  border-bottom: none;
-}
-
-.sugerencia-item:hover {
-  background: #f9fafb;
-}
-
-.sugerencia-atribucion {
-  padding: 8px 12px;
-  font-size: 12px;
-  color: #6b7280;
-  background: #fafafa;
-  border-top: 1px dashed #e5e7eb;
-  border-radius: 0 0 12px 12px;
-}
-
-@media (max-width: 480px) {
-  body {
-    padding: 20px;
+/* =========================================
+   Layout Principal (Split Screen)
+   ========================================= */
+   .login-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  /* =========================================
+     Lado Izquierdo: Branding
+     ========================================= */
+  .branding-side {
+    flex: 1;
+    background-image: url('/assets/imagen/login-bg.jpg'); /* Asegúrate de tener esta imagen o usa un color sólido */
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    overflow: hidden;
+    animation: kenBurns 20s infinite alternate;
+  }
+  
+  .branding-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 86, 179, 0.85), rgba(0, 168, 232, 0.85));
+    z-index: 1;
+  }
+  
+  .branding-content {
+    position: relative;
+    z-index: 2;
+    text-align: left; /* Alineación a la izquierda para mejor lectura de lista */
+    padding: 3rem;
+    max-width: 650px;
   }
 
-  .registro-container {
-    padding: 30px 25px;
+  .brand-logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+    display: inline-block;
+    border-bottom: 2px solid rgba(255,255,255,0.5);
+    padding-bottom: 0.5rem;
+  }
+  
+  .branding-content h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+  }
+
+  .text-highlight {
+    color: #ffd700; /* Un dorado/amarillo para resaltar sobre azul */
+    font-style: italic;
+  }
+  
+  .branding-description {
+    font-size: 1.4rem;
+    line-height: 1.6;
+    font-weight: 400;
+    margin-bottom: 3rem;
+    opacity: 0.95;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  }
+
+  /* =========================================
+     Marketing Features List
+     ========================================= */
+  .marketing-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, background 0.3s ease;
+  }
+
+  .feature-item:hover {
+    transform: translateX(10px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .feature-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    color: #ffd700;
+    flex-shrink: 0;
+  }
+
+  .feature-text h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem 0;
+    color: white;
+  }
+
+  .feature-text p {
+    font-size: 1rem;
     margin: 0;
-    max-width: 100%;
+    opacity: 0.9;
+    font-weight: 300;
   }
-
-  .welcome-title {
-    font-size: 24px;
+  
+  /* =========================================
+     Lado Derecho: Formulario
+     ========================================= */
+  .form-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #ffffff;
+    overflow-y: auto; /* Permitir scroll si el formulario es largo */
   }
-}
+  
+  .form-container {
+    width: 100%;
+    max-width: 550px; /* Un poco más ancho para el registro */
+    padding: 2rem;
+  }
+  
+  .header-section {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  
+  .header-section h2 {
+    font-size: 2.5rem;
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  /* =========================================
+     Estilos del Formulario (Senior Friendly)
+     ========================================= */
+  .form-group {
+    margin-bottom: 1.8rem;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.5rem;
+  }
+  
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .input-icon {
+    position: absolute;
+    left: 1.2rem;
+    font-size: 1.3rem;
+    color: #0056b3;
+    z-index: 10;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3.2rem; /* Espacio para el icono */
+    font-size: 1.2rem;
+    border: 2px solid #ced4da;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+    color: #333;
+  }
+  
+  .form-input:focus {
+    border-color: #0056b3;
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.15);
+    outline: none;
+  }
+  
+  .form-input.invalid {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+  }
+  
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+  
+  .toggle-password:hover {
+    color: #0056b3;
+  }
+  
+  .error-text {
+    color: #dc3545;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .error-text::before {
+    content: '⚠️';
+  }
+  
+  /* =========================================
+     Selector de Tipo de Usuario (Cards)
+     ========================================= */
+  .user-type-selector {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .type-card {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    background: #fff;
+  }
+  
+  .hidden-radio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .card-icon {
+    font-size: 2rem;
+  }
+  
+  .card-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #444;
+  }
+  
+  .card-desc {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  /* Estado Seleccionado */
+  .type-card.selected {
+    border-color: #0056b3;
+    background-color: #f0f7ff;
+    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .type-card.selected .card-title {
+    color: #0056b3;
+  }
+  
+  /* =========================================
+     Botones
+     ========================================= */
+  .actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .btn-primary {
+    width: 100%;
+    padding: 1.2rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    background-color: #0056b3;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 86, 179, 0.2);
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    background-color: #004494;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 86, 179, 0.3);
+  }
+  
+  .btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  .btn-secondary {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0056b3;
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #f0f7ff;
+    text-decoration: underline;
+  }
+  
+  /* =========================================
+     Sugerencias de Dirección
+     ========================================= */
+  .sugerencias {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fff;
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .sugerencia-item {
+    padding: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+  }
+  
+  .sugerencia-item:hover {
+    background-color: #f0f7ff;
+    color: #0056b3;
+  }
+  
+  /* =========================================
+     Animaciones
+     ========================================= */
+  @keyframes kenBurns {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+  }
+  
+  /* =========================================
+     Responsive
+     ========================================= */
+  @media (max-width: 992px) {
+    .login-layout {
+      flex-direction: column;
+    }
+  
+    .branding-side {
+      flex: 0 0 200px; /* Altura fija en móviles */
+      min-height: 200px;
+    }
+  
+    .branding-content h1 {
+      font-size: 2.5rem;
+    }
+  
+    .branding-content p {
+      display: none; /* Ocultar texto largo en móviles */
+    }
+  
+    .form-side {
+      padding: 1rem;
+    }
+  
+    .form-container {
+      padding: 1rem;
+    }
+  }

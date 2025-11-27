@@ -1,141 +1,199 @@
-<div class="registro-container">
-  <div><h1 class="welcome-title">REGÍSTRATE</h1></div>
+<div class="login-layout">
+  
+  <!-- Lado Izquierdo: Branding -->
+  <div class="branding-side">
+    <div class="branding-overlay"></div>
+    <div class="branding-content">
+      <div class="brand-logo-text">El Dato</div>
+      <h1>Donde el Talento <br> <span class="text-highlight">Encuentra Oportunidades</span></h1>
+      <p class="branding-description">
+        Únete a la comunidad de servicios más confiable. Conecta con expertos verificados o haz crecer tu negocio con herramientas profesionales diseñadas para ti.
+      </p>
 
-  <form class="login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <!-- Nombre -->
-    <div class="form-group">
-      <label class="form-label">Nombre *</label>
-      <div class="input-container">
-        <span class="input-icon">👤</span>
-        <input type="text" class="form-input" placeholder="Nombre Completo"
-               formControlName="nombre" [class.invalid]="invalid('nombre')" required>
+      <div class="marketing-features">
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <i class="fas fa-rocket"></i>
+          </div>
+          <div class="feature-text">
+            <h3>Rápido y Eficiente</h3>
+            <p>Publica o contrata servicios en minutos.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="feature-text">
+            <h3>Confianza Total</h3>
+            <p>Reseñas reales y perfiles verificados.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon-wrapper">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="feature-text">
+            <h3>Impulsa tu Éxito</h3>
+            <p>Gestiona tu agenda y clientes fácilmente.</p>
+          </div>
+        </div>
       </div>
-      <div class="error-text" *ngIf="invalid('nombre')">El nombre es obligatorio.</div>
     </div>
+  </div>
 
-    <!-- Fecha de nacimiento -->
-    <div class="form-group">
-      <label class="form-label">Fecha de nacimiento *</label>
-      <div class="input-container">
-        <span class="input-icon">🎂</span>
-        <input type="date" class="form-input" placeholder="AAAA-MM-DD"
-               formControlName="fechaNacimiento" 
-               [attr.max]="maxDateAllowed"
-               [class.invalid]="invalid('fechaNacimiento')" required>
-      </div>
+  <!-- Lado Derecho: Formulario -->
+  <div class="form-side">
+    <div class="form-container">
       
-      <div class="error-text" *ngIf="invalid('fechaNacimiento')">
-        <span *ngIf="form.get('fechaNacimiento')?.errors?.['required']">
-          La fecha de nacimiento es obligatoria.
-        </span>
-        <span *ngIf="form.get('fechaNacimiento')?.errors?.['underAge']">
-          Debes ser mayor de 18 años para registrarte.
-        </span>
+      <div class="header-section">
+        <h2>Crear Cuenta</h2>
+        <p class="subtitle">Completa tus datos para comenzar</p>
       </div>
-    </div>
 
-    <!-- Dirección con autocompletado -->
-    <div class="form-group" style="position: relative;">
-      <label class="form-label">Dirección *</label>
-      <div class="input-container">
-        <span class="input-icon">📍</span>
-        <input #direccionInput type="text" class="form-input" placeholder="Escribe tu dirección"
-               autocomplete="off"
-               (keydown.enter)="$event.preventDefault()"
-               (input)="onDireccionInput(direccionInput.value)"
-               (focus)="abrirSugerenciasSiHay()"
-               (blur)="onDireccionBlur()"
-               [value]="form.value.direccionDescripcion || ''"
-               [class.invalid]="invalid('direccionDescripcion')" required>
-      </div>
-      <div class="error-text" *ngIf="invalid('direccionDescripcion')">La dirección es obligatoria.</div>
+      <form class="login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        
+        <!-- Nombre -->
+        <div class="form-group">
+          <label class="form-label">Nombre Completo *</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" class="form-input" placeholder="Ej: Juan Pérez"
+                   formControlName="nombre" [class.invalid]="invalid('nombre')" required>
+          </div>
+          <div class="error-text" *ngIf="invalid('nombre')">
+            <span *ngIf="form.get('nombre')?.errors?.['required']">El nombre es obligatorio.</span>
+            <span *ngIf="form.get('nombre')?.errors?.['incompleteName']">Ingresa tu nombre y apellido.</span>
+          </div>
+        </div>
 
-      <ul class="sugerencias" *ngIf="mostrandoSugerencias">
-        <li class="sugerencia-item" *ngFor="let s of sugerencias"
-            (mousedown)="seleccionarSugerencia(s, direccionInput)">
-          {{ s.display_name }}
-        </li>
-        <li class="sugerencia-atribucion">
-          Resultados por Nominatim — © OpenStreetMap contributors
-        </li>
-      </ul>
-    </div>
+        <!-- Fecha de nacimiento -->
+        <div class="form-group">
+          <label class="form-label">Fecha de nacimiento *</label>
+          <div class="input-wrapper">
+            <i class="fas fa-birthday-cake input-icon"></i>
+            <input type="date" class="form-input"
+                   formControlName="fechaNacimiento" 
+                   [attr.max]="maxDateAllowed"
+                   [class.invalid]="invalid('fechaNacimiento')" required>
+          </div>
+          <div class="error-text" *ngIf="invalid('fechaNacimiento')">
+            <span *ngIf="form.get('fechaNacimiento')?.errors?.['required']">La fecha es obligatoria.</span>
+            <span *ngIf="form.get('fechaNacimiento')?.errors?.['underAge']">Debes ser mayor de 18 años.</span>
+          </div>
+        </div>
 
-    <!-- Correo -->
-    <div class="form-group">
-      <label class="form-label">Correo electrónico *</label>
-      <div class="input-container">
-        <span class="input-icon">📧</span>
-        <input type="email" class="form-input" placeholder="tu@correo.com"
-               formControlName="correo" [class.invalid]="invalid('correo')" required>
-      </div>
-      <div class="error-text" *ngIf="invalid('correo')">Ingresa un correo válido.</div>
-    </div>
+        <!-- Dirección -->
+        <div class="form-group" style="position: relative;">
+          <label class="form-label">Dirección *</label>
+          <div class="input-wrapper">
+            <i class="fas fa-map-marker-alt input-icon"></i>
+            <input #direccionInput type="text" class="form-input" placeholder="Busca tu dirección..."
+                   autocomplete="off"
+                   (keydown.enter)="$event.preventDefault()"
+                   (input)="onDireccionInput(direccionInput.value)"
+                   (focus)="abrirSugerenciasSiHay()"
+                   (blur)="onDireccionBlur()"
+                   [value]="form.value.direccionDescripcion || ''"
+                   [class.invalid]="invalid('direccionDescripcion')" required>
+          </div>
+          <div class="error-text" *ngIf="invalid('direccionDescripcion')">La dirección es obligatoria.</div>
 
-    <!-- Teléfono (opcional) 
-    <div class="form-group">
-      <label class="form-label">Teléfono (opcional)</label>
-      <div class="input-container">
-        <span class="input-icon">📱</span>
-        <input type="tel" class="form-input" placeholder="+56 9 1234 5678"
-               formControlName="telefono">
-      </div>
-    </div>
-    -->
+          <!-- Sugerencias OSM -->
+          <ul class="sugerencias" *ngIf="mostrandoSugerencias">
+            <li class="sugerencia-item" *ngFor="let s of sugerencias"
+                (mousedown)="seleccionarSugerencia(s, direccionInput)">
+              {{ s.display_name }}
+            </li>
+          </ul>
+        </div>
 
-    <!-- Passwords (grupo) -->
-    <div formGroupName="passwordGroup">
-      <div class="form-group">
-        <label class="form-label">Contraseña *</label>
-        <div class="input-container">
-          <span class="input-icon">🔒</span>
-          <input [type]="showPass ? 'text' : 'password'" class="form-input"
-                 placeholder="Contraseña" formControlName="password" id="passwordInput"
-                 [class.invalid]="form.get('passwordGroup.password')?.invalid && (form.get('passwordGroup.password')?.touched || form.get('passwordGroup.password')?.dirty)" required>
-          <button type="button" class="password-toggle" (click)="togglePassword()">
-            {{ showPass ? '🙈' : '👁' }}
+        <!-- Correo -->
+        <div class="form-group">
+          <label class="form-label">Correo electrónico *</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" class="form-input" placeholder="ejemplo@correo.com"
+                   formControlName="correo" [class.invalid]="invalid('correo')" required>
+          </div>
+          <div class="error-text" *ngIf="invalid('correo')">Ingresa un correo válido.</div>
+        </div>
+
+        <!-- Contraseñas -->
+        <div formGroupName="passwordGroup">
+          <div class="form-group">
+            <label class="form-label">Contraseña *</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input [type]="showPass ? 'text' : 'password'" class="form-input"
+                     placeholder="Mínimo 6 caracteres" formControlName="password"
+                     [class.invalid]="form.get('passwordGroup.password')?.invalid && (form.get('passwordGroup.password')?.touched || form.get('passwordGroup.password')?.dirty)" required>
+              <button type="button" class="toggle-password" (click)="togglePassword()">
+                <i class="fas" [ngClass]="showPass ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+            </div>
+            <div class="error-text" *ngIf="form.get('passwordGroup.password')?.invalid && (form.get('passwordGroup.password')?.touched || form.get('passwordGroup.password')?.dirty)">
+              La contraseña es obligatoria (mínimo 6 caracteres).
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Repetir contraseña *</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input [type]="showPass2 ? 'text' : 'password'" class="form-input"
+                     placeholder="Repite tu contraseña" formControlName="repeatPassword"
+                     [class.invalid]="(form.get('passwordGroup.repeatPassword')?.touched || form.get('passwordGroup.repeatPassword')?.dirty) && !passwordsMatch" required>
+              <button type="button" class="toggle-password" (click)="togglePassword2()">
+                <i class="fas" [ngClass]="showPass2 ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+            </div>
+            <div class="error-text" *ngIf="form.get('passwordGroup')?.touched && form.get('passwordGroup')?.errors?.['passwordsMismatch']">
+              Las contraseñas no coinciden.
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipo de Usuario (Selector Visual) -->
+        <div class="form-group">
+          <label class="form-label">¿Cómo quieres usar la plataforma? *</label>
+          <div class="user-type-selector">
+            
+            <label class="type-card" [class.selected]="form.get('tipoUsuario')?.value === 'solicitante'">
+              <input type="radio" formControlName="tipoUsuario" value="solicitante" class="hidden-radio">
+              <div class="card-content">
+                <span class="card-icon">🔍</span>
+                <span class="card-title">Solicitante</span>
+                <span class="card-desc">Busco servicios</span>
+              </div>
+            </label>
+
+            <label class="type-card" [class.selected]="form.get('tipoUsuario')?.value === 'proveedor'">
+              <input type="radio" formControlName="tipoUsuario" value="proveedor" class="hidden-radio">
+              <div class="card-content">
+                <span class="card-icon">🛠️</span>
+                <span class="card-title">Proveedor</span>
+                <span class="card-desc">Ofrezco servicios</span>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="actions-group">
+          <button type="submit" class="btn-primary" [disabled]="form.invalid">
+            Registrarme
+          </button>
+          
+          <button type="button" class="btn-secondary" (click)="routeLogin()">
+            Ya tengo cuenta, Iniciar Sesión
           </button>
         </div>
-        <div class="error-text"
-             *ngIf="form.get('passwordGroup.password')?.invalid && (form.get('passwordGroup.password')?.touched || form.get('passwordGroup.password')?.dirty)">
-          La contraseña es obligatoria (mínimo 6 caracteres).
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label">Repetir contraseña *</label>
-        <div class="input-container">
-          <span class="input-icon">🔒</span>
-          <input [type]="showPass2 ? 'text' : 'password'" class="form-input"
-                 placeholder="Repetir Contraseña" formControlName="repeatPassword" id="passwordRepeatInput"
-                 [class.invalid]="(form.get('passwordGroup.repeatPassword')?.touched || form.get('passwordGroup.repeatPassword')?.dirty) && !passwordsMatch" required>
-          <button type="button" class="password-toggle" (click)="togglePassword2()">
-            {{ showPass2 ? '🙈' : '👁' }}
-          </button>
-        </div>
-        <div class="error-text"
-             *ngIf="form.get('passwordGroup')?.touched && form.get('passwordGroup')?.errors?.['passwordsMismatch']">
-          Las contraseñas no coinciden.
-        </div>
-      </div>
+      </form>
     </div>
-
-    <!-- Tipo de usuario -->
-    <div class="tipo-usuario-container">
-      <label>Tipo de Usuario *:</label>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" formControlName="tipoUsuario" value="proveedor" id="radioDefault1">
-        <label class="form-check-label" for="radioDefault1">Proveedor</label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" formControlName="tipoUsuario" value="solicitante" id="radioDefault2">
-        <label class="form-check-label" for="radioDefault2">Solicitante</label>
-      </div>
-    </div>
-
-    <br>
-    <button type="submit" class="login-button" [disabled]="form.invalid">Registrarme</button>
-    <br><br>
-    <button type="button" class="cancel-button" (click)="routeLogin()">Cancelar</button>
-  </form>
+  </div>
 </div>

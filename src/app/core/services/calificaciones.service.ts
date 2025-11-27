@@ -7,11 +7,13 @@ import { CalificacionCreateDTO } from '../models/calificacion-create.dto';
 import { CalificacionUpdateDTO } from '../models/calificacion-update.dto';
 import { UsersService } from './users.service';
 import { UsuarioDetalleDTO } from '../models/usuario-detalle.dto';
+import { SolicitudesService } from './solicitudes.service'; 
 
 @Injectable({ providedIn: 'root' })
 export class CalificacionesService {
   constructor(
     private http: HttpClient,
+    private solicitudesService: SolicitudesService,
     private usersService: UsersService,
     @Inject(API_URL) private apiUrl: string
   ) {}

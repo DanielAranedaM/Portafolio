@@ -149,64 +149,75 @@ export class CalificacionesComponent implements OnInit {
   }
 
   openSelectModal(): void {
-    if (!this.myUserId) return;
+    this.selectModalOpen = true; 
 
-    this.selectModalOpen = true;
-    this.selectLoading = true;
-    this.selectError = null;
-    this.clientesOProveedores = [];
-
-    // Trae en paralelo: todas mis solicitudes + mis calificaciones enviadas
+    // Usamos forkJoin para cargar solicitudes y mis calificaciones enviadas
     forkJoin({
       solicitudes: this.solicitudesService.obtenerTodas(),
-      enviadas: this.califsService.getByAuthor(this.myUserId)
+      // CORRECCIÓN AQUÍ: Usamos el método real de tu servicio
+      enviadas: this.califsService.getMineAuthored() 
     }).subscribe({
       next: ({ solicitudes, enviadas }) => {
-        // 1) Solo solicitudes FINALIZADAS donde YO participo
-        const finalizadasMias = solicitudes.filter(s =>
-          s.estado === 'Finalizado' &&
-          (this.isProveedor ? s.idProveedor === this.myUserId : s.idUsuario === this.myUserId)
-        );
 
-        // 2) Mapa por idSolicitud para cruzar con calificaciones
-        const byIdSolicitud = new Map(finalizadasMias.map(s => [s.idSolicitud, s]));
+        // 1) Filtrar solicitudes candidatas
+        const solicitudesCandidatas = solicitudes.filter(s => {
+          // A) Verifico que la solicitud me pertenezca
+          const soyParte = this.isProveedor 
+            ? s.idProveedor === this.myUserId 
+            : s.idUsuario === this.myUserId;
+          
+          if (!soyParte) return false;
 
-        // 3) Personas YA calificadas (a partir de mis calificaciones enviadas)
+          // B) Lógica de Estados:
+          if (this.isProveedor) {
+            // El proveedor espera a 'Finalizado'
+            return s.estado === 'Finalizado';
+          } else {
+            // El cliente puede calificar en 'Completado' o 'Finalizado'
+            return s.estado === 'Finalizado' || s.estado === 'Completado';
+          }
+        });
+
+        // 2) Identificar a quién ya califiqué
+        const byIdSolicitud = new Map(solicitudesCandidatas.map(s => [s.idSolicitud, s]));
         const yaCalificadasIds = new Set<number>();
+        
         for (const c of (enviadas ?? [])) {
-          const sol = byIdSolicitud.get(c.idSolicitud);
-          if (!sol) continue;
+          const sol = byIdSolicitud.get(c.idSolicitud); 
+          if (!sol) continue; 
+
+          // Si soy proveedor, califiqué al idUsuario. Si soy cliente, al idProveedor.
           const personaId = this.isProveedor ? sol.idUsuario : sol.idProveedor;
           yaCalificadasIds.add(personaId);
         }
 
-        // 4) De finalizadas, dejar SOLO las NO calificadas
-        const pendientes = finalizadasMias.filter(s => {
+        // 3) Filtrar pendientes
+        const pendientes = solicitudesCandidatas.filter(s => {
           const personaId = this.isProveedor ? s.idUsuario : s.idProveedor;
           return !yaCalificadasIds.has(personaId);
         });
 
-        // 5) Convertir a {id, nombre} y quedarnos con únicos por persona
+        // 4) Mapear para visualización
         const items = pendientes.map(s => ({
           id: this.isProveedor ? s.idUsuario : s.idProveedor,
           nombre: this.isProveedor ? s.clienteNombre : s.proveedorNombre
         }));
 
-        const unicos = items.filter((item, idx, arr) =>
+        // 5) Quitar duplicados visuales
+        const unicos = items.filter((item, idx, arr) => 
           idx === arr.findIndex(t => t.id === item.id)
         );
 
         this.clientesOProveedores = unicos;
       },
-      error: (err) => {
-        console.error('Error obteniendo datos para selector:', err);
-        this.selectError = 'No se pudo obtener la lista de personas a calificar.';
+      error: (e) => {
+        console.error('Error cargando listas para modal:', e);
+        alert('No se pudieron cargar los usuarios pendientes.');
+        this.selectModalOpen = false;
       }
-    }).add(() => {
-      this.selectLoading = false;
     });
   }
-
+  
   openEditModal(item: CalificacionDTO): void {
     this.isEditing = true;
     this.editingId = item.idValorizacion;
@@ -329,38 +340,51 @@ export class CalificacionesComponent implements OnInit {
   }
 
   selectPerson(person: { id: number; nombre: string }): void {
-    this.selectModalOpen = false;
+      // Cerramos el modal de selección de persona
+      this.selectModalOpen = false;
 
-    this.selectedPersonId = person.id;
-    this.selectedPersonName = person.nombre;
+      // Guardamos temporalmente a quién vamos a calificar
+      this.selectedPersonId = person.id;
+      this.selectedPersonName = person.nombre;
 
-    this.solicitudesService.obtenerTodas().subscribe({
-      next: (solicitudes) => {
-        const finalizadas = solicitudes.filter(s => s.estado === 'Finalizado');
+      // Buscamos de nuevo las solicitudes para obtener el ID exacto de la Solicitud
+      this.solicitudesService.obtenerTodas().subscribe({
+        next: (solicitudes) => {
+          
+          // 1. Aplicamos el mismo filtro de estados
+          const candidatas = solicitudes.filter(s => {
+            if (this.isProveedor) {
+              return s.estado === 'Finalizado';
+            } else {
+              return s.estado === 'Finalizado' || s.estado === 'Completado';
+            }
+          });
 
-        // (opcional) Aseguramos que la solicitud es mía:
-        const mias = this.isProveedor
-          ? finalizadas.filter(s => s.idProveedor === this.myUserId)
-          : finalizadas.filter(s => s.idUsuario === this.myUserId);
+          // 2. Filtramos solo las mías
+          const mias = this.isProveedor
+            ? candidatas.filter(s => s.idProveedor === this.myUserId)
+            : candidatas.filter(s => s.idUsuario === this.myUserId);
 
-        const match = this.isProveedor
-          ? mias.find(s => s.idUsuario   === person.id)   // proveedor -> cliente
-          : mias.find(s => s.idProveedor === person.id);  // cliente   -> proveedor
+          // 3. Buscamos la coincidencia con la persona seleccionada
+          const match = this.isProveedor
+            ? mias.find(s => s.idUsuario   === person.id)   // Soy Proveedor -> busco al Cliente
+            : mias.find(s => s.idProveedor === person.id);  // Soy Cliente   -> busco al Proveedor
 
-        if (!match) {
-          alert('No se encontró una solicitud finalizada con esta persona.');
-          return;
+          if (!match) {
+            alert('No se encontró una solicitud apta para calificar con esta persona.');
+            return;
+          }
+
+          // 4. Asignamos el ID de la solicitud al formulario
+          this.rateForm.idSolicitud = match.idSolicitud;
+
+          // 5. Abrimos el modal de las estrellas (reset = true para limpiar campos)
+          this.openRateModal(true); 
+        },
+        error: (e) => {
+          console.error('Error buscando solicitud para calificar:', e);
+          alert('Ocurrió un error al preparar la calificación.');
         }
-
-        // Guardamos la solicitud y abrimos el modal preservándola
-        this.rateForm.idSolicitud = match.idSolicitud;
-        this.openRateModal(true);   // 👈 preserva idSolicitud
-      },
-      error: (e) => {
-        console.error('Error buscando solicitud:', e);
-        alert('No se pudo preparar la calificación.');
-      }
-    });
+      });
   }
-
 }

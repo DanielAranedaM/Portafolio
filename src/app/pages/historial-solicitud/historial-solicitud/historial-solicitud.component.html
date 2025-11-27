@@ -2,167 +2,153 @@
   <!-- Header -->
   <header class="requests-header" role="banner">
     <div class="header-main">
-      <h1 class="header-title">📅 Solicitudes Agendadas</h1>
-      <p class="header-subtitle">
-        Revisa y gestiona tus servicios. Vista simple y clara.
-      </p>
+      <button class="btn-back-icon" aria-label="Volver" (click)="routeMenu()">
+        <i class="bi bi-arrow-left"></i>
+      </button>
+      <div>
+        <h1 class="header-title">Mis Solicitudes</h1>
+        <p class="header-subtitle">Gestiona tus servicios agendados</p>
+      </div>
     </div>
 
     <div class="header-actions">
-      <button class="btn btn-back" aria-label="Volver al inicio" (click)="routeMenu()">
-        ← Volver al inicio
+      <button class="btn-refresh-icon" (click)="refresh()" [disabled]="isRefreshing" title="Actualizar">
+        <i class="bi bi-arrow-clockwise" [class.spin]="isRefreshing"></i>
       </button>
     </div>
   </header>
 
-  <button
-    class="btn btn-refresh"
-    (click)="refresh()"
-    [disabled]="isRefreshing"
-    [attr.aria-busy]="isRefreshing"
-    title="Actualizar lista de solicitudes">
-    🔄 {{ isRefreshing ? 'Actualizando…' : 'Actualizar' }}
-  </button>
-
-  <small *ngIf="lastUpdated" class="last-updated">
-    Última actualización: {{ lastUpdated | date:'dd/MM/yyyy, h:mm a' }}
-  </small>
-
-  <!-- Resumen -->
-  <section class="summary-cards" aria-label="Resumen de estados">
-    <div class="summary-card">
-      <div class="summary-value">{{ summary.total | number }}</div>
-      <div class="summary-label">Totales</div>
+  <!-- Resumen Compacto -->
+  <section class="stats-row">
+    <div class="stat-item">
+      <span class="stat-value">{{ summary.total }}</span>
+      <span class="stat-label">Total</span>
     </div>
-    <div class="summary-card">
-      <div class="summary-value">{{ summary.agendados | number }}</div>
-      <div class="summary-label">Agendados</div>
+    <div class="stat-divider"></div>
+    <div class="stat-item text-agendado">
+      <span class="stat-value">{{ summary.agendados }}</span>
+      <span class="stat-label">Agendados</span>
     </div>
-    <div class="summary-card">
-      <div class="summary-value">{{ summary.completados | number }}</div>
-      <div class="summary-label">Completados cliente</div>
+    <div class="stat-divider"></div>
+    <div class="stat-item text-completado">
+      <span class="stat-value">{{ summary.completados }}</span>
+      <span class="stat-label">Completados</span>
     </div>
-    <div class="summary-card">
-      <div class="summary-value">{{ summary.finalizados | number }}</div>
-      <div class="summary-label">Finalizados</div>
+    <div class="stat-divider"></div>
+    <div class="stat-item text-finalizado">
+      <span class="stat-value">{{ summary.finalizados }}</span>
+      <span class="stat-label">Finalizados</span>
     </div>
   </section>
 
-  <!-- Tabla -->
-  <section class="section requests-table-section" aria-label="Tabla de solicitudes">
-    <h2 class="section-title">Listado</h2>
+  <!-- Filtros -->
+  <nav class="filters-nav">
+    <button class="filter-chip" [class.active]="filtroEstado === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
+    <button class="filter-chip" [class.active]="filtroEstado === 'Agendado'" (click)="setFiltro('Agendado')">Agendados</button>
+    <button class="filter-chip" [class.active]="filtroEstado === 'Completado'" (click)="setFiltro('Completado')">Completados</button>
+    <button class="filter-chip" [class.active]="filtroEstado === 'Finalizado'" (click)="setFiltro('Finalizado')">Finalizados</button>
+  </nav>
 
-    <div class="table-wrapper" role="table" aria-label="Solicitudes">
-      <div class="table-scroll">
-        <table class="requests-table">
-          <thead>
-            <tr>
-              <th scope="col">N°</th>
-              <th scope="col">Cliente</th>
-              <th scope="col">Proveedor</th>
-              <th scope="col">Fecha agendamiento</th>
-              <th scope="col">Precio cobrado</th>
-              <th scope="col">Fecha completado cliente</th>
-              <th scope="col">Fecha finalizado</th>
-              <th scope="col">Notas</th>
-              <th scope="col">Estado</th>
-              <th scope="col" class="col-actions" *ngIf="mostrarColumnaAcciones">Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody *ngIf="dataLoaded">
-            <tr *ngFor="let s of solicitudes">
-              <td data-label="N°">{{ s.idSolicitud }}</td>
-              <td data-label="Cliente">{{ s.clienteNombre }}</td>
-              <td data-label="Proveedor">{{ s.proveedorNombre }}</td>
-              <td data-label="Fecha agendamiento">{{ formatoFecha(s.fechaAgendamiento) }}</td>
-              <td data-label="Precio cobrado">{{ formatoPrecio(s.precioAcordado) }}</td>
-              <td data-label="Fecha completado cliente">{{ formatoFecha(s.fechaCreacion) }}</td>
-              <td data-label="Fecha finalizado">{{ formatoFecha(s.fechaRealizacion) }}</td>
-              <td data-label="Notas">{{ s.notas || '—' }}</td>
-              <td data-label="Estado">
-                <span class="badge" [ngClass]="{
-                  'badge-agendado': s.estado === 'Agendado',
-                  'badge-completado': s.estado === 'Completado',
-                  'badge-finalizado': s.estado === 'Finalizado'
-                }">{{ s.estado }}</span>
-              </td>
-              <td class="col-actions" data-label="Acciones" *ngIf="mostrarColumnaAcciones">
-                <!-- CLIENTE: Completar -->
-                <button *ngIf="isCliente && s.estado === 'Agendado'" 
-                        class="action-chip btn-complete" 
-                        (click)="onClickCompletar(s)">
-                  ✓ Completar
-                </button>
-
-                <!-- PROVEEDOR: Finalizar -->
-                <button *ngIf="isProveedor && s.estado === 'Completado'" 
-                        class="action-chip btn-finish" 
-                        (click)="onClickFinalizar(s)">
-                  ✔ Finalizar
-                </button>
-
-                <!-- PROVEEDOR: Ver detalle -->
-                <button *ngIf="isProveedor && s.estado === 'Finalizado'" 
-                        class="action-chip btn-detail" 
-                        (click)="abrirModalDetalle(s)">
-                  👁️ Ver detalle
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Tarjetas móviles (misma lógica que la tabla) -->
-      <div class="cards-mobile" *ngIf="dataLoaded">
-        <article class="req-card" *ngFor="let s of solicitudes">
-          <header class="req-card-header">
-            <span class="req-number">N° {{ s.idSolicitud }}</span>
-            <span class="badge" [ngClass]="{
-              'badge-agendado': s.estado === 'Agendado',
-              'badge-completado': s.estado === 'Completado',
-              'badge-finalizado': s.estado === 'Finalizado'
-            }">{{ s.estado }}</span>
-          </header>
-          <dl class="req-data">
-            <div><dt>Cliente</dt><dd>{{ s.clienteNombre }}</dd></div>
-            <div><dt>Proveedor</dt><dd>{{ s.proveedorNombre }}</dd></div>
-            <div><dt>Agendado</dt><dd>{{ formatoFecha(s.fechaAgendamiento) }}</dd></div>
-            <div><dt>Precio</dt><dd>{{ formatoPrecio(s.precioAcordado) }}</dd></div>
-            <div><dt>Completado cliente</dt><dd>{{ formatoFecha(s.fechaCreacion) || '—' }}</dd></div>
-            <div><dt>Finalizado</dt><dd>{{ formatoFecha(s.fechaRealizacion) || '—' }}</dd></div>
-            <div class="req-notas"><dt>Notas</dt><dd>{{ s.notas || '—' }}</dd></div>
-          </dl>
-          <footer class="req-actions">
-            <!-- CLIENTE: Completar -->
-            <button *ngIf="isCliente && s.estado === 'Agendado'"
-                    class="action-chip btn-complete"
-                    (click)="onClickCompletar(s)">
-              ✓ Completar
-            </button>
-
-            <!-- PROVEEDOR: Finalizar -->
-            <button *ngIf="isProveedor && s.estado === 'Completado'"
-                    class="action-chip btn-finish"
-                    (click)="onClickFinalizar(s)">
-              ✔ Finalizar
-            </button>
-
-            <!-- PROVEEDOR: Ver detalle -->
-            <button *ngIf="isProveedor && s.estado === 'Finalizado'"
-                    class="action-chip btn-detail"
-                    (click)="abrirModalDetalle(s)">
-              👁️ Ver detalle
-            </button>
-          </footer>
-        </article>
-      </div>
+  <!-- Lista de Tarjetas -->
+  <section class="cards-grid" *ngIf="dataLoaded">
+    
+    <div class="empty-state" *ngIf="solicitudesFiltradas.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>No hay solicitudes en este estado</h3>
+      <p>Cambia el filtro o actualiza la lista.</p>
     </div>
+
+    <article class="request-card" *ngFor="let s of solicitudesFiltradas">
+      <!-- Header Tarjeta -->
+      <div class="card-header">
+        <div class="card-id">#{{ s.idSolicitud }}</div>
+        <span class="status-badge" [ngClass]="{
+          'status-agendado': s.estado === 'Agendado',
+          'status-completado': s.estado === 'Completado',
+          'status-finalizado': s.estado === 'Finalizado'
+        }">{{ s.estado }}</span>
+      </div>
+
+      <!-- Cuerpo Tarjeta -->
+      <div class="card-body">
+        <div class="info-row">
+          <div class="info-col">
+            <span class="label">Fecha Agendada</span>
+            <span class="value date-highlight">{{ formatoFecha(s.fechaAgendamiento) }}</span>
+          </div>
+          <div class="info-col text-end">
+            <span class="label">Precio</span>
+            <span class="value price">{{ formatoPrecio(s.precioAcordado) }}</span>
+          </div>
+        </div>
+
+        <div class="people-row">
+          <div class="person">
+            <span class="role-label">Cliente</span>
+            <span class="person-name">{{ s.clienteNombre }}</span>
+          </div>
+          <div class="arrow">➝</div>
+          <div class="person">
+            <span class="role-label">Proveedor</span>
+            <span class="person-name">{{ s.proveedorNombre }}</span>
+          </div>
+        </div>
+
+        <!-- Timeline Visual -->
+        <div class="timeline-mini">
+          <div class="step step-done"></div> <!-- Creado -->
+          <div class="line" [class.line-done]="s.estado !== 'Agendado'"></div>
+          <div class="step" [class.step-done]="s.estado !== 'Agendado'"></div> <!-- Completado -->
+          <div class="line" [class.line-done]="s.estado === 'Finalizado'"></div>
+          <div class="step" [class.step-done]="s.estado === 'Finalizado'"></div> <!-- Finalizado -->
+        </div>
+        <div class="timeline-labels">
+          <span>Inicio</span>
+          <span>Completado</span>
+          <span>Fin</span>
+        </div>
+
+        <!-- Fechas secundarias -->
+        <div class="dates-secondary" *ngIf="s.estado !== 'Agendado'">
+          <div *ngIf="s.fechaCreacion && s.estado !== 'Agendado'">
+            <i class="bi bi-check-circle"></i> Completado: {{ formatoFecha(s.fechaCreacion) }}
+          </div>
+          <div *ngIf="s.fechaRealizacion">
+            <i class="bi bi-check-all"></i> Finalizado: {{ formatoFecha(s.fechaRealizacion) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Acciones -->
+      <div class="card-footer" *ngIf="mostrarColumnaAcciones">
+        <!-- CLIENTE: Completar -->
+        <button *ngIf="isCliente && s.estado === 'Agendado'" 
+                class="btn-action btn-complete" 
+                (click)="onClickCompletar(s)">
+          <i class="bi bi-check-lg"></i> Marcar Completado
+        </button>
+
+        <!-- PROVEEDOR: Finalizar -->
+        <button *ngIf="isProveedor && s.estado === 'Completado'" 
+                class="btn-action btn-finish" 
+                (click)="onClickFinalizar(s)">
+          <i class="bi bi-check2-all"></i> Finalizar Servicio
+        </button>
+
+        <!-- PROVEEDOR: Ver detalle -->
+        <button *ngIf="isProveedor && s.estado === 'Finalizado'" 
+                class="btn-action btn-detail" 
+                (click)="abrirModalDetalle(s)">
+          <i class="bi bi-eye"></i> Ver Detalle
+        </button>
+      </div>
+    </article>
   </section>
 </div>
 
-<!-- =================== MODAL: EVALUAR SERVICIO =================== -->
+<!-- =================== MODALES (Mismos que antes, solo estilos si es necesario) =================== -->
+
+<!-- MODAL: EVALUAR SERVICIO -->
 <div class="modal-backdrop" 
      [class.is-open]="modalEvaluacionAbierto"
      [attr.aria-hidden]="!modalEvaluacionAbierto">
@@ -209,11 +195,11 @@
       <div class="form-grid">
         <div class="form-row">
           <label>Precio cobrado *</label>
-          <input type="number" [(ngModel)]="precioCobrado" placeholder="$ 0" />
+          <input type="number" [(ngModel)]="precioCobrado" placeholder="$ 0" class="form-input" />
         </div>
         <div class="form-row">
           <label>Medio de pago *</label>
-          <select [(ngModel)]="medioPago">
+          <select [(ngModel)]="medioPago" class="form-select">
             <option value="" disabled selected>Selecciona medio de pago</option>
             <option>Efectivo</option>
             <option>Transferencia</option>
@@ -223,13 +209,13 @@
         </div>
         <div class="form-row">
           <label>Notas (opcional)</label>
-          <textarea rows="3" [(ngModel)]="notas"></textarea>
+          <textarea rows="3" [(ngModel)]="notas" class="form-textarea"></textarea>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="action-chip btn-cancel" (click)="cerrarModalFinalizar()">Cancelar</button>
-      <button class="action-chip btn-finish" (click)="guardarFinalizacion()">✔ Guardar finalización</button>
+      <button class="btn-text" (click)="cerrarModalFinalizar()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarFinalizacion()">Guardar</button>
     </div>
   </div>
 </div>

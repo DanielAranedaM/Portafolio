@@ -96,7 +96,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
       fechaNacimiento: ['', [Validators.required, this.minimumAgeValidator(18)]],
       direccionDescripcion: ['', [Validators.required]],
       correo: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
-      telefono: [''], // opcional
+      telefono: ['', [Validators.required, Validators.pattern('^[0-9]+$'), Validators.minLength(8)]],
       tipoUsuario: ['solicitante', [Validators.required]],
       // Grupo de contraseñas
       passwordGroup: this.fb.group(

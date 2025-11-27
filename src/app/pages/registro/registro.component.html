@@ -121,6 +121,21 @@
           <div class="error-text" *ngIf="invalid('correo')">Ingresa un correo válido.</div>
         </div>
 
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label class="form-label">Teléfono *</label>
+          <div class="input-wrapper">
+            <i class="fas fa-phone input-icon"></i>
+            <input type="tel" class="form-input" placeholder="Ej: 912345678"
+                   formControlName="telefono" [class.invalid]="invalid('telefono')" required>
+          </div>
+          <div class="error-text" *ngIf="invalid('telefono')">
+            <span *ngIf="form.get('telefono')?.errors?.['required']">El teléfono es obligatorio.</span>
+            <span *ngIf="form.get('telefono')?.errors?.['pattern']">Solo se permiten números.</span>
+            <span *ngIf="form.get('telefono')?.errors?.['minlength']">Mínimo 8 dígitos.</span>
+          </div>
+        </div>
+
         <!-- Contraseñas -->
         <div formGroupName="passwordGroup">
           <div class="form-group">

@@ -421,18 +421,6 @@ chatbotVisible: boolean = false;
     this.router.navigate(['/servicios-guardados']);
   }
 
-  navigateToNotifications(): void {
-    // TODO: Implementar navegación a "Notificaciones"
-    console.log('Navegando a Notificaciones...');
-    alert('Funcionalidad "Notificaciones" próximamente disponible');
-  }
-
-  navigateToSettings(): void {
-    // TODO: Implementar navegación a "Configuración"
-    console.log('Navegando a Configuración...');
-    alert('Funcionalidad "Configuración" próximamente disponible');
-  }
-
     navigateToHistorialSolicitudes(): void {
     this.router.navigate(['/historial-solicitud']);
   }
@@ -790,7 +778,7 @@ chatbotVisible: boolean = false;
       idUsuario: this.me.idUsuario,
       idProveedor: detalle.proveedorId,
       idServicio: detalle.idServicio,
-      fechaAgendamiento: new Date().toISOString() // Por defecto "ahora", o podrías abrir un modal de fecha
+      fechaAgendamiento: this.getLocalISOString()
     };
 
     this.solicitudesService.crear(dto).subscribe({
@@ -807,6 +795,13 @@ chatbotVisible: boolean = false;
         this.showNotification('No se pudo crear la solicitud.', 'error');
       }
     });
+  }
+
+  private getLocalISOString(): string {
+    const now = new Date();
+    const offsetMs = now.getTimezoneOffset() * 60000;
+    const localTime = new Date(now.getTime() - offsetMs);
+    return localTime.toISOString().slice(0, -1);
   }
 
   /**

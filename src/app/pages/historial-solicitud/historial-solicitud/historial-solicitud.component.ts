@@ -49,6 +49,9 @@ export class HistorialSolicitudComponent implements OnInit {
   isRefreshing = false;
   lastUpdated: Date | null = null;
 
+  // Filtros
+  filtroEstado: string = 'Todos';
+
   constructor(
     private router: Router,
     private solicitudesService: SolicitudesService,
@@ -105,6 +108,17 @@ export class HistorialSolicitudComponent implements OnInit {
 
   refresh(): void {
     this.cargarSolicitudes();
+  }
+
+  setFiltro(estado: string): void {
+    this.filtroEstado = estado;
+  }
+
+  get solicitudesFiltradas(): SolicitudListadoDTO[] {
+    if (this.filtroEstado === 'Todos') {
+      return this.solicitudes;
+    }
+    return this.solicitudes.filter(s => s.estado === this.filtroEstado);
   }
 
   // ====== FLUJO CLIENTE (Completar) ======

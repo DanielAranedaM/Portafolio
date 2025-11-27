@@ -149,7 +149,7 @@ export class ServiciosGuardadosComponent implements OnInit {
       idUsuario: this.me.idUsuario,
       idProveedor: detalle.proveedorId,
       idServicio: detalle.idServicio,
-      fechaAgendamiento: new Date().toISOString()
+      fechaAgendamiento: this.getLocalISOString()
     };
 
     this.solicitudesService.crear(dto).subscribe({
@@ -165,6 +165,13 @@ export class ServiciosGuardadosComponent implements OnInit {
         this.showNotification('No se pudo crear la solicitud.', 'error');
       }
     });
+  }
+
+  private getLocalISOString(): string {
+    const now = new Date();
+    const offsetMs = now.getTimezoneOffset() * 60000;
+    const localTime = new Date(now.getTime() - offsetMs);
+    return localTime.toISOString().slice(0, -1);
   }
 
   volverAlMenu(): void {

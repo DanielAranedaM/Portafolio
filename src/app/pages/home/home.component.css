@@ -22,18 +22,17 @@ html {
 
 /* === Separación del contenido por navbar fijo === */
 body {
-    padding-top: 90px; /* suficiente para que nada quede oculto tras el navbar */
+    padding-top: 90px; 
 }
 
-/* Compensar el scroll al ir a los anchors (#inicio, #como-funciona, etc.) */
 section {
     scroll-margin-top: 100px;
 }
 
 /* === Navbar === */
 .navbar {
-    background: #ffffff;  /* Fondo blanco */
-    padding: 0.7rem 1.5rem; /* ALTURA REDUCIDA */
+    background: #ffffff;  
+    padding: 0.7rem 1.5rem; 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     position: fixed;
     top: 0;
@@ -67,7 +66,7 @@ section {
 .logo-text {
     font-size: 1.8rem;
     font-weight: bold;
-    color: #003D6B; /* Texto del logo oscuro para fondo blanco */
+    color: #003D6B; 
     text-shadow: 0 0 0 transparent;
 }
 
@@ -77,7 +76,7 @@ section {
 }
 
 .nav-link {
-    color: #003D6B;  /* Texto oscuro */
+    color: #003D6B;  
     text-decoration: none;
     font-size: 1.1rem;
     font-weight: 600;
@@ -144,26 +143,6 @@ section {
   overflow: hidden;
 }
 
-/* Decoración de fondo */
-.hero::before {
-  content: '🏘️';
-  position: absolute;
-  top: 20px;
-  right: 5%;
-  font-size: 8rem;
-  opacity: 0.1;
-  animation: float 6s ease-in-out infinite;
-}
-
-.hero::after {
-  content: '🤝';
-  position: absolute;
-  bottom: 20px;
-  left: 5%;
-  font-size: 8rem;
-  opacity: 0.1;
-  animation: float 8s ease-in-out infinite;
-}
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -224,8 +203,8 @@ section {
 
 /* === Buscar Servicios (ACCESIBLE, opción A) === */
 .btn-primary {
-  background: #F9F871;         /* amarillo suave y muy visible */
-  color: #003D6B;              /* texto azul oscuro */
+  background: #F9F871;         
+  color: #003D6B;             
   border: 2px solid #E0D000;
 }
 

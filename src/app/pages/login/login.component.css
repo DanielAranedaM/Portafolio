@@ -11,15 +11,14 @@
 .branding-side {
     flex: 1;
     position: relative;
-    /* La imagen ahora va en el pseudo-elemento ::before para poder animarla */
     display: flex;
     align-items: flex-end;
     padding: 60px;
     color: white;
-    overflow: hidden; /* Crucial para que el zoom no desborde */
+    overflow: hidden; 
 }
 
-/* Imagen de fondo animada (Efecto Ken Burns) */
+/* Imagen de fondo animada */
 .branding-side::before {
     content: '';
     position: absolute;
@@ -31,7 +30,6 @@
     background-size: cover;
     background-position: center;
     z-index: 0;
-    /* Animación de zoom suave */
     animation: zoomEffect 25s infinite alternate ease-in-out;
 }
 
@@ -69,7 +67,6 @@
     position: relative;
     z-index: 2;
     max-width: 600px;
-    /* Entrada suave del texto */
     animation: fadeInUp 1.5s ease-out;
 }
 
@@ -100,8 +97,8 @@
 
 /* --- Lado Derecho: Formulario --- */
 .form-side {
-    flex: 0 0 45%; /* Más ancho para mejor visibilidad */
-    min-width: 550px; /* Asegurar un ancho mínimo cómodo */
+    flex: 0 0 45%; 
+    min-width: 550px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -113,7 +110,7 @@
 
 .form-container {
     width: 100%;
-    max-width: 500px; /* Más ancho para elementos más grandes */
+    max-width: 500px; 
 }
 
 /* Logo y Header */
@@ -123,7 +120,7 @@
 }
 
 .logo-img {
-    height: 90px; /* Logo más grande */
+    height: 90px;
     width: auto;
 }
 
@@ -133,29 +130,29 @@
 }
 
 .header-section h2 {
-    font-size: 2.8rem; /* Título mucho más grande y claro */
-    color: #222; /* Negro suave para alto contraste */
+    font-size: 2.8rem; 
+    color: #222; 
     margin-bottom: 15px;
     font-weight: 800;
 }
 
 .subtitle {
     color: #444;
-    font-size: 1.3rem; /* Subtítulo más legible */
+    font-size: 1.3rem; 
     line-height: 1.5;
 }
 
 /* Formulario */
 .form-group {
-    margin-bottom: 35px; /* Más espacio entre campos */
+    margin-bottom: 35px; 
 }
 
 .form-group label {
     display: block;
     margin-bottom: 12px;
     color: #333;
-    font-weight: 700; /* Negrita para mejor legibilidad */
-    font-size: 1.2rem; /* Etiquetas más grandes */
+    font-weight: 700; 
+    font-size: 1.2rem; 
 }
 
 .input-wrapper {
@@ -167,21 +164,21 @@
 .input-icon {
     position: absolute;
     left: 20px;
-    color: #555; /* Iconos más oscuros para contraste */
-    font-size: 1.5rem; /* Icono más grande */
+    color: #555; 
+    font-size: 1.5rem;
     pointer-events: none;
     transition: color 0.3s;
 }
 
 .form-input {
     width: 100%;
-    padding: 20px 20px 20px 65px; /* Inputs más altos y espaciosos */
-    border: 2px solid #ccc; /* Borde más visible por defecto */
+    padding: 20px 20px 20px 65px; 
+    border: 2px solid #ccc; 
     border-radius: 16px;
-    font-size: 1.3rem; /* Texto ingresado más grande */
+    font-size: 1.3rem; 
     transition: all 0.3s ease;
     background-color: #f8f9fa;
-    color: #000; /* Negro puro */
+    color: #000; 
 }
 
 .form-input:focus {
@@ -203,7 +200,7 @@
     border: none;
     color: #555;
     cursor: pointer;
-    padding: 10px; /* Área de click más grande */
+    padding: 10px; 
     font-size: 1.5rem;
     transition: color 0.3s;
 }
@@ -220,7 +217,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 45px;
-    font-size: 1.1rem; /* Texto de opciones más grande */
+    font-size: 1.1rem; 
 }
 
 .remember-me {
@@ -234,7 +231,7 @@
 }
 
 .remember-me input[type="checkbox"] {
-    width: 24px; /* Checkbox más grande */
+    width: 24px; 
     height: 24px;
     accent-color: #005c00;
     cursor: pointer;
@@ -242,10 +239,10 @@
 
 .forgot-link {
     color: #005c00;
-    text-decoration: underline; /* Subrayado para claridad */
+    text-decoration: underline; 
     font-weight: 700;
     transition: color 0.2s;
-    padding: 5px; /* Área de click un poco mayor */
+    padding: 5px; 
 }
 
 .forgot-link:hover {
@@ -257,12 +254,12 @@
 /* Botones */
 .btn-primary {
     width: 100%;
-    padding: 22px; /* Botón muy alto y fácil de tocar */
+    padding: 22px; 
     background-color: #005c00;
     color: white;
     border: none;
     border-radius: 16px;
-    font-size: 1.4rem; /* Texto grande */
+    font-size: 1.4rem; 
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -310,12 +307,12 @@
 
 .btn-secondary {
     width: 100%;
-    padding: 20px; /* Botón más alto */
+    padding: 20px;
     background-color: transparent;
-    color: #333; /* Mayor contraste */
-    border: 3px solid #ddd; /* Borde más grueso y visible */
+    color: #333; 
+    border: 3px solid #ddd; 
     border-radius: 16px;
-    font-size: 1.2rem; /* Texto más grande */
+    font-size: 1.2rem; 
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -350,7 +347,7 @@
 /* Responsive */
 @media (max-width: 900px) {
     .branding-side {
-        display: none; /* Ocultar imagen en tablets/móviles */
+        display: none; 
     }
     
     .form-side {

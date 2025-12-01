@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { DenunciaCreateDTO } from '../models/denuncia-create.dto';
 import { API_URL } from '../tokens/api-url.token';
 
-// DTOs de administración (puedes moverlos a core/models si quieres)
 export interface DenunciaResenaAdminDTO {
   idDenuncia: number;
   idUsuarioDenunciante: number;
@@ -67,7 +66,7 @@ export class DenunciasService {
     @Inject(API_URL) private readonly apiUrl: string
   ) {}
 
-  // Crear denuncia (ya lo tenías)
+  // Crear denuncia
   crearDenuncia(dto: DenunciaCreateDTO): Observable<any> {
     return this.http.post(`${this.apiUrl}/api/denuncia`, dto);
   }

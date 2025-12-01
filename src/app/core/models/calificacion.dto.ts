@@ -4,7 +4,7 @@ export interface CalificacionDTO {
   idSolicitud: number;
   cantEstrellas: number;
   comentario?: string | null;
-  fecha: string;            // ISO
+  fecha: string;        
 
   // Extras del backend para pintar en UI (opcionales):
   receptorUsuarioId?: number;

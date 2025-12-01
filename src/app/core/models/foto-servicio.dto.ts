@@ -1,7 +1,7 @@
 export interface FotoServicioDTO {
   idFotoServicio?: number;
   idServicio?: number;
-  ruta: string;                      // URL o path ya disponible
+  ruta: string;                     
   esPrincipal: boolean;
-  fechaSubida?: string;              // ISO string si el backend lo devuelve
+  fechaSubida?: string;            
 }

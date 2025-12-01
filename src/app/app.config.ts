@@ -11,6 +11,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: API_URL, useValue: 'https://localhost:7054' } // <--- AJUSTA AQUÍ SI CAMBIA
+    { provide: API_URL, useValue: 'https://localhost:7054' } 
   ]
 };

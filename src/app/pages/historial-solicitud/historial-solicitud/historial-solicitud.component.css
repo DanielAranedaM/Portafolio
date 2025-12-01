@@ -1,4 +1,4 @@
-/* Layout base - Senior Friendly */
+/* Layout base  */
 .requests-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -7,7 +7,7 @@
   background: #f4f6f8;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #222; /* Más oscuro para contraste */
-  font-size: 18px; /* Base más grande */
+  font-size: 18px; 
 }
 
 /* Header */
@@ -31,8 +31,8 @@
 
 .btn-back-icon {
   background: #f0f2f5;
-  border: 2px solid #ccc; /* Borde visible */
-  width: 48px; /* Más grande */
+  border: 2px solid #ccc; 
+  width: 48px; 
   height: 48px;
   border-radius: 50%;
   display: flex;
@@ -46,7 +46,7 @@
 .btn-back-icon:hover { background: #e4e6e9; border-color: #bbb; }
 
 .header-title {
-  font-size: 26px; /* Título grande */
+  font-size: 26px; 
   font-weight: 800;
   margin: 0;
   color: #111;
@@ -61,7 +61,7 @@
 .btn-refresh-icon {
   background: transparent;
   border: none;
-  font-size: 28px; /* Icono grande */
+  font-size: 28px; 
   color: #005A9C;
   cursor: pointer;
   padding: 12px;

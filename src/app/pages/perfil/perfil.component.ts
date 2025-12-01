@@ -25,7 +25,6 @@ export class PerfilComponent implements OnInit {
   osmRegion: string | null = null;
   private initialDireccionDescripcion = '';
   private initialCodigoPostal = '';
-  // Flags de validación UI
   submitted = false;
 
   // OSM
@@ -41,10 +40,9 @@ export class PerfilComponent implements OnInit {
   osmLat: number | null = null;
   osmLon: number | null = null;
   
-  // Subject manual evitando RxJS extra (mantener simple):
   direccionTimer: any = null;
   
-  isPublicProfile = false; // Flag para perfil público
+  isPublicProfile = false;
 
   constructor(
     private router: Router,
@@ -62,7 +60,6 @@ export class PerfilComponent implements OnInit {
   profileImageUrl: string | null = null;
   userInitials = 'US';
 
-  // Nuevas propiedades para la interfaz moderna
   editingDescription = false;
   tempDescription = '';
   activeTab = 'servicios';

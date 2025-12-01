@@ -99,8 +99,6 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       next: (cats) => {
         this.categorias = cats ?? [];
         this.cargandoCategorias = false;
-
-        // Check for edit mode
         this.route.queryParams.subscribe(params => {
           if (params['id']) {
             this.editMode = true;
@@ -115,7 +113,6 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Precargar dirección REAL desde la API (SQL)
     if (!this.editMode) {
       this.usersService.getMe().subscribe({
         next: (user) => {
@@ -298,7 +295,6 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       // Crear FormData con todos los datos
       const formData = new FormData();
       
-      // Agregar campos del formulario
       formData.append('Titulo', (this.form.value.nombreServicio ?? '').trim());
       formData.append('Descripcion', (this.form.value.descripcion ?? '').trim());
       formData.append('IdCategoriaServicio', idCategoriaServicio.toString());
@@ -307,8 +303,6 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         formData.append('PrecioBase', this.form.value.precio.toString());
       }
 
-      // Agregar TODAS las imágenes con el mismo nombre 'imagenes'
-      // El backend las recibe como List<IFormFile>
       this.selectedFiles.forEach((file) => {
         formData.append('imagenes', file, file.name);
       });
@@ -321,16 +315,14 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
           alert('Nota: La actualización de imágenes no está soportada en la edición. Se actualizarán solo los datos de texto.');
         }
 
-        // Construir objeto JSON para update
-        // Mezclamos el original con los cambios del form
         const updatePayload: ServicioDTO = {
           ...this.servicioOriginal,
           titulo: (this.form.value.nombreServicio ?? '').trim(),
           descripcion: (this.form.value.descripcion ?? '').trim(),
           idCategoriaServicio: idCategoriaServicio,
-          precioBase: 0, // El precio se especifica en la descripción
+          precioBase: 0, 
           ubicacion: (this.form.value.direccionDescripcion ?? '').trim()
-          // Mantenemos idUsuario, fechaPublicacion, etc. del original
+         
         };
 
          await firstValueFrom(
@@ -345,10 +337,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         formData.append('Titulo', (this.form.value.nombreServicio ?? '').trim());
         formData.append('Descripcion', (this.form.value.descripcion ?? '').trim());
         formData.append('IdCategoriaServicio', idCategoriaServicio.toString());
-        
-        // PrecioBase no se envía ya que se especifica en la descripción
 
-        // Agregar TODAS las imágenes
         this.selectedFiles.forEach((file) => {
           formData.append('imagenes', file, file.name);
         });

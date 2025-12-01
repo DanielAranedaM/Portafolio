@@ -12,13 +12,9 @@ import { ServicesService } from '../../core/services/services.service';
   styleUrl: './servicio-detalle-modal.component.css'
 })
 export class ServicioDetalleModalComponent implements OnInit {
-  
-  // OPCIÓN A: Datos directos (Lo que usa Denuncias)
-  // Al agregar esto, el error "Can't bind to servicio" desaparecerá
+ 
   @Input() servicio: ServicioDetalleDTO | null = null; 
 
-  // OPCIÓN B: ID (Lo que usa el Menú/Otros)
-  // Lo mantenemos para NO romper el código antiguo
   @Input() servicioId: number | null = null;
 
   @Output() close = new EventEmitter<void>();
@@ -38,18 +34,16 @@ export class ServicioDetalleModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // LÓGICA INTELIGENTE:
     
-    // CASO 1: Denuncias (Ya tenemos los datos, no llamamos a la API)
+    // Denuncias (Ya tenemos los datos, no llamamos a la API)
     if (this.servicio) {
       this.detalle = this.servicio;
       this.isLoading = false;
     } 
-    // CASO 2: Menú (Solo tenemos ID, llamamos a la API como siempre)
     else if (this.servicioId) {
       this.loadServiceDetail();
     }
-    // CASO 3: Error
+    // Error
     else {
       this.error = "No se proporcionó información del servicio.";
       this.isLoading = false;
@@ -148,18 +142,14 @@ export class ServicioDetalleModalComponent implements OnInit {
       }
 
       // Limpieza del número para la API de WhatsApp
-      // 1. Eliminar caracteres no numéricos excepto el +
+      // Eliminar caracteres no numéricos excepto el +
       let cleanPhone = phone.replace(/[^0-9+]/g, '');
 
-      // 2. Si no tiene código de país (no empieza con +), asumir Chile (56) si parece un número local
       if (!cleanPhone.startsWith('+')) {
-        // Si tiene 9 dígitos (ej: 912345678), agregar 56
         if (cleanPhone.length === 9) {
           cleanPhone = '56' + cleanPhone;
         }
       }
-
-      // 3. Eliminar el + final para la URL (wa.me prefiere números puros)
       cleanPhone = cleanPhone.replace('+', '');
 
       console.log('Redirigiendo a WhatsApp:', cleanPhone);

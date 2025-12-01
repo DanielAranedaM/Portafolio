@@ -13,7 +13,6 @@ export interface ServicioDetalleDTO {
   proveedorEvaluacion: number;
   proveedorTelefono: string | null;
   
-  // Todas las fotos
   fotos: FotoServicioDetalleDTO[];
 }
 

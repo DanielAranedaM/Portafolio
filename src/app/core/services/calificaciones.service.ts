@@ -38,7 +38,6 @@ export class CalificacionesService {
     return this.http.get<CalificacionDTO[]>(`${this.apiUrl}/api/Calificacion/recibidas/${idUsuarioReceptor}`);
   }
 
-  // Helpers con tu getMe()
   getMineAuthored(): Observable<CalificacionDTO[]> {
     return this.usersService.getMe().pipe(
       switchMap((me: UsuarioDetalleDTO) => this.getByAuthor(me.idUsuario))

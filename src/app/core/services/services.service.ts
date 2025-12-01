@@ -18,10 +18,7 @@ export class ServicesService {
     this.base = `${this.apiUrl}/api/Services`;
   }
 
-  /**
-   * Crea un servicio enviando FormData (incluye archivos de imágenes)
-   * No envía IdUsuario en el body (se toma del JWT).
-   */
+  // Crea un servicio enviando FormData (incluye archivos de imágenes), No envía IdUsuario en el body (se toma del JWT).
   createService(formData: FormData): Observable<ServicioDTO> {
     return this.http
       .post<ServicioDTO>(`${this.base}/CreateService`, formData)
@@ -31,10 +28,7 @@ export class ServicesService {
       );
   }
 
-  /**
-   * Convierte URLs relativas del backend a URLs absolutas
-   * Ejemplo: /uploads/abc.jpg → https://localhost:7054/uploads/abc.jpg
-   */
+  //Convierte URLs relativas del backend a URLs absolutas
   private makeAbsoluteUrl(ruta: string | null | undefined): string | null {
     if (!ruta) return null;
     // Si ya es absoluta, retornarla tal cual
@@ -43,9 +37,6 @@ export class ServicesService {
     return `${this.apiUrl}${ruta}`;
   }
 
-  /**
-   * Normaliza un ServicioDTO convirtiendo las URLs relativas a absolutas
-   */
   private normalizeServicio(servicio: ServicioDTO): ServicioDTO {
     return {
       ...servicio,
@@ -54,11 +45,9 @@ export class ServicesService {
   }
 
   private handleError = (err: HttpErrorResponse) => {
-    // 400 del controller: { message: string }
     if (err.status === 400 && err.error?.message) {
       return throwError(() => new Error(err.error.message));
     }
-    // 500 ProblemDetails del controller: { title: string, ... }
     if (err.status === 500 && err.error?.title) {
       return throwError(() => new Error(err.error.title));
     }
@@ -101,9 +90,8 @@ export class ServicesService {
       );
   }
   
-  /**
-   * Obtiene un servicio por su ID
-   */
+  // Obtiene un servicio por su ID
+
   getServiceById(id: number): Observable<ServicioDTO> {
     return this.http
       .get<ServicioDTO>(`${this.base}/GetServiceById/${id}`)
@@ -113,9 +101,7 @@ export class ServicesService {
       );
   }
 
-  /**
-   * Actualiza un servicio existente enviando JSON
-   */
+  //Actualiza un servicio existente enviando JSON
   updateService(id: number, serviceData: any): Observable<ServicioDTO> {
     return this.http
       .put<ServicioDTO>(`${this.base}/UpdateService/${id}`, serviceData)
@@ -125,9 +111,7 @@ export class ServicesService {
       );
   }
 
-  /**
-   * Elimina un servicio por su ID
-   */
+  //Elimina un servicio por su ID
   deleteService(id: number): Observable<any> {
     return this.http
       .delete(`${this.base}/DeleteServices/${id}`)
@@ -138,9 +122,7 @@ export class ServicesService {
     return this.http.get<any[]>(`${this.base}/DashboardProveedor`);
   }
 
-  /**
-   * Obtiene detalle completo del servicio incluyendo todas las fotos
-   */
+  //Obtiene detalle completo del servicio incluyendo todas las fotos
   getServiceDetailWithPhotos(id: number): Observable<ServicioDetalleDTO> {
     return this.http
       .get<ServicioDetalleDTO>(`${this.base}/GetServiceDetailWithPhotos/${id}`)
@@ -159,33 +141,25 @@ export class ServicesService {
       );
   }
 
-  /**
-   * Guarda un servicio en favoritos
-   */
+  //Guarda un servicio en favoritos
   guardarServicio(idServicio: number): Observable<any> {
     return this.http.post(`${this.base}/Guardar/${idServicio}`, {});
   }
 
-  /**
-   * Quita un servicio de favoritos
-   */
+  //Quita un servicio de favoritos
   quitarServicioGuardado(idServicio: number): Observable<any> {
     return this.http.delete(`${this.base}/Guardar/${idServicio}`);
   }
 
-  /**
-   * Obtiene los servicios guardados por el usuario actual
-   */
+  //Obtiene los servicios guardados por el usuario actual
   getServiciosGuardados(): Observable<ServicioDTO[]> {
     return this.http
       .get<ServicioDTO[] | { message: string }>(`${this.base}/Guardados`)
       .pipe(
         map((res: any) => {
-          // Si el backend devuelve { message: "No tiene servicios guardados." }
           if (res && res.message) {
             return [];
           }
-          // Si devuelve array
           const servicios = res as ServicioDTO[];
           return servicios.map(s => this.normalizeServicio(s));
         }),

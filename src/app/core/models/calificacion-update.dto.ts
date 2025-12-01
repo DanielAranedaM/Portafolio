@@ -1,4 +1,4 @@
 export interface CalificacionUpdateDTO {
-  cantEstrellas: number;   // 1..5
+  cantEstrellas: number;  
   comentario?: string | null;
 }

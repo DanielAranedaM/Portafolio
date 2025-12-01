@@ -40,7 +40,6 @@ const passwordsMatchValidator: ValidatorFn = (group: AbstractControl): Validatio
 
 const fullNameValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const value = (control.value || '').trim();
-  // Verifica si hay al menos un espacio entre caracteres (ej: "Juan Perez")
   const hasSpace = value.indexOf(' ') > 0;
   return hasSpace ? null : { incompleteName: true };
 };
@@ -204,7 +203,6 @@ export class RegistroComponent implements OnInit, OnDestroy {
       fotoPerfilUrl: null,
     } as unknown as UsuarioDTO;
 
-    // 🔍 LOG para verificar que las coordenadas están en el payload
     console.log('📤 Payload de registro:', JSON.stringify(payload, null, 2));
     console.log('📍 Coordenadas:', {
       latitud: dirDto?.latitud,
@@ -264,14 +262,14 @@ export class RegistroComponent implements OnInit, OnDestroy {
       comuna,
       region,
       codigoPostal,
-      latitud,      // ⬅️ AGREGADO
-      longitud      // ⬅️ AGREGADO
+      latitud,     
+      longitud      
     };
   }
 
   minimumAgeValidator(minAge: number): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) return null; // Si está vacío, el Validators.required se encarga
+      if (!control.value) return null;
       
       const birthDate = new Date(control.value);
       const today = new Date();
@@ -279,7 +277,6 @@ export class RegistroComponent implements OnInit, OnDestroy {
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       
-      // Ajuste si aún no ha cumplido años en el mes/día actual
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }

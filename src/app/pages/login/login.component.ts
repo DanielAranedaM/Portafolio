@@ -27,7 +27,6 @@ export class LoginComponent {
     private authService: AuthService
   ) {}
 
-  // --- FUNCIONES DE NAVEGACIÓN Y UI (Las que faltaban) ---
 
   routeRegistro() {
     this.router.navigate(['/registro']);
@@ -40,8 +39,6 @@ export class LoginComponent {
   togglePassword(input: HTMLInputElement) {
     input.type = input.type === 'password' ? 'text' : 'password';
   }
-
-  // --- LÓGICA DE LOGIN ---
 
   login() {
     this.mensajeError = '';
@@ -57,8 +54,6 @@ export class LoginComponent {
         if (res.isSuccess && res.token) {
           // 1. Guardar token
           localStorage.setItem('auth_token', res.token);
-          
-          // 2. Verificar rol
           this.verificarRolYRedirigir();
         } else {
           this.loading = false;

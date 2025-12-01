@@ -73,7 +73,7 @@ export const routes: Routes = [
     {
         path: 'denuncias',
         component: DenunciasComponent,
-        canActivate: [adminGuard] // <--- AQUÍ SE APLICA LA SEGURIDAD
+        canActivate: [adminGuard] 
     },
     {
         path: '**',

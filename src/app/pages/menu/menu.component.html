@@ -11,10 +11,9 @@
   
   <!-- Sección de foto de perfil -->
   <div class="profile-photo-section">
-    <!-- Título de bienvenida -->
     <h2 class="welcome-title">Bienvenido</h2>
     
-    <!-- Foto Perfil CON FUNCIONALIDAD -->
+    <!-- Foto Perfil-->
     <div class="profile-photo-large" (click)="openPhotoModal()">
       <!-- Imagen si existe -->
       <img 
@@ -198,7 +197,7 @@
             </div>
         </section>
 
-        <!-- Vista de Categorías (SIEMPRE visible el header y el botón) -->
+        <!-- Vista de Categorías -->
         <section class="categories-section-improved" *ngIf="!categoriaSeleccionada">
           <div class="categories-header">
             <h2 class="section-main-title">

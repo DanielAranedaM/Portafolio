@@ -43,12 +43,12 @@ chatbotVisible: boolean = false;
     private servicesService: ServicesService,
     private califsService: CalificacionesService,
     private denunciasService: DenunciasService,
-    private solicitudesService: SolicitudesService, // 👈 NUEVO
+    private solicitudesService: SolicitudesService, 
     private toastService: ToastService,
     @Inject(API_URL) private apiUrl: string
   ) {}
 
-  // ------------------ Estado / props ------------------
+
   logoutModalVisible = false;
   userRole = ''; // 'proveedor' | 'cliente'
 
@@ -81,22 +81,22 @@ chatbotVisible: boolean = false;
 
   photoModalVisible = false;
   cameraModalVisible = false;
-  profileImageUrl: string | null = null;   // URL absoluta para <img>
+  profileImageUrl: string | null = null;   
   userInitials = 'US';
   currentStream: MediaStream | null = null;
 
 
-  categoriasVisibles = true; // control para mostrar/ocultar categorías
+  categoriasVisibles = true; 
   searchResults: ServicioDTO[] = [];
   searchLoading = false;
   searchError: string | null = null;
   recentSearches: string[] = []; // últimas 3 búsquedas
 
 
-  selectedCategoryIdForSearch: number | null = null; // si decides aplicar categoría al buscar
+  selectedCategoryIdForSearch: number | null = null; // 
 
   // --- modo y estado unificado de resultados ---
-  resultMode: 'search' | 'category' | null = null; // quién llenó la lista
+  resultMode: 'search' | 'category' | null = null; 
   results: ServicioDTO[] = [];
   loading = false;
   error: string | null = null;
@@ -105,8 +105,6 @@ chatbotVisible: boolean = false;
   // Modal de detalle del servicio
   selectedServiceId: number | null = null;
   showDetailModal = false;
-
-  // --- colapsar/expandir categorías ---
   categoriasCollapsed = false;
 
   // ===== Denuncia de servicio =====
@@ -161,7 +159,7 @@ chatbotVisible: boolean = false;
       }
     }
 
-    // 🔹 cargar historial de búsquedas guardado
+    // cargar historial de búsquedas guardado
     const stored = localStorage.getItem('recentSearches');
     this.recentSearches = stored ? JSON.parse(stored) : [];
 
@@ -176,7 +174,6 @@ chatbotVisible: boolean = false;
       next: (data) => {
         console.log('GET /api/Services/DashboardProveedor ->', data);
 
-        // KPIs del header
         const serviciosActivos = Array.isArray(data) ? data.length : 0;
         const contactosAgendados = Array.isArray(data)
           ? data.reduce((sum, s) => sum + (s.contactosAgendados || 0), 0)
@@ -184,7 +181,7 @@ chatbotVisible: boolean = false;
 
         this.proveedorStats = {
           serviciosActivos,
-          contactosEsteMes: contactosAgendados,  // usamos total de agendados como “contactos”
+          contactosEsteMes: contactosAgendados,  
           totalResenas: this.userRating ? Math.round(this.userRating) : 0
         };
 
@@ -299,7 +296,6 @@ chatbotVisible: boolean = false;
   seleccionarCategoria(cat: CategoriaDTO): void {
     if (!cat?.idCategoriaServicio) return;
 
-    // 👇 Al seleccionar categoría, limpiamos todo lo relacionado a búsqueda
     this.searchResults = [];
     this.searchError = null;
     this.searchLoading = false;
@@ -309,7 +305,7 @@ chatbotVisible: boolean = false;
     this.categoriaSeleccionada = cat;
     this.serviciosLoading = true;
     this.serviciosError = null;
-    this.serviciosDeCategoria = []; // 👈 este es el array que tu HTML itera
+    this.serviciosDeCategoria = []; 
 
     console.log('🔄 Cargando servicios de categoría', cat.idCategoriaServicio, '...');
     
@@ -346,7 +342,7 @@ chatbotVisible: boolean = false;
           console.warn('   ⚠️ Usuario SIN dirección registrada');
         }
         
-        this.me = me; // 👈 guarda el usuario aquí
+        this.me = me;
         this.profileImageUrl = me.fotoPerfilUrl ? this.makeAbsoluteUrl(me.fotoPerfilUrl) : null;
         this.userName = me.nombre || 'Usuario';
         this.userInitials = this.computeInitials(this.userName);
@@ -373,8 +369,6 @@ chatbotVisible: boolean = false;
   }
 
   private makeAbsoluteUrl(ruta: string): string {
-    // Si ya es URL absoluta, la dejamos; si es relativa (empieza con /uploads)
-    // concatenamos la base de la API.
     if (/^https?:\/\//i.test(ruta)) return ruta;
     return `${this.apiUrl}${ruta}`;
   }
@@ -389,7 +383,6 @@ chatbotVisible: boolean = false;
   verDetalleServicio(servicio: any): void {
     console.log('Ver detalle de servicio:', servicio);
     this.toastService.show(`Ver detalles de: ${servicio.titulo}`, 'info');
-    // TODO: Navegar a página de detalle del servicio
   }
 
   editarServicio(servicio: any): void {
@@ -419,13 +412,6 @@ chatbotVisible: boolean = false;
     const filled = '★'.repeat(rating);
     const empty = '☆'.repeat(5 - rating);
     return filled + empty;
-  }
-
-  // Nuevos métodos de navegación para la barra lateral
-  navigateToMyServices(): void {
-    // TODO: Implementar navegación a "Mis servicios"
-    console.log('Navegando a Mis servicios...');
-    alert('Funcionalidad "Mis servicios" próximamente disponible');
   }
 
   navigateToMyReviews(): void {
@@ -611,14 +597,14 @@ chatbotVisible: boolean = false;
     this.serviciosError = null;
     this.serviciosLoading = false;
 
-    // 🔹 ocultar categorías al buscar
+    // ocultar categorías al buscar
     this.categoriasVisibles = false;
 
     this.searchLoading = true;
     this.searchError = null;
     this.searchResults = [];
 
-    // 🔹 guardar búsqueda reciente
+    // guardar búsqueda reciente
     this.addRecentSearch(query);
 
     this.servicesService.searchServices(query).subscribe({
@@ -649,18 +635,17 @@ chatbotVisible: boolean = false;
   private addRecentSearch(term: string): void {
     const existingIndex = this.recentSearches.findIndex(t => t.toLowerCase() === term.toLowerCase());
     if (existingIndex !== -1) {
-      this.recentSearches.splice(existingIndex, 1); // evita duplicados
+      this.recentSearches.splice(existingIndex, 1); 
     }
 
-    this.recentSearches.unshift(term); // agrega al inicio
+    this.recentSearches.unshift(term); 
     if (this.recentSearches.length > 3) {
-      this.recentSearches.pop(); // deja solo las últimas 3
+      this.recentSearches.pop(); 
     }
 
     localStorage.setItem('recentSearches', JSON.stringify(this.recentSearches));
   }
 
-  // ------------------ NUEVO MÉTODO PARA VOLVER A MOSTRAR CATEGORÍAS ------------------
   mostrarCategorias(): void {
     this.categoriasVisibles = true;
     this.searchResults = [];
@@ -688,7 +673,6 @@ chatbotVisible: boolean = false;
   }
 
   getServiceCount(category: CategoriaDTO): number {
-    // Obtener el conteo real desde el mapa, o 0 si aún no se ha cargado
     return this.serviciosCountMap.get(category.idCategoriaServicio) ?? 0;
   }
 
@@ -728,7 +712,6 @@ chatbotVisible: boolean = false;
 
     this.servicesService.guardarServicio(servicio.idServicio).subscribe({
       next: (res: any) => {
-        // El backend devuelve { message: "Servicio guardado" } o { message: "Ya estaba guardado" }
         const msg = res?.message || 'Servicio guardado';
         this.showNotification(`${msg}: "${servicio.titulo}"`, 'success');
       },
@@ -746,20 +729,17 @@ chatbotVisible: boolean = false;
   openServiceDetail(servicioId: number): void {
     this.selectedServiceId = servicioId;
     this.showDetailModal = true;
-    // Prevenir scroll del body
     document.body.style.overflow = 'hidden';
   }
 
   closeDetailModal(): void {
     this.showDetailModal = false;
     this.selectedServiceId = null;
-    // Restaurar scroll
     document.body.style.overflow = 'auto';
   }
 
   handleContactar(servicioId: number): void {
     console.log('Contactar servicio:', servicioId);
-    // TODO: Implementar lógica de contacto (WhatsApp, etc.)
     this.closeDetailModal();
   }
 
@@ -895,7 +875,7 @@ chatbotVisible: boolean = false;
       idUsuario: this.me.idUsuario,
       idSolicitud: null,
       idValorizacion: null,
-      idServicio: this.serviceReportTarget.idServicio, // 👈 ahora sí
+      idServicio: this.serviceReportTarget.idServicio,
       motivo: motivoFinal
     };
 

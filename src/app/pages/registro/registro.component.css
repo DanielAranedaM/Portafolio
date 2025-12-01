@@ -1,5 +1,5 @@
 /* =========================================
-   Layout Principal (Split Screen)
+   Layout Principal 
    ========================================= */
    .login-layout {
     display: flex;
@@ -9,12 +9,9 @@
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   }
   
-  /* =========================================
-     Lado Izquierdo: Branding
-     ========================================= */
   .branding-side {
     flex: 1;
-    background-image: url('/assets/imagen/login-bg.jpg'); /* Asegúrate de tener esta imagen o usa un color sólido */
+    background-image: url('/assets/imagen/login-bg.jpg'); 
     background-size: cover;
     background-position: center;
     position: relative;
@@ -39,7 +36,7 @@
   .branding-content {
     position: relative;
     z-index: 2;
-    text-align: left; /* Alineación a la izquierda para mejor lectura de lista */
+    text-align: left;
     padding: 3rem;
     max-width: 650px;
   }
@@ -65,7 +62,7 @@
   }
 
   .text-highlight {
-    color: #ffd700; /* Un dorado/amarillo para resaltar sobre azul */
+    color: #ffd700; 
     font-style: italic;
   }
   
@@ -141,12 +138,12 @@
     justify-content: center;
     padding: 2rem;
     background-color: #ffffff;
-    overflow-y: auto; /* Permitir scroll si el formulario es largo */
+    overflow-y: auto; 
   }
   
   .form-container {
     width: 100%;
-    max-width: 550px; /* Un poco más ancho para el registro */
+    max-width: 550px; 
     padding: 2rem;
   }
   
@@ -168,7 +165,7 @@
   }
   
   /* =========================================
-     Estilos del Formulario (Senior Friendly)
+     Estilos del Formulario 
      ========================================= */
   .form-group {
     margin-bottom: 1.8rem;
@@ -198,7 +195,7 @@
   
   .form-input {
     width: 100%;
-    padding: 1rem 1rem 1rem 3.2rem; /* Espacio para el icono */
+    padding: 1rem 1rem 1rem 3.2rem; 
     font-size: 1.2rem;
     border: 2px solid #ced4da;
     border-radius: 12px;
@@ -249,7 +246,7 @@
   }
   
   /* =========================================
-     Selector de Tipo de Usuario (Cards)
+     Selector de Tipo de Usuario
      ========================================= */
   .user-type-selector {
     display: flex;
@@ -412,7 +409,7 @@
     }
   
     .branding-side {
-      flex: 0 0 200px; /* Altura fija en móviles */
+      flex: 0 0 200px; 
       min-height: 200px;
     }
   
@@ -421,7 +418,7 @@
     }
   
     .branding-content p {
-      display: none; /* Ocultar texto largo en móviles */
+      display: none; 
     }
   
     .form-side {

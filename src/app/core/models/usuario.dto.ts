@@ -25,7 +25,7 @@ export interface UsuarioDTO {
   esProveedor: boolean;
   fotoPerfilUrl?: string | null;
 
-  direccion?: DireccionDTO | null;   // <<-- embebida para crear en backend
+  direccion?: DireccionDTO | null;  
 }
 
 export interface RegisterResponse {

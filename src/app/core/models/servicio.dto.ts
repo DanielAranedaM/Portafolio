@@ -7,7 +7,7 @@ export interface ServicioDTO {
   esConversable: boolean;
   idCategoriaServicio: number;
   activo: boolean;
-  fechaPublicacion: string;          // ISO string
+  fechaPublicacion: string;         
   urlFotoPrincipal?: string | null;
   categoriaNombre: string;
   proveedorNombre: string;

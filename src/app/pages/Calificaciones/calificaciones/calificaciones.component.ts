@@ -18,21 +18,19 @@ type TabKey = 'recibidas' | 'enviadas';
 
 @Component({
   selector: 'app-calificaciones',
-  standalone: true,                                   // ✅ Standalone para usar imports aquí mismo
-  imports: [CommonModule, FormsModule],               // ✅ DatePipe, ngIf, ngFor, ngModel
+  standalone: true,                                   
+  imports: [CommonModule, FormsModule],             
   templateUrl: './calificaciones.component.html',
   styleUrl: './calificaciones.component.css'
 })
 export class CalificacionesComponent implements OnInit {
 
-  // ===== inyección SIN constructor (respetando tu estilo)
   private readonly router = inject(Router);
   private readonly usersService = inject(UsersService);
   private readonly califsService = inject(CalificacionesService);
   private readonly solicitudesService = inject(SolicitudesService);
   private readonly denunciasService = inject(DenunciasService);
 
-  // ===== estado básico
   activeTab: TabKey = 'recibidas';
   me: UsuarioDetalleDTO | null = null;
   myUserId: number | null = null;
@@ -47,7 +45,6 @@ export class CalificacionesComponent implements OnInit {
   errorRecibidas: string | null = null;
   errorEnviadas: string | null = null;
 
-  // ===== modal calificar/editar
   rateModalOpen = false;
   isEditing = false;
   editingId: number | null = null;
@@ -58,7 +55,6 @@ export class CalificacionesComponent implements OnInit {
     comentario: '' as string | null
   };
 
-  // ===== modal reportar (placeholder sin endpoint)
   reportModalOpen = false;
   reportForm = {
     motivo: '',
@@ -66,7 +62,6 @@ export class CalificacionesComponent implements OnInit {
   };
   private reportTarget: CalificacionDTO | null = null;
 
-  // ===== modal selección cliente/proveedor =====
   selectModalOpen = false;
   clientesOProveedores: { id: number; nombre: string }[] = [];
   selectLoading = false;
@@ -97,7 +92,6 @@ export class CalificacionesComponent implements OnInit {
     return this.isProveedor ? 'Calificar un cliente' : 'Calificar un proveedor';
   }
 
-  // ===== navegación / acciones header =====
   goHome(): void {
     this.router.navigate(['/menu']);
   }
@@ -109,7 +103,6 @@ export class CalificacionesComponent implements OnInit {
   refresh(): void {
     if (!this.myUserId) return;
 
-    // --- Recibidas ---
     this.loadingRecibidas = true;
     this.errorRecibidas = null;
     this.califsService.getReceived(this.myUserId).subscribe({
@@ -121,7 +114,6 @@ export class CalificacionesComponent implements OnInit {
       }
     }).add(() => (this.loadingRecibidas = false));
 
-    // --- Enviadas ---
     this.loadingEnviadas = true;
     this.errorEnviadas = null;
     this.califsService.getByAuthor(this.myUserId).subscribe({
@@ -134,7 +126,6 @@ export class CalificacionesComponent implements OnInit {
     }).add(() => (this.loadingEnviadas = false));
   }
 
-  // ===== modal calificar / editar =====
   openRateModal(preserveSolicitud = false): void {
     this.isEditing = false;
     this.editingId = null;
@@ -154,7 +145,6 @@ export class CalificacionesComponent implements OnInit {
     // Usamos forkJoin para cargar solicitudes y mis calificaciones enviadas
     forkJoin({
       solicitudes: this.solicitudesService.obtenerTodas(),
-      // CORRECCIÓN AQUÍ: Usamos el método real de tu servicio
       enviadas: this.califsService.getMineAuthored() 
     }).subscribe({
       next: ({ solicitudes, enviadas }) => {
@@ -340,7 +330,6 @@ export class CalificacionesComponent implements OnInit {
   }
 
   selectPerson(person: { id: number; nombre: string }): void {
-      // Cerramos el modal de selección de persona
       this.selectModalOpen = false;
 
       // Guardamos temporalmente a quién vamos a calificar

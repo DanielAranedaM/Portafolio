@@ -656,8 +656,6 @@ body {
     flex: 1;
 }
 
-/* Estilos removidos - ya no se usan las secciones de descripción y reviews en la sidebar */
-
 /* Botón toggle sidebar - Paleta El Dato */
 .toggle-sidebar {
     position: fixed;
@@ -690,12 +688,12 @@ body {
     background: #96BA2F;
 }
 
-/* Contenido principal - CON SCROLL HABILITADO */
+/* Contenido principal */
 .main-content {
     margin-left: 320px;
     padding: 25px;
-    overflow-y: auto; /* ⬅️ Permite scroll vertical */
-    max-height: 100vh; /* ⬅️ Limita altura para activar scroll */
+    overflow-y: auto; 
+    max-height: 100vh; 
     min-height: 100vh;
     width: calc(100% - 320px);
     transition: margin-left 0.3s ease, width 0.3s ease;
@@ -706,7 +704,6 @@ body {
     width: 100%;
 }
 
-/* Scrollbar personalizado para mejor UX */
 .main-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -852,10 +849,7 @@ body {
     font-size: 16px;
 }
 
-/* ========================================
-   VISTA DE CATEGORÍAS MEJORADA - OPCIÓN 1
-======================================== */
-
+/* Sección de categorías mejorada */
 .categories-section-improved {
   padding: 2.5rem 1.5rem;
   max-width: 1400px;
@@ -885,13 +879,13 @@ body {
   50% { transform: translateY(-10px); }
 }
 
-/* Grid de Categorías Mejorado - con padding inferior para scroll cómodo */
+/* Grid de Categorías Mejorado */
 .categories-grid-improved {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
   margin-top: 2.5rem;
-  padding-bottom: 40px; /* ⬅️ Espacio al final para mejor scroll */
+  padding-bottom: 40px;
 }
 
 .category-card-improved {
@@ -1122,12 +1116,12 @@ body {
   border-radius: 20px;
 }
 
-/* Lista de Servicios con Cards Grandes - con padding para scroll */
+/* Lista de Servicios */
 .services-list-view {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  padding-bottom: 40px; /* ⬅️ Espacio al final para scroll cómodo */
+  padding-bottom: 40px; 
 }
 
 .service-card-large {
@@ -1208,7 +1202,6 @@ body {
   pointer-events: none;
 }
 
-/* Placeholder cuando no hay imagen */
 .service-image-placeholder {
   width: 100%;
   height: 100%;
@@ -1383,7 +1376,6 @@ body {
   font-weight: 700;
 }
 
-/* Botones de Acción Grandes y Claros */
 .service-card-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1505,7 +1497,6 @@ body {
   box-shadow: 0 10px 30px rgba(0, 90, 156, 0.4);
 }
 
-/* Responsive Design */
 @media (max-width: 992px) {
   .categories-grid-improved {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1886,7 +1877,6 @@ body {
     }
 }
 
-/* MODALES PERSONALIZADOS (Copiado de Servicios Guardados) */
 .custom-modal-overlay {
   position: fixed;
   top: 0;
@@ -1952,7 +1942,7 @@ body {
 }
 
 .btn-modal-ok {
-  background: #005A9C; /* Color principal del menú */
+  background: #005A9C; 
   color: white;
   width: 100%;
   box-shadow: 0 4px 12px rgba(0, 90, 156, 0.3);
@@ -1973,7 +1963,6 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Estilos adicionales para el modal de notificación */
 .custom-modal-header {
     display: flex;
     justify-content: space-between;
@@ -2023,17 +2012,15 @@ body {
     background: #004a80;
 }
 
-/* Card especial para servicios de personas mayores (sin texto) */
+/* Card especial para servicios de personas mayores */
 .senior-service-card {
-  background: #fff7e0;              /* fondo suave amarillito */
-  border: 1px solid #f6b73c;        /* borde acorde al fondo */
+  background: #fff7e0;             
+  border: 1px solid #f6b73c;        
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   position: relative;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-/* Si ya tienes un :hover para .service-card-large, puedes opcionalmente
-   añadir un toque extra cuando sea senior */
 .senior-service-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);

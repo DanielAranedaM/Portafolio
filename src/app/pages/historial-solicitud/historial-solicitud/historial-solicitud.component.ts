@@ -93,10 +93,8 @@ export class HistorialSolicitudComponent implements OnInit {
         // Éxito: Cerramos modal y recargamos lista
         this.cerrarModalCancelar();
         this.cargarSolicitudes(); 
-        // Opcional: Podrías usar un 'Toast' o snackbar aquí si quieres feedback visual sutil
       },
       error: (err) => {
-        console.error('Error al cancelar:', err);
         // En lugar de alert, mostramos el error en el modal
         this.mensajeErrorCancelar = 'No se pudo cancelar. Verifica que no esté finalizada o intenta nuevamente.';
       }
@@ -159,7 +157,6 @@ export class HistorialSolicitudComponent implements OnInit {
 
   // ====== FLUJO CLIENTE (Completar) ======
 
-  // Clic en "Completar" (cliente): primero preguntar si quiere evaluar
   onClickCompletar(s: SolicitudListadoDTO): void {
     this.solicitudEnEvaluacion = s;
     this.tipoAccionEvaluacion = 'completar';
@@ -168,9 +165,8 @@ export class HistorialSolicitudComponent implements OnInit {
 
   // ====== FLUJO PROVEEDOR (Finalizar) ======
 
-  // Clic en "Finalizar" (proveedor): primero finalizar servicio
   onClickFinalizar(s: SolicitudListadoDTO): void {
-    this.abrirModalFinalizar(s);  // solo abrir modal verde
+    this.abrirModalFinalizar(s); 
   }
 
   abrirModalFinalizar(s: SolicitudListadoDTO): void {
@@ -209,7 +205,7 @@ export class HistorialSolicitudComponent implements OnInit {
         this.cerrarModalFinalizar();
         this.cargarSolicitudes();
 
-        // AHORA, recién finalizado, mostramos el modal de "¿Desea evaluar?"
+        //recién finalizado, mostramos el modal de "¿Desea evaluar?"
         if (solicitudFinalizada) {
           this.solicitudEnEvaluacion = solicitudFinalizada;
           this.tipoAccionEvaluacion = 'finalizar';
@@ -230,22 +226,19 @@ export class HistorialSolicitudComponent implements OnInit {
     if (this.tipoAccionEvaluacion === 'completar') {
       this.completar(this.solicitudEnEvaluacion, true); // sin confirm()
     }
-    // Si es proveedor, ya está finalizado aquí; no hacemos nada más
 
     this.modalEvaluacionAbierto = false;
     this.limpiarEvaluacion();
 
-    // Llevar a la página de calificaciones (ajusta la ruta a la tuya)
+    // Llevar a la página de calificaciones 
     this.router.navigate(['/calificaciones']);
   }
 
   // Botón "Más tarde"
   posponerEvaluacion(): void {
     if (this.solicitudEnEvaluacion && this.tipoAccionEvaluacion === 'completar') {
-      // Cliente: marcar completado sin confirm()
       this.completar(this.solicitudEnEvaluacion, true);
     }
-    // Proveedor: ya finalizó en guardarFinalizacion, no hacemos nada más
 
     this.modalEvaluacionAbierto = false;
     this.limpiarEvaluacion();
@@ -320,7 +313,7 @@ export class HistorialSolicitudComponent implements OnInit {
     this.solicitudesService.cancelarSolicitud(s.idSolicitud).subscribe({
       next: () => {
         alert('La solicitud ha sido cancelada exitosamente.');
-        this.cargarSolicitudes(); // Recargamos la lista para ver el cambio de estado
+        this.cargarSolicitudes(); 
       },
       error: (err) => {
         console.error('Error al cancelar:', err);

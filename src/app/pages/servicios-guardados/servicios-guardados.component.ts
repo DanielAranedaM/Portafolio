@@ -131,11 +131,9 @@ export class ServiciosGuardadosComponent implements OnInit {
 
   handleContactar(servicioId: number): void {
     this.closeDetailModal();
-    // Lógica de contacto si es necesaria, o ya se maneja en el modal
   }
 
   handleGuardar(servicioId: number): void {
-    // Ya estamos en guardados, quizás no sea necesario hacer nada o refrescar
     this.closeDetailModal();
   }
 

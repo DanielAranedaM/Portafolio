@@ -7,7 +7,7 @@ export interface UsuarioDetalleDTO {
   telefono?: string | null;
   evaluacion?: number | null;
   descripcion?: string | null;
-  direccion?: DireccionDTO | null;   // viene desde SQL
+  direccion?: DireccionDTO | null;  
   fotoPerfilUrl?: string | null;
   esCliente?: boolean;
   esProveedor?: boolean;

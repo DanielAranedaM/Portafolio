@@ -99,35 +99,37 @@
     </div>
   </div>
 
-  <!-- Galería de Trabajos -->
+  <!-- Galería de Trabajos (Reemplazado por Servicios Publicados) -->
   <div class="gallery-section-modern" *ngIf="isProveedor">
     <div class="section-header-modern">
       <h2 class="section-title-modern">
-        <i class="section-icon">🖼️</i>
-        Galería de Trabajos
+        <i class="section-icon">💼</i>
+        Servicios Publicados
       </h2>
-      <button class="add-photo-btn-modern" (click)="addPhoto()" *ngIf="!isPublicProfile">
-        📷 Agregar Foto
+      <button class="add-photo-btn-modern" (click)="goToRegisterService()" *ngIf="!isPublicProfile">
+        ➕ Publicar Servicio
       </button>
     </div>
 
-    <div *ngIf="galleryPhotos.length > 0; else noPhotos" class="gallery-grid-modern">
-      <div *ngFor="let photo of galleryPhotos; let i = index" class="gallery-item-modern">
-        <img [src]="photo.url" [alt]="photo.description" class="gallery-image">
-        <div class="gallery-overlay">
-          <button class="gallery-action delete" (click)="removePhoto(i)" *ngIf="!isPublicProfile">🗑️</button>
-          <button class="gallery-action view" (click)="viewPhoto(photo)">🔍</button>
+    <div *ngIf="userServices.length > 0; else noServices" class="gallery-grid-modern">
+      <div *ngFor="let service of userServices" class="gallery-item-modern" style="position: relative; overflow: hidden;">
+        <img [src]="service.urlFoto" [alt]="service.titulo" class="gallery-image" style="width: 100%; height: 100%; object-fit: cover;">
+        
+        <!-- Información del servicio -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 12px; pointer-events: none;">
+            <div style="font-weight: bold; font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">{{ service.titulo }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">{{ service.categoria }}</div>
         </div>
       </div>
     </div>
 
-    <ng-template #noPhotos>
+    <ng-template #noServices>
       <div class="empty-state-modern gallery-empty">
-        <i class="empty-icon">📸</i>
-        <h3>No hay fotos de trabajos</h3>
-        <p *ngIf="!isPublicProfile">Agrega fotos de tus trabajos para que los clientes vean la calidad de tu trabajo</p>
-        <button class="btn-primary-modern" (click)="addPhoto()" *ngIf="!isPublicProfile">
-          📷 Subir Primera Foto
+        <i class="empty-icon">💼</i>
+        <h3>No hay servicios publicados</h3>
+        <p *ngIf="!isPublicProfile">Publica tus servicios para que los clientes puedan encontrarte.</p>
+        <button class="btn-primary-modern" (click)="goToRegisterService()" *ngIf="!isPublicProfile">
+          ➕ Publicar Primer Servicio
         </button>
       </div>
     </ng-template>
@@ -153,7 +155,7 @@
     display: flex; align-items: center; justify-content: center;
     z-index: 1000;">
 
-  <!-- Contenedor del modal (NO se cierra al hacer click fuera) -->
+  <!-- Contenedor del modal -->
   <div
     style="
       width: min(760px, 94vw);

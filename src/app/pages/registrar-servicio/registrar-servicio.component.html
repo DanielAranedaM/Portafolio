@@ -1,14 +1,26 @@
 <div class="rs-bg">
   <div class="rs-container">
     
-    <!-- Header principal prominente -->
-    <div class="rs-header">
-      <button class="rs-back-btn" (click)="goBackToMenu()" title="Volver al menú principal">
-        ⬅️ Volver al Menú
+    <!-- Navegación superior -->
+    <div class="rs-top-nav">
+      <button class="rs-back-link" (click)="goBackToMenu()">
+        <i class="bi bi-arrow-left-circle-fill"></i> Volver al Menú
       </button>
-      <span class="rs-icon">🛠️</span>
-      <h1>Registrar Servicio</h1>
-      <p class="rs-subtitle">Publica tu servicio en 3 pasos simples y claros</p>
+    </div>
+
+    <!-- Header moderno -->
+    <div class="rs-header-modern">
+      <div class="rs-header-content">
+        <div class="rs-icon-circle">
+          <i class="bi bi-tools"></i>
+        </div>
+        <div class="rs-header-text">
+          <h1>Registrar Servicio</h1>
+          <p class="rs-subtitle">Publica tu servicio en 3 pasos simples y claros</p>
+        </div>
+      </div>
+      <!-- Decoración visual -->
+      <div class="rs-header-bg-shape"></div>
     </div>
 
     <!-- Stepper horizontal prominente -->
@@ -56,15 +68,22 @@
           </div>
           
           <div class="rs-col">
-            <label for="categoria" class="form-label-xl">¿A qué categoría pertenece?</label>
-            <select class="form-select-xl" id="categoria" formControlName="categoria">
-              <option value="">Selecciona la categoría más adecuada</option>
-              <option *ngFor="let c of categorias" [value]="c.idCategoriaServicio">
-                {{ c.nombre }}
-              </option>
-            </select>
+            <label class="form-label-xl">¿A qué categoría pertenece?</label>
+            
+            <div class="category-grid">
+              <div 
+                *ngFor="let c of categorias" 
+                class="category-card" 
+                [class.selected]="form.get('categoria')?.value == c.idCategoriaServicio"
+                (click)="selectCategory(c.idCategoriaServicio)"
+              >
+                <i class="bi" [ngClass]="getCategoryIcon(c.nombre)"></i>
+                <span>{{ c.nombre }}</span>
+              </div>
+            </div>
+
             <div *ngIf="cargandoCategorias" class="text-muted">Cargando categorías disponibles...</div>
-            <div *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="text-danger">
+            <div *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="text-danger mt-2">
               <i class="bi bi-exclamation-circle"></i> 
               Debes seleccionar una categoría
             </div>
@@ -79,51 +98,64 @@
           Detalles de tu Servicio
         </h2>
         
-        <!-- Panel de ayuda arriba, visible para todos -->
-        <div class="rs-tip-panel">
-          <div class="rs-tip-title">
-            <i class="bi bi-lightbulb"></i>
-            Consejos para una buena descripción
-          </div>
-          <div class="rs-tip-content">
-            <ul class="rs-tip-list">
-              <li>Usa palabras simples y claras</li>
-              <li>Explica qué incluye y qué no incluye</li>
-              <li>Menciona precios por diferentes tamaños</li>
-              <li>Indica si llevas materiales o herramientas</li>
-              <li>Señala tiempo estimado de trabajo</li>
-              <li>Especifica tu radio de atención</li>
-            </ul>
-            
-            <div class="rs-examples">
-              <strong>Ejemplo para Corte de Pasto:</strong>
-              <ul>
-                <li>Jardín pequeño (hasta 50m²): $15.000</li>
-                <li>Jardín mediano (hasta 100m²): $25.000</li>
-                <li>Jardín grande (más de 100m²): precio a conversar</li>
-              </ul>
-              <small>Incluye orillado y barrido. No incluye retiro de residuos.</small>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Área de texto centrada y prominente -->
         <div class="rs-row">
-          <div class="rs-col">
+          <!-- Columna Izquierda: Input y Tags -->
+          <div class="rs-col-wide">
             <label for="descripcion" class="form-label-xl">Describe tu servicio en detalle</label>
+            
+            <!-- Etiquetas rápidas -->
+            <div class="quick-tags-container">
+              <span class="quick-tags-label"><i class="bi bi-magic"></i> Frases rápidas (clic para agregar):</span>
+              <div class="quick-tags-list">
+                <button 
+                  *ngFor="let tag of quickTags" 
+                  type="button" 
+                  class="tag-btn" 
+                  (click)="addTag(tag)"
+                >
+                  + {{ tag }}
+                </button>
+              </div>
+            </div>
+
             <textarea
               class="form-control-xl rs-textarea-xl"
               id="descripcion"
               formControlName="descripcion"
               placeholder="Explica qué incluye tu servicio, materiales que usas, tiempo que tomas, precios por diferentes tamaños, etc."
             ></textarea>
+            
             <div class="rs-char-counter">
               {{ (form.value.descripcion?.length || 0) }} caracteres escritos
               <br><small>Recomendamos escribir entre 120-300 caracteres para una mejor descripción</small>
             </div>
+            
             <div *ngIf="form.get('descripcion')?.invalid && form.get('descripcion')?.touched" class="text-danger">
               <i class="bi bi-exclamation-circle"></i> 
               La descripción es requerida (mínimo 10 caracteres)
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Consejos (Sticky si es posible) -->
+          <div class="rs-col-narrow">
+            <div class="rs-tip-card">
+              <div class="rs-tip-header">
+                <i class="bi bi-lightbulb-fill"></i>
+                <h3>Consejos Útiles</h3>
+              </div>
+              <div class="rs-tip-body">
+                <ul class="rs-tip-check-list">
+                  <li><i class="bi bi-check2-circle"></i> Usa palabras simples</li>
+                  <li><i class="bi bi-check2-circle"></i> Menciona precios base</li>
+                  <li><i class="bi bi-check2-circle"></i> ¿Incluyes materiales?</li>
+                  <li><i class="bi bi-check2-circle"></i> Tu zona de atención</li>
+                </ul>
+                
+                <div class="rs-example-box">
+                  <strong>Ejemplo:</strong>
+                  <p>"Realizo limpieza profunda de alfombras a domicilio. Uso productos hipoalergénicos. Precio desde $25.000 por habitación estándar."</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -152,78 +184,40 @@
           </div>
           
           <div class="rs-col">
-            <label for="imagenes" class="form-label-xl">Fotos de tu trabajo</label>
-            <div class="rs-file-area">
-              <i class="bi bi-images" style="font-size: 3rem; color: #007bff; margin-bottom: 1rem; display: block;"></i>
+            <label class="form-label-xl">Fotos de tu trabajo</label>
+            
+            <div class="upload-zone" (click)="fileInput.click()">
+              <i class="bi bi-cloud-arrow-up-fill"></i>
+              <p>Haz clic aquí para subir fotos</p>
+              <small>Puedes subir hasta 5 fotos (JPG, PNG)</small>
               <input
+                #fileInput
                 type="file"
-                class="form-control-xl"
                 id="imagenes"
                 multiple
                 accept="image/*"
                 (change)="onFileSelected($event)"
+                style="display: none;"
               />
-              <small class="text-muted">Selecciona hasta 5 fotos de trabajos anteriores</small>
             </div>
             
-            <div *ngIf="selectedFiles.length > 0" class="rs-img-preview">
-              <div *ngFor="let file of selectedFiles; let i = index" class="rs-img-item">
-                <span class="rs-img-name">
-                  <i class="bi bi-file-image"></i> 
-                  {{ file.name }}
-                </span>
-                <span class="rs-img-size">
-                  ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)
-                </span>
-                <button 
-                  type="button" 
-                  class="btn btn-sm btn-outline-danger" 
-                  (click)="removeFile(i)"
-                >
-                  <i class="bi bi-trash"></i> Quitar
+            <div *ngIf="selectedFiles.length > 0" class="image-preview-grid">
+              <div *ngFor="let file of selectedFiles; let i = index" class="preview-thumbnail">
+                <div class="preview-icon"><i class="bi bi-image"></i></div>
+                <div class="preview-info">
+                  <span class="preview-name">{{ file.name }}</span>
+                  <span class="preview-size">{{ (file.size / 1024 / 1024).toFixed(2) }} MB</span>
+                </div>
+                <button type="button" class="remove-btn" (click)="removeFile(i)" title="Eliminar foto">
+                  <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
         </div>
-        
-        <!-- Resumen final -->
-        <div class="rs-resumen-wide">
-          <h3 class="rs-resumen-title">
-            <i class="bi bi-clipboard-check"></i>
-            Resumen de tu servicio
-          </h3>
-          <div class="rs-resumen-grid">
-            <div class="rs-resumen-item">
-              <i class="bi bi-pencil"></i>
-              <strong>Servicio:</strong><br>
-              {{ form.value.nombreServicio || 'No especificado' }}
-            </div>
-            <div class="rs-resumen-item">
-              <i class="bi bi-tags"></i>
-              <strong>Categoría:</strong><br>
-              {{ getCategoriaName(form.value.categoria) || 'No seleccionada' }}
-            </div>
-            <div class="rs-resumen-item">
-              <i class="bi bi-card-text"></i>
-              <strong>Descripción:</strong><br>
-              {{ (form.value.descripcion || 'Sin descripción').substring(0, 100) }}{{ (form.value.descripcion || '').length > 100 ? '...' : '' }}
-            </div>
-            <div class="rs-resumen-item">
-              <i class="bi bi-geo-alt"></i>
-              <strong>Ubicación:</strong><br>
-              {{ form.value.direccionDescripcion || 'No especificada' }}
-            </div>
-            <div class="rs-resumen-item">
-              <i class="bi bi-images"></i>
-              <strong>Fotos:</strong><br>
-              {{ selectedFiles.length }} imagen{{ selectedFiles.length !== 1 ? 'es' : '' }} seleccionada{{ selectedFiles.length !== 1 ? 's' : '' }}
-            </div>
-          </div>
-        </div>
       </section>
-
-      <!-- Navegación prominente -->
+        
+        <!-- Navegación prominente -->
       <div class="rs-nav-wide">
         <button 
           type="button" 
@@ -245,25 +239,107 @@
         </button>
         
         <button 
-          type="submit" 
+          type="button" 
           class="btn btn-success btn-xl" 
-          [disabled]="!form.valid || isSubmitting" 
+          [disabled]="!form.valid" 
           *ngIf="currentStep === totalSteps"
+          (click)="openConfirmModal()"
         >
-          <span *ngIf="!isSubmitting">
-            <i class="bi bi-check-circle"></i> Publicar Servicio
-          </span>
-          <span *ngIf="isSubmitting">
-            <i class="bi bi-hourglass-split"></i> Publicando... {{ uploadProgress }}%
-          </span>
+          <i class="bi bi-check-circle"></i> Revisar y Publicar
         </button>
-
-        <!-- Indicador de progreso -->
-        <div *ngIf="isSubmitting" class="upload-progress-container">
-          <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
-        </div>
       </div>
       
     </form>
+  </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="rs-modal-overlay" *ngIf="showConfirmModal">
+  <div class="rs-modal-content">
+    <div class="rs-modal-header">
+      <h3><i class="bi bi-clipboard-check"></i> Confirmar Publicación</h3>
+      <button type="button" class="rs-close-btn" (click)="closeConfirmModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    
+    <div class="rs-modal-body">
+      <p class="rs-modal-intro">
+        Estás a un paso de publicar tu servicio. Por favor revisa que la información sea correcta:
+      </p>
+      
+      <div class="rs-resumen-grid">
+        <div class="rs-resumen-item">
+          <div class="rs-ri-icon">
+            <i class="bi bi-pencil-fill"></i>
+          </div>
+          <div class="rs-ri-content">
+            <span class="rs-ri-label">Nombre del Servicio</span>
+            <span class="rs-ri-value">{{ form.value.nombreServicio || 'No especificado' }}</span>
+          </div>
+        </div>
+        
+        <div class="rs-resumen-item">
+          <div class="rs-ri-icon">
+            <i class="bi bi-tag-fill"></i>
+          </div>
+          <div class="rs-ri-content">
+            <span class="rs-ri-label">Categoría</span>
+            <span class="rs-ri-value">{{ getCategoriaName(form.value.categoria) || 'No seleccionada' }}</span>
+          </div>
+        </div>
+        
+        <div class="rs-resumen-item full-width">
+          <div class="rs-ri-icon">
+            <i class="bi bi-file-text-fill"></i>
+          </div>
+          <div class="rs-ri-content">
+            <span class="rs-ri-label">Descripción Detallada</span>
+            <div class="desc-preview">
+              {{ form.value.descripcion || 'Sin descripción' }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="rs-resumen-item">
+          <div class="rs-ri-icon">
+            <i class="bi bi-geo-alt-fill"></i>
+          </div>
+          <div class="rs-ri-content">
+            <span class="rs-ri-label">Ubicación</span>
+            <span class="rs-ri-value">{{ form.value.direccionDescripcion || 'No especificada' }}</span>
+          </div>
+        </div>
+        
+        <div class="rs-resumen-item">
+          <div class="rs-ri-icon">
+            <i class="bi bi-images"></i>
+          </div>
+          <div class="rs-ri-content">
+            <span class="rs-ri-label">Galería</span>
+            <span class="rs-ri-value">{{ selectedFiles.length }} imagen{{ selectedFiles.length !== 1 ? 'es' : '' }} seleccionada{{ selectedFiles.length !== 1 ? 's' : '' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="rs-modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">
+        Volver a editar
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-success" 
+        (click)="confirmAndSubmit()" 
+        [disabled]="isSubmitting"
+      >
+        <span *ngIf="!isSubmitting">
+          <i class="bi bi-check-lg"></i> Confirmar y Publicar
+        </span>
+        <span *ngIf="isSubmitting">
+          <i class="bi bi-hourglass-split"></i> Publicando... {{ uploadProgress }}%
+        </span>
+      </button>
+    </div>
   </div>
 </div>

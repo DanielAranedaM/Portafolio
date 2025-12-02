@@ -230,6 +230,69 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
     return categoria ? categoria.nombre : 'Categoría no encontrada';
   }
 
+  // Helper para iconos de categoría
+  getCategoryIcon(nombre: string): string {
+    const n = nombre.toLowerCase();
+    if (n.includes('jardin') || n.includes('pasto')) return 'bi-flower1';
+    if (n.includes('aseo') || n.includes('limpieza')) return 'bi-bucket';
+    if (n.includes('gasfiter') || n.includes('plomer')) return 'bi-wrench';
+    if (n.includes('electric')) return 'bi-lightning';
+    if (n.includes('pintura') || n.includes('pintor')) return 'bi-paint-bucket';
+    if (n.includes('carpint')) return 'bi-hammer';
+    if (n.includes('construc') || n.includes('albañil')) return 'bi-bricks';
+    if (n.includes('transporte') || n.includes('flete')) return 'bi-truck';
+    if (n.includes('comput') || n.includes('tecno')) return 'bi-laptop';
+    if (n.includes('clases') || n.includes('profe')) return 'bi-book';
+    if (n.includes('salud') || n.includes('enferm')) return 'bi-heart-pulse';
+    if (n.includes('belleza') || n.includes('peluqu')) return 'bi-scissors';
+    return 'bi-tools'; // default
+  }
+
+  selectCategory(id: number): void {
+    this.form.patchValue({ categoria: id });
+  }
+
+  // Etiquetas rápidas para la descripción
+  quickTags = [
+    'Presupuesto gratis',
+    'Incluye materiales',
+    'Trabajo garantizado',
+    'Disponibilidad inmediata',
+    'Atención a domicilio',
+    'Experiencia comprobable',
+    'Se emite boleta/factura',
+    'Pago con transferencia'
+  ];
+
+  // Modal de confirmación
+  showConfirmModal = false;
+
+  openConfirmModal() {
+    if (this.form.valid) {
+      this.showConfirmModal = true;
+    } else {
+      this.form.markAllAsTouched();
+      this.toastService.show('Por favor completa todos los campos requeridos', 'error');
+    }
+  }
+
+  closeConfirmModal() {
+    this.showConfirmModal = false;
+  }
+
+  confirmAndSubmit() {
+    this.submit();
+  }
+
+  addTag(tag: string): void {
+    const currentDesc = this.form.get('descripcion')?.value || '';
+    // Añadir espacio si ya hay texto y no termina en espacio o salto de línea
+    const separator = currentDesc.length > 0 && !currentDesc.match(/[\s\n]$/) ? ' ' : '';
+    this.form.patchValue({
+      descripcion: currentDesc + separator + tag + '. '
+    });
+  }
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const files: FileList | null = input.files;

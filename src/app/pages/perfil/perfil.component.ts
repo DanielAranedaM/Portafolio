@@ -4,9 +4,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 import { UsersService } from '../../core/services/users.service';
+import { ServicesService } from '../../core/services/services.service';
 import { UsuarioDetalleDTO } from '../../core/models/usuario-detalle.dto';
 import { API_URL } from '../../core/tokens/api-url.token';
 import { ModificarUsuarioDTO } from '../../core/models/modificar-usuario.dto';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-perfil',
@@ -48,7 +50,9 @@ export class PerfilComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private usersService: UsersService,
+    private servicesService: ServicesService,
     private fb: FormBuilder,
+    private toastService: ToastService,
     @Inject(API_URL) private apiUrl: string
   ) {}
 
@@ -72,16 +76,20 @@ export class PerfilComponent implements OnInit {
     // Servicios de ejemplo
     this.userServices = [
       {
-        nombreServicio: 'Limpieza del hogar',
+        id: 101,
+        titulo: 'Limpieza del hogar',
         categoria: 'Aseo y Limpieza',
         descripcion: 'Servicio completo de limpieza para hogares, incluye pisos, baños, cocina y dormitorios. Trabajo con productos de calidad.',
-        fechaCreacion: new Date('2024-10-15')
+        fechaCreacion: new Date('2024-10-15'),
+        urlFoto: '/assets/imagen/trabajo1.jpg' // Use a placeholder or existing asset
       },
       {
-        nombreServicio: 'Jardinería básica',
+        id: 102,
+        titulo: 'Jardinería básica',
         categoria: 'Jardinería',
         descripcion: 'Mantención de jardines, poda de plantas, riego y cuidado general de áreas verdes.',
-        fechaCreacion: new Date('2024-09-20')
+        fechaCreacion: new Date('2024-09-20'),
+        urlFoto: '/assets/imagen/trabajo1.jpg'
       }
     ];
 
@@ -177,11 +185,36 @@ export class PerfilComponent implements OnInit {
         this.form.markAsUntouched();
         this.dataLoaded = true; 
         
-        this.initializeExampleData();
+        if (this.isProveedor) {
+          this.loadServicesForMe();
+        } else {
+          this.initializeExampleData();
+        }
       },
       error: (err) => {
         console.error('Error cargando perfil:', err);
         this.dataLoaded = true; 
+      }
+    });
+  }
+
+  private loadServicesForMe(): void {
+    this.servicesService.getDashboardDataForProveedor().subscribe({
+      next: (data) => {
+        this.userServices = (data || []).map(s => ({
+          id: s.idServicio,
+          titulo: s.titulo,
+          categoria: s.categoriaNombre || `Cat #${s.idCategoriaServicio}`,
+          fechaCreacion: s.fechaPublicacion ? new Date(s.fechaPublicacion) : new Date(),
+          urlFoto: s.urlFotoPrincipal
+            ? this.makeAbsoluteUrl(s.urlFotoPrincipal)
+            : '/assets/imagen/default-service.png',
+          descripcion: s.descripcion || 'Sin descripción' // Backend might not return description in dashboard data
+        }));
+      },
+      error: (err) => {
+        console.error('Error cargando servicios del proveedor:', err);
+        this.userServices = [];
       }
     });
   }
@@ -238,7 +271,7 @@ export class PerfilComponent implements OnInit {
     const file = input?.files?.[0] || null;
     if (!file) { this.selectedFile = null; return; }
     if (!file.type.startsWith('image/')) {
-      alert('Selecciona una imagen válida (JPG, PNG o WEBP).');
+      this.toastService.show('Selecciona una imagen válida (JPG, PNG o WEBP).', 'warning');
       input.value = '';
       return;
     }
@@ -309,7 +342,7 @@ export class PerfilComponent implements OnInit {
 
     // si vamos a crear o cambiar dirección, exigir selección OSM
     if (addressChanged && !this.direccionSeleccionada) {
-      alert('Selecciona una dirección válida de las sugerencias.');
+      this.toastService.show('Selecciona una dirección válida de las sugerencias.', 'warning');
       return;
     }
 
@@ -374,11 +407,11 @@ export class PerfilComponent implements OnInit {
         this.osmComuna = null;
         this.osmRegion = null;
 
-        alert('Perfil actualizado correctamente.');
+        this.toastService.show('Perfil actualizado correctamente.', 'success');
       },
       error: (e) => {
         console.error('Error al guardar perfil:', e);
-        alert(e?.error?.message || 'No se pudo actualizar el perfil.');
+        this.toastService.show(e?.error?.message || 'No se pudo actualizar el perfil.', 'error');
       }
     }).add(() => {
       this.saving = false;

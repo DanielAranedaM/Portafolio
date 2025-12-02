@@ -113,20 +113,19 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
       }
     });
 
-    if (!this.editMode) {
-      this.usersService.getMe().subscribe({
-        next: (user) => {
-          const desc = (user?.direccion?.descripcion ?? '').toString().trim();
-          if (desc) {
-            this.form.patchValue({ direccionDescripcion: desc });
-          }
-        },
-        error: (err) => {
-          console.warn('No se pudo precargar dirección desde API:', err);
-          this.precargarDesdeLocalStorage();
+    // Cargar datos del usuario siempre (la ubicación viene del perfil)
+    this.usersService.getMe().subscribe({
+      next: (user) => {
+        const desc = (user?.direccion?.descripcion ?? '').toString().trim();
+        if (desc) {
+          this.form.patchValue({ direccionDescripcion: desc });
         }
-      });
-    }
+      },
+      error: (err) => {
+        console.warn('No se pudo precargar dirección desde API:', err);
+        this.precargarDesdeLocalStorage();
+      }
+    });
 
     // Suscripción a Nominatim
     this.sub = this.direccionInput$
@@ -144,12 +143,17 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
   loadServiceData(id: number) {
     this.servicesService.getServiceById(id).subscribe({
       next: (dto) => {
+        console.log('📦 Datos del servicio cargados:', dto);
         this.servicioOriginal = dto;
+        
+        // Intentar obtener la ubicación de varias formas por si el casing varía
+        const ubicacion = dto.ubicacion || (dto as any).Ubicacion || (dto as any).direccion || '';
+        
         this.form.patchValue({
           nombreServicio: dto.titulo,
           categoria: dto.idCategoriaServicio,
-          descripcion: dto.descripcion,
-          direccionDescripcion: dto.ubicacion 
+          descripcion: dto.descripcion
+          // La ubicación se mantiene desde el perfil del usuario
         });
       },
       error: (err) => {
@@ -340,14 +344,14 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
   async submit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      alert('Por favor completa todos los campos requeridos');
+      this.toastService.show('Por favor completa todos los campos requeridos', 'error');
       return;
     }
 
     // Validar categoría
     const idCategoriaServicio = Number(this.form.value.categoria) || 0;
     if (idCategoriaServicio <= 0) {
-      alert('Selecciona una categoría válida.');
+      this.toastService.show('Selecciona una categoría válida.', 'error');
       return;
     }
 
@@ -375,7 +379,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
 
       if (this.editMode && this.serviceId && this.servicioOriginal) {
         if (this.selectedFiles.length > 0) {
-          alert('Nota: La actualización de imágenes no está soportada en la edición. Se actualizarán solo los datos de texto.');
+          this.toastService.show('Nota: La actualización de imágenes no está soportada en la edición. Se actualizarán solo los datos de texto.', 'warning');
         }
 
         const updatePayload: ServicioDTO = {
@@ -391,7 +395,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
          await firstValueFrom(
           this.servicesService.updateService(this.serviceId, updatePayload)
         );
-        alert('¡Servicio actualizado exitosamente!');
+        this.toastService.show('¡Servicio actualizado exitosamente!', 'success');
       } else {
         // MODO CREACIÓN (FormData)
         const formData = new FormData();
@@ -409,7 +413,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         await firstValueFrom(
           this.servicesService.createService(formData)
         );
-        alert('¡Servicio publicado exitosamente!');
+        this.toastService.show('¡Servicio publicado exitosamente!', 'success');
       }
 
       this.uploadProgress = 100;
@@ -430,7 +434,7 @@ export class RegistrarServicioComponent implements OnInit, OnDestroy {
         errorMessage = error.message;
       }
       
-      alert(errorMessage);
+      this.toastService.show(errorMessage, 'error');
     } finally {
       this.isSubmitting = false;
       this.uploadProgress = 0;

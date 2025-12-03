@@ -148,7 +148,12 @@ export class PerfilComponent implements OnInit {
         this.populateUserData(user);
         this.form.disable(); // Deshabilitar formulario en modo lectura
         this.dataLoaded = true;
-        this.initializeExampleData();
+        
+        if (this.isProveedor) {
+          this.loadServicesForUser(id);
+        } else {
+          this.initializeExampleData();
+        }
       },
       error: (err) => {
         console.error('Error cargando perfil de usuario:', err);
@@ -214,6 +219,27 @@ export class PerfilComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error cargando servicios del proveedor:', err);
+        this.userServices = [];
+      }
+    });
+  }
+
+  private loadServicesForUser(userId: number): void {
+    this.servicesService.getServicesByUserId(userId).subscribe({
+      next: (data) => {
+        this.userServices = (data || []).map(s => ({
+          id: s.idServicio,
+          titulo: s.titulo,
+          categoria: s.categoriaNombre || `Cat #${s.idCategoriaServicio}`,
+          fechaCreacion: s.fechaPublicacion ? new Date(s.fechaPublicacion) : new Date(),
+          urlFoto: s.urlFotoPrincipal
+            ? this.makeAbsoluteUrl(s.urlFotoPrincipal)
+            : '/assets/imagen/default-service.png',
+          descripcion: s.descripcion || 'Sin descripción'
+        }));
+      },
+      error: (err) => {
+        console.warn('No se encontraron servicios para el usuario (o error en API):', err.status);
         this.userServices = [];
       }
     });

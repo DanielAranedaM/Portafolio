@@ -13,6 +13,7 @@ import { CalificacionUpdateDTO } from '../../../core/models/calificacion-update.
 import { UsuarioDetalleDTO } from '../../../core/models/usuario-detalle.dto'; 
 import { SolicitudesService } from '../../../core/services/solicitudes.service';
 import { SolicitudListadoDTO } from '../../../core/models/solicitud-listado.dto';
+import { ToastService } from '../../../core/services/toast.service';
 
 type TabKey = 'recibidas' | 'enviadas';
 
@@ -30,6 +31,7 @@ export class CalificacionesComponent implements OnInit {
   private readonly califsService = inject(CalificacionesService);
   private readonly solicitudesService = inject(SolicitudesService);
   private readonly denunciasService = inject(DenunciasService);
+  private readonly toastService = inject(ToastService);
 
   activeTab: TabKey = 'recibidas';
   me: UsuarioDetalleDTO | null = null;
@@ -202,7 +204,7 @@ export class CalificacionesComponent implements OnInit {
       },
       error: (e) => {
         console.error('Error cargando listas para modal:', e);
-        alert('No se pudieron cargar los usuarios pendientes.');
+        this.toastService.show('No se pudieron cargar los usuarios pendientes.', 'error');
         this.selectModalOpen = false;
       }
     });
@@ -240,13 +242,13 @@ export class CalificacionesComponent implements OnInit {
         },
         error: (e) => {
           console.error('Error actualizando reseña:', e);
-          alert(e?.error || e?.message || 'No se pudo actualizar la reseña');
+          this.toastService.show(e?.error || e?.message || 'No se pudo actualizar la reseña', 'error');
         }
       });
     } else {
       // --- Crear nueva reseña ---
       if (!this.rateForm.idSolicitud) {
-        alert('Debes seleccionar la solicitud asociada.');
+        this.toastService.show('Debes seleccionar la solicitud asociada.', 'warning');
         return;
       }
 
@@ -263,7 +265,7 @@ export class CalificacionesComponent implements OnInit {
         },
         error: (e) => {
           console.error('Error creando reseña:', e);
-          alert(e?.error || e?.message || 'No se pudo crear la reseña');
+          this.toastService.show(e?.error || e?.message || 'No se pudo crear la reseña', 'error');
         }
       });
     }
@@ -283,17 +285,17 @@ export class CalificacionesComponent implements OnInit {
 
   sendReport(): void {
     if (!this.myUserId) {
-      alert('No se ha identificado el usuario actual.');
+      this.toastService.show('No se ha identificado el usuario actual.', 'error');
       return;
     }
 
     if (!this.reportTarget) {
-      alert('No se ha seleccionado la reseña a reportar.');
+      this.toastService.show('No se ha seleccionado la reseña a reportar.', 'error');
       return;
     }
 
     if (!this.reportForm.motivo) {
-      alert('Debes seleccionar un motivo.');
+      this.toastService.show('Debes seleccionar un motivo.', 'warning');
       return;
     }
 
@@ -312,12 +314,12 @@ export class CalificacionesComponent implements OnInit {
 
     this.denunciasService.crearDenuncia(dto).subscribe({
       next: () => {
-        alert('Tu reporte ha sido enviado. Gracias por ayudarnos a mantener la comunidad segura.');
+        this.toastService.show('Tu reporte ha sido enviado. Gracias por ayudarnos a mantener la comunidad segura.', 'success');
         this.closeReportModal();
       },
       error: (e) => {
         console.error('Error enviando denuncia:', e);
-        alert(e?.error || e?.message || 'No se pudo enviar el reporte. Intenta nuevamente.');
+        this.toastService.show(e?.error || e?.message || 'No se pudo enviar el reporte. Intenta nuevamente.', 'error');
       }
     });
   }
@@ -360,7 +362,7 @@ export class CalificacionesComponent implements OnInit {
             : mias.find(s => s.idProveedor === person.id);  // Soy Cliente   -> busco al Proveedor
 
           if (!match) {
-            alert('No se encontró una solicitud apta para calificar con esta persona.');
+            this.toastService.show('No se encontró una solicitud apta para calificar con esta persona.', 'warning');
             return;
           }
 
@@ -372,7 +374,7 @@ export class CalificacionesComponent implements OnInit {
         },
         error: (e) => {
           console.error('Error buscando solicitud para calificar:', e);
-          alert('Ocurrió un error al preparar la calificación.');
+          this.toastService.show('Ocurrió un error al preparar la calificación.', 'error');
         }
       });
   }

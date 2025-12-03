@@ -441,7 +441,7 @@ chatbotVisible: boolean = false;
   async takePhoto(): Promise<void> {
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        alert('Tu navegador no soporta acceso a la cámara');
+        this.toastService.show('Tu navegador no soporta acceso a la cámara', 'error');
         return;
       }
       this.closePhotoModal();
@@ -451,10 +451,10 @@ chatbotVisible: boolean = false;
       this.showCameraModal(stream);
     } catch (error: any) {
       console.error('Error al acceder a la cámara:', error);
-      if (error?.name === 'NotAllowedError') alert('Acceso a la cámara denegado.');
-      else if (error?.name === 'NotFoundError') alert('No se encontró una cámara.');
-      else if (error?.name === 'NotReadableError') alert('La cámara está en uso por otra app.');
-      else alert('Error al acceder a la cámara.');
+      if (error?.name === 'NotAllowedError') this.toastService.show('Acceso a la cámara denegado.', 'error');
+      else if (error?.name === 'NotFoundError') this.toastService.show('No se encontró una cámara.', 'error');
+      else if (error?.name === 'NotReadableError') this.toastService.show('La cámara está en uso por otra app.', 'error');
+      else this.toastService.show('Error al acceder a la cámara.', 'error');
     }
   }
 
@@ -469,7 +469,7 @@ chatbotVisible: boolean = false;
     const file = target.files?.[0];
     if (!file) { target.value = ''; return; }
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen válido');
+      this.toastService.show('Por favor selecciona un archivo de imagen válido', 'warning');
       target.value = '';
       return;
     }
@@ -480,7 +480,7 @@ chatbotVisible: boolean = false;
       },
       error: (e) => {
         console.error('Error subiendo foto:', e);
-        alert('No se pudo subir la foto');
+        this.toastService.show('No se pudo subir la foto', 'error');
       }
     });
 
@@ -495,7 +495,7 @@ chatbotVisible: boolean = false;
       },
       error: (e) => {
         console.error('Error eliminando foto:', e);
-        alert('No se pudo eliminar la foto');
+        this.toastService.show('No se pudo eliminar la foto', 'error');
       }
     });
   }
@@ -547,7 +547,7 @@ chatbotVisible: boolean = false;
         },
         error: (e) => {
           console.error('Error subiendo foto:', e);
-          alert('No se pudo subir la foto');
+          this.toastService.show('No se pudo subir la foto', 'error');
         }
       });
     }
@@ -567,7 +567,7 @@ chatbotVisible: boolean = false;
         if (video) video.srcObject = newStream;
       } catch (error) {
         console.error('Error al cambiar cámara:', error);
-        alert('No se pudo cambiar la cámara');
+        this.toastService.show('No se pudo cambiar la cámara', 'error');
       }
     }
   }
@@ -587,7 +587,7 @@ chatbotVisible: boolean = false;
 
     const query = searchInput.value.trim();
     if (!query) {
-      alert('Por favor ingresa un término de búsqueda');
+      this.toastService.show('Por favor ingresa un término de búsqueda', 'warning');
       return;
     }
 
@@ -852,17 +852,17 @@ chatbotVisible: boolean = false;
 
   sendServiceReport(): void {
     if (!this.me || !this.me.idUsuario) {
-      alert('No se pudo identificar al usuario actual.');
+      this.toastService.show('No se pudo identificar al usuario actual.', 'error');
       return;
     }
 
     if (!this.serviceReportTarget) {
-      alert('No se ha seleccionado el servicio a denunciar.');
+      this.toastService.show('No se ha seleccionado el servicio a denunciar.', 'error');
       return;
     }
 
     if (!this.serviceReportForm.motivo) {
-      alert('Debes seleccionar un motivo.');
+      this.toastService.show('Debes seleccionar un motivo.', 'warning');
       return;
     }
 
@@ -882,12 +882,12 @@ chatbotVisible: boolean = false;
 
     this.denunciasService.crearDenuncia(dto).subscribe({
       next: () => {
-        alert('Tu denuncia ha sido enviada. Gracias por ayudarnos a mantener la plataforma segura.');
+        this.toastService.show('Tu denuncia ha sido enviada. Gracias por ayudarnos a mantener la plataforma segura.', 'success');
         this.closeServiceReportModal();
       },
       error: (e) => {
         console.error('Error enviando denuncia de servicio:', e);
-        alert(e?.error || e?.message || 'No se pudo enviar la denuncia. Intenta nuevamente.');
+        this.toastService.show(e?.error || e?.message || 'No se pudo enviar la denuncia. Intenta nuevamente.', 'error');
       }
     });
   }

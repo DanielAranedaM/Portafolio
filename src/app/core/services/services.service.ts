@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { API_URL } from '../tokens/api-url.token';
 import { CreateServiceDTO } from '../models/create-service.dto';
@@ -120,6 +120,20 @@ export class ServicesService {
 
   getDashboardDataForProveedor(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/DashboardProveedor`);
+  }
+
+  //Obtiene los servicios de un usuario específico
+  getServicesByUserId(userId: number): Observable<ServicioDTO[]> {
+    return this.http
+      .get<ServicioDTO[]>(`${this.base}/GetByUser/${userId}`)
+      .pipe(
+        map(servicios => servicios.map(s => this.normalizeServicio(s))),
+        catchError(err => {
+          // Si retorna 404, asumimos que no tiene servicios
+          if (err.status === 404) return of([]);
+          return this.handleError(err);
+        })
+      );
   }
 
   //Obtiene detalle completo del servicio incluyendo todas las fotos

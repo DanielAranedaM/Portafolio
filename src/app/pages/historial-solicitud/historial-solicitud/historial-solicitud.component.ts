@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { SolicitudListadoDTO } from '../../../core/models/solicitud-listado.dto';
 import { SolicitudFinalizarDTO } from '../../../core/models/solicitud-finalizar.dto';
 import { Router } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-historial-solicitud',
@@ -60,7 +61,8 @@ export class HistorialSolicitudComponent implements OnInit {
   constructor(
     private router: Router,
     private solicitudesService: SolicitudesService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -184,9 +186,8 @@ export class HistorialSolicitudComponent implements OnInit {
 
   guardarFinalizacion(): void {
     if (!this.solicitudSeleccionada) return;
-
     if (!this.precioCobrado || !this.medioPago.trim()) {
-      alert('Debes ingresar precio cobrado y medio de pago.');
+      this.toastService.show('Debes ingresar precio cobrado y medio de pago.', 'warning');
       return;
     }
 
@@ -201,7 +202,7 @@ export class HistorialSolicitudComponent implements OnInit {
 
     this.solicitudesService.finalizar(this.solicitudSeleccionada.idSolicitud, dto).subscribe({
       next: () => {
-        alert('Solicitud finalizada correctamente.');
+        this.toastService.show('Solicitud finalizada correctamente.', 'success');
         this.cerrarModalFinalizar();
         this.cargarSolicitudes();
 
@@ -265,7 +266,7 @@ export class HistorialSolicitudComponent implements OnInit {
 
     this.solicitudesService.marcarCompletada(s.idSolicitud).subscribe({
       next: () => {
-        alert('Solicitud marcada como completada.');
+        this.toastService.show('Solicitud marcada como completada.', 'success');
         this.cargarSolicitudes();
       },
       error: (err) => console.error('Error completando solicitud:', err)

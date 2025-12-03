@@ -17,13 +17,17 @@
         <div class="stars-modern">
           <ng-container *ngIf="userRating !== null && userRating > 0; else noRating">
             <ng-container *ngFor="let star of [1,2,3,4,5]">
-              <span *ngIf="userRating >= star" class="star-filled">★</span>
-              <span *ngIf="userRating < star && userRating >= star - 0.5" class="star-half">⯨</span>
-              <span *ngIf="userRating < star - 0.5" class="star-empty">☆</span>
+              <i *ngIf="userRating >= star" class="bi bi-star-fill star-filled"></i>
+              <i *ngIf="userRating < star && userRating >= star - 0.5" class="bi bi-star-half star-half"></i>
+              <i *ngIf="userRating < star - 0.5" class="bi bi-star star-empty"></i>
             </ng-container>
           </ng-container>
           <ng-template #noRating>
-            <span class="star-empty">☆☆☆☆☆</span>
+            <i class="bi bi-star star-empty"></i>
+            <i class="bi bi-star star-empty"></i>
+            <i class="bi bi-star star-empty"></i>
+            <i class="bi bi-star star-empty"></i>
+            <i class="bi bi-star star-empty"></i>
           </ng-template>
         </div>
         <span class="rating-text-modern">

@@ -1069,7 +1069,6 @@ body {
   box-shadow: 0 6px 20px rgba(168, 205, 58, 0.4);
 }
 
-/* Botones de acción finales - Paleta El Dato */
 .action-buttons-modern {
   display: flex;
   flex-direction: column;
@@ -1179,4 +1178,27 @@ body {
   .action-buttons-modern {
     margin-top: 1.5rem;
   }
+}
+
+/* Calificacion/Reseñas */
+.stars-modern {
+    display: flex;
+    gap: 2px;
+    color: #FFD700; 
+    font-size: 1.2rem;
+}
+
+.star-filled, .star-half {
+    color: #FFD700;
+}
+
+.star-empty {
+    color: #e4e5e9; 
+}
+
+.rating-text-modern {
+    font-weight: bold;
+    color: white;
+    margin-left: 8px;
+    font-size: 1.1rem;
 }

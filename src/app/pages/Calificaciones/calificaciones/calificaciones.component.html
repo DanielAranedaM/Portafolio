@@ -1,23 +1,31 @@
-<div class="reviews-container" role="region" aria-label="Gestión de reseñas">
+<div class="reviews-container rs-bg" role="region" aria-label="Gestión de reseñas">
   <!-- Header -->
-  <header class="reviews-header" role="banner">
-    <div class="header-main">
-      <h1 class="header-title">⭐ Reseñas</h1>
-      <p class="header-subtitle">Todo en un solo lugar. Claro y fácil de leer.</p>
+  <header class="rs-header-modern" role="banner">
+    <div class="rs-header-content">
+      <div class="rs-icon-circle">
+        <i class="bi bi-star-fill"></i>
+      </div>
+      <div class="rs-header-text">
+        <h1>Reseñas y Calificaciones</h1>
+        <p class="rs-subtitle">Gestiona tu reputación y opiniones en un solo lugar</p>
+      </div>
     </div>
 
     <div class="header-actions">
-      <button class="btn btn-back" aria-label="Volver al inicio" (click)="goHome()">
-        ← Volver al inicio
+      <button class="rs-back-link" aria-label="Volver al inicio" (click)="goHome()">
+        <i class="bi bi-arrow-left"></i> Volver al inicio
       </button>
-      <button class="btn btn-refresh" title="Actualizar reseñas" aria-label="Actualizar" (click)="refresh()">
-        🔄 Actualizar
+      <button class="btn-refresh-modern" title="Actualizar reseñas" aria-label="Actualizar" (click)="refresh()">
+        <i class="bi bi-arrow-clockwise"></i> Actualizar
       </button>
     </div>
+    
+    <!-- Decoración de fondo -->
+    <div class="rs-header-bg-shape"></div>
   </header>
 
-  <!-- CARD GRANDE contenedora -->
-  <section class="section reviews-card" aria-label="Panel de reseñas">
+  <!-- CARD -->
+  <section class="section reviews-card rs-form-wide" aria-label="Panel de reseñas">
     <!-- Acción principal -->
     <div class="reviews-primary-action">
         <button class="action-chip btn-finish"
@@ -169,10 +177,12 @@
 </div>
 
 <!-- =================== MODAL: CALIFICAR / EDITAR =================== -->
-<div class="modal-backdrop" [class.is-open]="reportModalOpen">
+<div class="modal-backdrop" [class.is-open]="rateModalOpen">
   <div class="modal-card" role="dialog" aria-modal="true">
     <div class="modal-header">
-      <h3>{{ isEditing ? '✏️ Editar reseña' : '⭐ Calificar a un cliente' }}</h3>
+      <h3>
+        {{ isEditing ? '✏️ Editar reseña' : (isProveedor ? '⭐ Calificar a un cliente' : '⭐ Calificar a un proveedor') }}
+      </h3>
       <button class="modal-close" (click)="closeRateModal()" aria-label="Cerrar">✖</button>
     </div>
 
@@ -189,15 +199,16 @@
           </select>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" style="grid-column: 1 / -1;">
           <label>Calificación *</label>
-          <div class="radio-group" role="radiogroup" aria-label="Seleccionar estrellas">
+          <div class="radio-group stars-group" role="radiogroup" aria-label="Seleccionar estrellas">
             <button
-              class="action-chip"
+              class="star-btn"
               *ngFor="let s of [1,2,3,4,5]"
               (click)="rateForm.cantEstrellas = s"
+              [class.active]="s <= rateForm.cantEstrellas"
               [attr.aria-pressed]="rateForm.cantEstrellas === s">
-              {{ s <= rateForm.cantEstrellas ? '★' : '☆' }}
+              <i class="bi" [class.bi-star-fill]="s <= rateForm.cantEstrellas" [class.bi-star]="s > rateForm.cantEstrellas"></i>
             </button>
           </div>
         </div>
